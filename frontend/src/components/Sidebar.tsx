@@ -9,6 +9,7 @@ import {
   Search,
   Settings,
   Sun,
+  CalendarCheck,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Link, useLocation, useMatch, useNavigate } from "react-router-dom";
@@ -28,7 +29,7 @@ interface NavEntry {
 
 const NAV: NavEntry[] = [
   { label: "Journal", to: "/", icon: BookOpen },
-  { label: "Scenarios", to: "/scenarios", icon: Lightbulb },
+  { label: "Tracks", to: "/tracks", icon: CalendarCheck },
   { label: "Side Quests", to: "/side-quests", icon: Compass },
   { label: "Photos", to: "/photos", icon: PhotosIcon },
   { label: "Stats", to: "/stats", icon: ChartColumn },

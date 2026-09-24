@@ -12,6 +12,7 @@ import settingsRoutes from "./routes/settings.routes";
 import { errorHandler, notFound } from "./utility/errorHandler";
 import { requireAuth } from "./utility/requireAuth";
 import sideQuestRoutes from "./routes/sideQuest.routes";
+import trackRoutes from "./routes/track.routes";
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use(async (_req: Request, _res: Response, next: NextFunction) => {
 });
 
 app.use("/api", requireAuth);
+app.use("/api/tracks", trackRoutes);
 app.use("/api/journal", journalRoutes);
 app.use("/api/side-quests", sideQuestRoutes);
 app.use("/api/photo-library", photoLibraryRoutes);

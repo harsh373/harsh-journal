@@ -9,6 +9,8 @@ import Photos from "./pages/Photos";
 import Placeholder from "./pages/Placeholder";
 import SideQuestDetail from "./pages/SideQuestDetail";
 import SideQuests from "./pages/SideQuests";
+import TrackDetail from "./pages/TrackDetail";
+import Tracks from "./pages/Tracks";
 
 function AppRoutes() {
   const { status } = useAuth();
@@ -26,6 +28,8 @@ function AppRoutes() {
             <Route path="archive" element={<Archive />} />
             <Route path="scenarios" element={<Placeholder title="Scenarios" />} />
             <Route path="side-quests" element={<SideQuests />} />
+            <Route path="tracks" element={<Tracks />} />
+            <Route path="tracks/:id" element={<TrackDetail />} />
             <Route path="side-quests/:id" element={<SideQuestDetail />} />
             <Route path="photos" element={<Photos />} />
             <Route path="stats" element={<Placeholder title="Stats" />} />
