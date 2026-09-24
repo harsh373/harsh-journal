@@ -2,10 +2,10 @@ import axios, { isAxiosError } from "axios";
 
 export const UNAUTHORIZED_EVENT = "journal:unauthorized";
 
-// Two separate Vercel projects means two separate domains, so this can't be a
-// relative "/api" path — it has to point at wherever the backend is actually
-// deployed. VITE_API_URL is baked in at build time (see below for where to set it).
-const backendOrigin = import.meta.env.VITE_API_URL ?? "";
+// In production the browser talks only to the frontend's own domain. vercel.json forwards
+// /api to the backend, which keeps the login cookie first-party (works on every browser).
+// VITE_API_URL is used only during local development (npm run dev), never in a deployed build.
+const backendOrigin = import.meta.env.DEV ? (import.meta.env.VITE_API_URL ?? "") : "";
 
 export const api = axios.create({
   baseURL: `${backendOrigin}/api`,
