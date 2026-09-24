@@ -1,0 +1,161 @@
+@import "tailwindcss";
+
+/*
+  Design tokens. Every colour in the app comes from these variables, so light
+  and dark mode are two sets of values for the same design.
+  Layers: desktop backdrop -> background -> surface -> elevated surface.
+*/
+:root,
+:root[data-theme="light"] {
+  --desktop: #dcdce1;
+  --bg: #eeeef1;
+  --surface: #ffffff;
+  --elevated: #ffffff;
+  --text: #1d1d1f;
+  --text-secondary: #56565b;
+  --text-tertiary: #7a7a80;
+  --border: rgba(0, 0, 0, 0.1);
+  --window-border: rgba(0, 0, 0, 0.16);
+  --hover: rgba(0, 0, 0, 0.045);
+  --selected: rgba(0, 0, 0, 0.08);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 6px 20px rgba(0, 0, 0, 0.06);
+  --window-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  --green: #34c759;
+  --blue: #0a84ff;
+  --orange: #ff9f0a;
+  --red: #ff453a;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --desktop: #131316;
+  --bg: #000000;
+  --surface: #08080a;
+  --elevated: #1c1c1f;
+  --text: #f5f5f7;
+  --text-secondary: #98989d;
+  --text-tertiary: #6e6e73;
+  --border: rgba(255, 255, 255, 0.1);
+  --window-border: rgba(255, 255, 255, 0.16);
+  --hover: rgba(255, 255, 255, 0.05);
+  --selected: rgba(255, 255, 255, 0.09);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --window-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+
+/* Expose the variables to Tailwind so classes like bg-surface and text-secondary work. */
+@theme inline {
+  --color-desktop: var(--desktop);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-elevated: var(--elevated);
+  --color-text: var(--text);
+  --color-secondary: var(--text-secondary);
+  --color-tertiary: var(--text-tertiary);
+  --color-border: var(--border);
+  --color-window: var(--window-border);
+  --color-hover: var(--hover);
+  --color-selected: var(--selected);
+  --color-good: var(--green);
+  --color-special: var(--blue);
+  --color-tough: var(--orange);
+  --color-alert: var(--red);
+  --shadow-card: var(--shadow);
+  --shadow-window: var(--window-shadow);
+  --radius-card: 18px;
+  --radius-control: 10px;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background: var(--desktop);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-weight: 450;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+h1,
+h2 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Page transition: a very short fade with a 4px rise. */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-in {
+  animation: page-in 260ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Thin, quiet scrollbars like macOS. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* Slowly drifting stars on the desktop backdrop, dark mode only. Sits behind the
+   floating app panel; the panel itself never moves. */
+@keyframes starfield-drift {
+  from {
+    background-position: 0 0, 40px 60px, 130px 270px, 200px 40px, 20px 200px;
+  }
+  to {
+    background-position: -280px -280px, -240px -220px, -150px 10px, -80px -320px, -260px -60px;
+  }
+}
+
+.starfield {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-repeat: repeat;
+  background-size: 320px 320px;
+  background-image: radial-gradient(1.5px 1.5px at 20px 30px, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 120px 90px, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(1.5px 1.5px at 60px 170px, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1px 1px at 220px 230px, rgba(255, 255, 255, 0.35), transparent),
+    radial-gradient(1.5px 1.5px at 270px 50px, rgba(255, 255, 255, 0.5), transparent);
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+
+:root[data-theme="dark"] .starfield {
+  opacity: 1;
+  animation: starfield-drift 200s linear infinite;
+}
