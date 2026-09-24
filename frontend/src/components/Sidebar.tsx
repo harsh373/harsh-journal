@@ -3,7 +3,6 @@ import {
   ChartColumn,
   Compass,
   Image as PhotosIcon,
-  Lightbulb,
   Lock,
   Moon,
   Search,
