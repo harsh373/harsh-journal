@@ -10,6 +10,9 @@ import {
 } from "../config/dates";
 import type { DayKey } from "../config/dates";
 
+// Journal tracking started on this date — nothing before this counts as "missed"
+const START_DATE: DayKey = "2026-09-22";
+
 interface MiniCalendarProps {
   selected: DayKey;
   today: DayKey;
@@ -90,17 +93,23 @@ export default function MiniCalendar({
           const isSelected = day === selected;
           const isToday = day === today;
           const isFuture = day > today;
+          const isWithinTrackedRange = day >= START_DATE && day < today;
           const isLogged = Boolean(moods[day]);
+          const isMissed = isWithinTrackedRange && !isLogged;
 
-          const numberStyle = isSelected
-            ? "bg-text font-semibold text-bg shadow-sm ring-2 ring-text/20 ring-offset-2 ring-offset-bg"
-            : isLogged
-              ? "bg-text font-semibold text-bg shadow-sm group-hover:bg-text/90"
-              : isToday
-                ? "font-semibold text-special ring-1 ring-inset ring-special/30 group-hover:bg-hover"
-                : isFuture
-                  ? "font-medium text-tertiary group-hover:bg-hover"
-                  : "font-medium text-text group-hover:bg-hover";
+          const numberStyle = isToday
+            ? isSelected
+              ? "bg-red-500 font-semibold text-white shadow-sm ring-2 ring-red-500/30 ring-offset-2 ring-offset-bg"
+              : "bg-red-500 font-semibold text-white shadow-sm group-hover:bg-red-500/90"
+            : isSelected
+              ? "bg-text font-semibold text-bg shadow-sm ring-2 ring-text/20 ring-offset-2 ring-offset-bg"
+              : isLogged
+                ? "bg-text font-semibold text-bg shadow-sm group-hover:bg-text/90"
+                : isMissed
+                  ? "bg-yellow-400 font-semibold text-black shadow-sm group-hover:bg-yellow-400/90"
+                  : isFuture
+                    ? "font-medium text-tertiary group-hover:bg-hover"
+                    : "font-medium text-text group-hover:bg-hover"; // covers dates before START_DATE too
 
           return (
             <button
