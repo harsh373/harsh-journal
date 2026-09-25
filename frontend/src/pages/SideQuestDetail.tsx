@@ -30,6 +30,15 @@ const PATCH_FIELDS: (keyof QuestPatch)[] = [
 
 type LoadState = "loading" | "ready" | "error" | "not-found";
 
+// Newest first: sort by entry date, falling back to createdAt when dates tie.
+function sortPostsNewestFirst(posts: QuestPost[]): QuestPost[] {
+  return [...posts].sort((a, b) => {
+    const dateDiff = b.date.localeCompare(a.date);
+    if (dateDiff !== 0) return dateDiff;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+}
+
 export default function SideQuestDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -64,7 +73,7 @@ export default function SideQuestDetail() {
           endDate: loadedQuest.endDate,
         };
         setQuest(loadedQuest);
-        setPosts(loadedPosts);
+        setPosts(sortPostsNewestFirst(loadedPosts));
         setLoadState("ready");
       })
       .catch((err: unknown) => {
@@ -160,7 +169,7 @@ export default function SideQuestDetail() {
     setAddingPost(true);
     try {
       const post = await createPost(id, getJournalToday());
-      setPosts((current) => [...current, post]);
+      setPosts((current) => sortPostsNewestFirst([post, ...current]));
       setFreshPostId(post.id);
     } catch {
       setError("Couldn't start a new entry.");

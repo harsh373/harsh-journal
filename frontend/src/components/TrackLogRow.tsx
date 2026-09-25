@@ -36,9 +36,12 @@ export default function TrackLogRow({ log, unit, onSave, onDelete }: TrackLogRow
   }
 
   return (
-    <div className="group flex items-start gap-4 px-6 py-4">
-      <div className="w-24 shrink-0 pt-0.5 text-[13px] text-secondary">{formatDayMonth(log.date)}</div>
-      <div className="min-w-0 flex-1">
+    <div className="group relative flex flex-col gap-1 px-4 py-4 sm:flex-row sm:items-start sm:gap-4 sm:px-6">
+      <div className="text-[12px] text-secondary sm:w-24 sm:shrink-0 sm:pt-0.5 sm:text-[13px]">
+        {formatDayMonth(log.date)}
+      </div>
+
+      <div className="min-w-0 flex-1 pr-8 sm:pr-0">
         {log.amount !== null && (
           <p className="text-[15px] font-medium tabular-nums">{formatAmount(log.amount, unit)}</p>
         )}
@@ -48,7 +51,8 @@ export default function TrackLogRow({ log, unit, onSave, onDelete }: TrackLogRow
           log.amount === null && <p className="text-[15px] text-tertiary">Showed up.</p>
         )}
       </div>
-      <div className="flex shrink-0 items-center gap-0.5 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+
+      <div className="absolute right-4 top-4 flex items-center gap-0.5 opacity-60 transition-opacity sm:static sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
         <button type="button" onClick={() => setEditing(true)} aria-label="Edit log" className={iconButton}>
           <Pencil size={14} strokeWidth={1.75} />
         </button>

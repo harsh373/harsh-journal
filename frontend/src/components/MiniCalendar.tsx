@@ -9,7 +9,6 @@ import {
   shiftMonth,
 } from "../config/dates";
 import type { DayKey } from "../config/dates";
-import MoodDot from "./MoodDot";
 
 interface MiniCalendarProps {
   selected: DayKey;
@@ -91,15 +90,17 @@ export default function MiniCalendar({
           const isSelected = day === selected;
           const isToday = day === today;
           const isFuture = day > today;
-          const mood = moods[day];
+          const isLogged = Boolean(moods[day]);
 
           const numberStyle = isSelected
-            ? "bg-text font-semibold text-bg shadow-sm"
-            : isToday
-              ? "font-semibold text-special ring-1 ring-inset ring-special/30 group-hover:bg-hover"
-              : isFuture
-                ? "font-medium text-tertiary group-hover:bg-hover"
-                : "font-medium text-text group-hover:bg-hover";
+            ? "bg-text font-semibold text-bg shadow-sm ring-2 ring-text/20 ring-offset-2 ring-offset-bg"
+            : isLogged
+              ? "bg-text font-semibold text-bg shadow-sm group-hover:bg-text/90"
+              : isToday
+                ? "font-semibold text-special ring-1 ring-inset ring-special/30 group-hover:bg-hover"
+                : isFuture
+                  ? "font-medium text-tertiary group-hover:bg-hover"
+                  : "font-medium text-text group-hover:bg-hover";
 
           return (
             <button
@@ -119,7 +120,6 @@ export default function MiniCalendar({
               >
                 {parts?.day}
               </span>
-              {mood && <MoodDot mood={mood} className="absolute bottom-0 h-[5px] w-[5px]" />}
             </button>
           );
         })}

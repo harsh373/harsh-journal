@@ -11,7 +11,8 @@ import DayPhotos from "./DayPhotos";
 import { MoodBadge, MoodPicker } from "./MoodPicker";
 import { useMoods } from "./MoodProvider";
 import RecentDays from "./RecentDays";
-import TracksToday from "./TrackToday";
+import TracksOverview from "./TrackOverview";
+
 const LIMIT_SUMMARY = 50_000;
 const LIMIT_LOCATION = 120;
 const LIMIT_ONE_LINER = 280;
@@ -319,12 +320,13 @@ export default function JournalDay({ day }: { day: DayKey }) {
             </>
           )}
 
+          <TracksOverview />
+
           {showRecent && (
             <div className="mt-14 lg:hidden">
               <RecentDays entries={recentDays} />
             </div>
           )}
-          <TracksToday day={day} />
           <DayNav day={day} />
         </div>
 
