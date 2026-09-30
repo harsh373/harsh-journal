@@ -13,6 +13,7 @@ import { errorHandler, notFound } from "./utility/errorHandler";
 import { requireAuth } from "./utility/requireAuth";
 import sideQuestRoutes from "./routes/sideQuest.routes";
 import trackRoutes from "./routes/track.routes";
+import weeklyRoutes from "./routes/weekly.routes";
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use("/api/tracks", trackRoutes);
 app.use("/api/journal", journalRoutes);
 app.use("/api/side-quests", sideQuestRoutes);
 app.use("/api/photo-library", photoLibraryRoutes);
+app.use("/api/weekly", weeklyRoutes);
 app.use("/api/settings", settingsRoutes);
 
 app.use(notFound);

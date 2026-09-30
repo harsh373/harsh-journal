@@ -3,6 +3,7 @@ import {
   ChartColumn,
   Compass,
   Image as PhotosIcon,
+  ListChecks,
   Lock,
   Moon,
   Search,
@@ -28,6 +29,7 @@ interface NavEntry {
 
 const NAV: NavEntry[] = [
   { label: "Journal", to: "/", icon: BookOpen },
+  { label: "Weekly", to: "/weekly", icon: ListChecks },
   { label: "Tracks", to: "/tracks", icon: CalendarCheck },
   { label: "Side Quests", to: "/side-quests", icon: Compass },
   { label: "Photos", to: "/photos", icon: PhotosIcon },

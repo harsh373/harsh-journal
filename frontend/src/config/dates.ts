@@ -112,3 +112,28 @@ export function buildMonthGrid(year: number, month: number): (DayKey | null)[] {
   while (cells.length < 42) cells.push(null);
   return cells;
 }
+
+// The Monday (as a day key) of the week containing `key`.
+// getUTCDay(): 0 = Sunday, 1 = Monday, ... 6 = Saturday.
+export function getWeekStart(key: DayKey): DayKey {
+  const date = toUtcDate(key);
+  if (!date) return key;
+  const weekday = date.getUTCDay();
+  const diffToMonday = weekday === 0 ? 6 : weekday - 1;
+  date.setUTCDate(date.getUTCDate() - diffToMonday);
+  return toDayKey(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
+}
+
+// "5 – 11 October 2026" when the week sits inside one month,
+// "28 September – 4 October 2026" when it spans two.
+export function formatWeekRange(weekStart: DayKey): string {
+  const start = toUtcDate(weekStart);
+  const end = toUtcDate(addDays(weekStart, 6));
+  if (!start || !end) return "";
+
+  const endLabel = longDateFormat.format(end);
+  const sameMonth = start.getUTCMonth() === end.getUTCMonth() && start.getUTCFullYear() === end.getUTCFullYear();
+  const startLabel = sameMonth ? String(start.getUTCDate()) : dayMonthFormat.format(start);
+
+  return `${startLabel} – ${endLabel}`;
+}
