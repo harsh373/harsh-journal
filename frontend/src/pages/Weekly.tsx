@@ -6,7 +6,7 @@ import {
   fetchWeeklyPlan,
   updateWeeklyItem,
 } from "../api/weekly.api";
-import type { WeeklyItem, WeeklyPlan } from "../api/weekly.api";
+import type { WeeklyItem} from "../api/weekly.api";
 import { formatWeekRange, getJournalToday, getWeekStart } from "../config/dates";
 
 const TEXT_LIMIT = 500;
