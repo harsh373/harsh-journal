@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { LibraryPhoto } from "../api/photoLibrary.api";
@@ -24,7 +25,14 @@ export default function Lightbox({ photo, onClose, onPrev, onNext }: LightboxPro
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose, onPrev, onNext]);
 
-  return (
+  // Rendered via a portal directly into <body>, deliberately outside the
+  // normal React tree. This is what guarantees `fixed inset-0` below is
+  // positioned relative to the real screen: if this were rendered inline
+  // inside a routed page, any ancestor with a CSS `transform` (a page
+  // transition wrapper, for example) would silently turn "fixed" into
+  // "fixed relative to that ancestor's box" instead of the viewport —
+  // which is exactly what was pushing the image down and cropping it.
+  return createPortal(
     <div
       className="page-in fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xl"
       onClick={onClose}
@@ -82,6 +90,7 @@ export default function Lightbox({ photo, onClose, onPrev, onNext }: LightboxPro
           </p>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

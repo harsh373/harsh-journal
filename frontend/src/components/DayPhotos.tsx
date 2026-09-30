@@ -17,9 +17,10 @@ interface DayPhotosProps {
   photos: JournalPhoto[];
   editing: boolean;
   onPhotosChange: (photos: JournalPhoto[]) => void;
+  onPhotoClick?: (index: number) => void;
 }
 
-export default function DayPhotos({ day, photos, editing, onPhotosChange }: DayPhotosProps) {
+export default function DayPhotos({ day, photos, editing, onPhotosChange, onPhotoClick }: DayPhotosProps) {
   const [pending, setPending] = useState<PendingUpload[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -72,10 +73,26 @@ export default function DayPhotos({ day, photos, editing, onPhotosChange }: DayP
   return (
     <section className="mb-10">
       <div className="grid grid-cols-2 gap-3">
-        {photos.map((photo) => (
+        {photos.map((photo, index) => (
           <figure
             key={photo.id}
-            className="group relative aspect-[4/3] overflow-hidden rounded-[18px] border border-border bg-surface shadow-card"
+            className={
+              "group relative aspect-[4/3] overflow-hidden rounded-[18px] border border-border bg-surface shadow-card" +
+              (!editing ? " cursor-zoom-in" : "")
+            }
+            onClick={!editing ? () => onPhotoClick?.(index) : undefined}
+            role={!editing ? "button" : undefined}
+            tabIndex={!editing ? 0 : undefined}
+            onKeyDown={
+              !editing
+                ? (event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onPhotoClick?.(index);
+                    }
+                  }
+                : undefined
+            }
           >
             <img src={photo.url} alt={photo.caption ?? ""} className="h-full w-full object-cover" loading="lazy" />
             {editing && (
