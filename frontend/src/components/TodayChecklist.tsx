@@ -1,5 +1,5 @@
 import { Check, Plus, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { addTodayItem, deleteTodayItem, fetchTodayPlan, updateTodayItem } from "../api/today.api";
 import type { TodayItem } from "../api/today.api";
 import { getJournalToday } from "../config/dates";
