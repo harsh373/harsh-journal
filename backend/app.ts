@@ -12,6 +12,7 @@ import settingsRoutes from "./routes/settings.routes";
 import { errorHandler, notFound } from "./utility/errorHandler";
 import { requireAuth } from "./utility/requireAuth";
 import sideQuestRoutes from "./routes/sideQuest.routes";
+import todayRoutes from "./routes/today.routes";
 import trackRoutes from "./routes/track.routes";
 import weeklyRoutes from "./routes/weekly.routes";
 
@@ -43,8 +44,9 @@ app.use("/api/tracks", trackRoutes);
 app.use("/api/journal", journalRoutes);
 app.use("/api/side-quests", sideQuestRoutes);
 app.use("/api/photo-library", photoLibraryRoutes);
-app.use("/api/weekly", weeklyRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/weekly", weeklyRoutes);
+app.use("/api/today", todayRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

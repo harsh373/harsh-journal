@@ -25,7 +25,8 @@ export function isValidMonthKey(value: unknown): value is string {
   return month >= 1 && month <= 12;
 }
 
-// Caller must already know `key` is a 
+// Caller must already know `key` is a valid day key (check isValidDayKey first
+// if it came from outside this file, e.g. request params).
 function toUtcDate(key: string): Date {
   const match = DAY_KEY_PATTERN.exec(key) as RegExpExecArray;
   return new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
@@ -45,7 +46,8 @@ export function addDays(key: string, delta: number): string {
   return toDayKey(date);
 }
 
-// The Monday (as a day 
+// The Monday (as a day key) of the week containing `key`.
+// getUTCDay(): 0 = Sunday, 1 = Monday, ... 6 = Saturday.
 export function getWeekStart(key: string): string {
   const date = toUtcDate(key);
   const weekday = date.getUTCDay();
@@ -54,7 +56,9 @@ export function getWeekStart(key: string): string {
   return toDayKey(date);
 }
 
-// True only if `value` is a valid day key AND that 
+// True only if `value` is a valid day key AND that day is itself a Monday —
+// the only shape a week's identifying key is allowed to take. A week's
+// identity IS its Monday, so this is just "is this key already its own week start".
 export function isValidWeekStart(value: unknown): value is string {
   return isValidDayKey(value) && getWeekStart(value) === value;
 }

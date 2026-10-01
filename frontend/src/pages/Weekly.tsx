@@ -1,4 +1,4 @@
- import { Check, ListChecks, Plus, X } from "lucide-react";
+import { Check, ListChecks, Plus, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   addWeeklyItem,
@@ -6,7 +6,7 @@ import {
   fetchWeeklyPlan,
   updateWeeklyItem,
 } from "../api/weekly.api";
-import type { WeeklyItem} from "../api/weekly.api";
+import type { WeeklyItem, WeeklyPlan } from "../api/weekly.api";
 import { formatWeekRange, getJournalToday, getWeekStart } from "../config/dates";
 
 const TEXT_LIMIT = 500;
@@ -162,7 +162,7 @@ export default function Weekly() {
                 <li
                   key={item.id}
                   className={
-                    "page-in group flex items-center gap-3 px-5 py-4 transition-colors duration-150 hover:bg-hover" +
+                    "page-in group flex items-start gap-3 px-5 py-4 transition-colors duration-150 hover:bg-hover" +
                     (index > 0 ? " border-t border-border" : "")
                   }
                 >
@@ -171,7 +171,7 @@ export default function Weekly() {
                     onClick={() => void toggleComplete(item)}
                     aria-label={item.completed ? "Mark as not done" : "Mark as done"}
                     className={
-                      `flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border transition-all duration-200 ${EASE} active:scale-90 ` +
+                      `mt-[3px] flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border transition-all duration-200 ${EASE} active:scale-90 ` +
                       (item.completed ? "border-text bg-text" : "border-border hover:border-text/40")
                     }
                   >
@@ -207,7 +207,7 @@ export default function Weekly() {
                       type="button"
                       onClick={() => startEditing(item)}
                       className={
-                        `flex-1 truncate text-left text-[15px] transition-all duration-200 ${EASE} ` +
+                        `flex-1 whitespace-normal break-words text-left text-[15px] leading-relaxed transition-all duration-200 ${EASE} ` +
                         (item.completed ? "text-tertiary line-through" : "text-text")
                       }
                     >
@@ -219,7 +219,7 @@ export default function Weekly() {
                     type="button"
                     onClick={() => void removeItem(item)}
                     aria-label="Remove item"
-                    className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-tertiary opacity-0 transition-opacity duration-150 hover:bg-hover hover:text-text group-hover:opacity-100"
+                    className="mt-[1px] flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-tertiary opacity-0 transition-opacity duration-150 hover:bg-hover hover:text-text group-hover:opacity-100"
                   >
                     <X size={13} strokeWidth={2} />
                   </button>

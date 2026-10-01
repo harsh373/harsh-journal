@@ -6,7 +6,8 @@ export interface WeeklyItemFields {
 }
 
 export interface WeeklyPlanFields {
-  // The Monday of the week, as "YYYY-MM-DD"
+  // The Monday of the week, as "YYYY-MM-DD". This IS the week's identity —
+  // one plan per Monday, enforced by the unique index below.
   weekStart: string;
   items: WeeklyItemFields[];
   createdAt: Date;

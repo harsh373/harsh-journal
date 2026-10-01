@@ -12,6 +12,7 @@ import Lightbox from "./Lightbox";
 import { MoodBadge, MoodPicker } from "./MoodPicker";
 import { useMoods } from "./MoodProvider";
 import RecentDays from "./RecentDays";
+import TodayChecklist from "./TodayChecklist";
 import TracksOverview from "./TrackOverview";
 
 const LIMIT_SUMMARY = 50_000;
@@ -183,6 +184,11 @@ export default function JournalDay({ day }: { day: DayKey }) {
   const showEmptyState = ready && !hasEntry && !editing;
   const hasOneLiner = draft.whatIDidToday.trim().length > 0;
   const showRecent = !editing && recentDays.length > 0;
+  // Visible all day on today's page, no matter what you're doing on it.
+  // It stops on its own once the day rolls past 4 AM, because at that point
+  // this page is no longer "today" — the isToday check above already covers
+  // that, nothing extra needed here.
+  const showTodayChecklist = isToday && ready;
 
   return (
     <>
@@ -257,6 +263,8 @@ export default function JournalDay({ day }: { day: DayKey }) {
                 </div>
               )}
             </header>
+
+            {showTodayChecklist && <TodayChecklist />}
 
             {loadState === "loading" && <div className="h-64" aria-busy="true" />}
 
