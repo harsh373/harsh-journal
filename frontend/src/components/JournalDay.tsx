@@ -239,6 +239,10 @@ export default function JournalDay({ day }: { day: DayKey }) {
                       <MapPin size={14} strokeWidth={1.75} />
                       <input
                         type="text"
+                        name="journal-location"
+                        autoComplete="off"
+                        autoCorrect="off"
+                        inputMode="text"
                         value={draft.location}
                         maxLength={LIMIT_LOCATION}
                         placeholder="Add location"
@@ -311,6 +315,11 @@ export default function JournalDay({ day }: { day: DayKey }) {
                     {editing ? (
                       <input
                         type="text"
+                        name="journal-entry"
+                        autoComplete="off"
+                        autoCorrect="on"
+                        autoCapitalize="sentences"
+                        inputMode="text"
                         value={draft.whatIDidToday}
                         maxLength={LIMIT_ONE_LINER}
                         placeholder="One good line about today."

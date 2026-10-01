@@ -85,6 +85,11 @@ export default function AutoGrowTextarea({
     <textarea
       ref={ref}
       rows={1}
+      name="journal-summary"
+      autoComplete="off"
+      autoCorrect="on"
+      autoCapitalize="sentences"
+      inputMode="text"
       value={value}
       onFocus={(e: FocusEvent<HTMLTextAreaElement>) => {
         onFocus?.(e);
