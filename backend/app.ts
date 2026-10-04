@@ -6,6 +6,7 @@ import { connectDatabase } from "./config/db";
 import { env } from "./config/env";
 import authRoutes from "./routes/auth.routes";
 import healthRoutes from "./routes/health.routes";
+import insightsRoutes from "./routes/insights.routes";
 import journalRoutes from "./routes/journal.routes";
 import photoLibraryRoutes from "./routes/photoLibrary.routes";
 import settingsRoutes from "./routes/settings.routes";
@@ -47,6 +48,7 @@ app.use("/api/photo-library", photoLibraryRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/weekly", weeklyRoutes);
 app.use("/api/today", todayRoutes);
+app.use("/api/insights", insightsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

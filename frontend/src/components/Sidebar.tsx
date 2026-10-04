@@ -7,7 +7,8 @@ import {
   Lock,
   Moon,
   Search,
-  Settings,
+ 
+  Sparkles,
   Sun,
   CalendarCheck,
 } from "lucide-react";
@@ -35,7 +36,7 @@ const NAV: NavEntry[] = [
   { label: "Photos", to: "/photos", icon: PhotosIcon },
   { label: "Stats", to: "/stats", icon: ChartColumn },
   { label: "Search", to: "/search", icon: Search },
-  { label: "Settings", to: "/settings", icon: Settings },
+  { label: "Insights", to: "/insights", icon: Sparkles },
 ];
 
 // The Journal item stays highlighted on the home page and on any single day.

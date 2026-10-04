@@ -15,6 +15,13 @@ export interface Env {
   cloudinaryCloudName: string;
   cloudinaryApiKey: string;
   cloudinaryApiSecret: string;
+  aiApiKey: string;
+  aiBaseUrl: string;
+  aiFastModel: string;
+  aiSmartModel: string;
+  aiReasoningEffort: string;
+  embeddingApiKey: string;
+  embeddingUrl: string;
 }
 
 function parseNodeEnv(value: string | undefined): NodeEnv {
@@ -49,6 +56,12 @@ function requireValue(name: string, value: string | undefined): string {
   return value.trim();
 }
 
+// AI settings are optional: without them the journal works exactly as before.
+function optionalValue(value: string | undefined, fallback: string): string {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : fallback;
+}
+
 const nodeEnv = parseNodeEnv(process.env.NODE_ENV);
 
 export const env: Env = {
@@ -62,4 +75,14 @@ export const env: Env = {
   cloudinaryCloudName: requireValue("CLOUDINARY_CLOUD_NAME", process.env.CLOUDINARY_CLOUD_NAME),
   cloudinaryApiKey: requireValue("CLOUDINARY_API_KEY", process.env.CLOUDINARY_API_KEY),
   cloudinaryApiSecret: requireValue("CLOUDINARY_API_SECRET", process.env.CLOUDINARY_API_SECRET),
+  aiApiKey: optionalValue(process.env.AI_API_KEY, ""),
+  aiBaseUrl: optionalValue(process.env.AI_BASE_URL, "https://api.groq.com/openai/v1"),
+  aiFastModel: optionalValue(process.env.AI_FAST_MODEL, "openai/gpt-oss-20b"),
+  aiSmartModel: optionalValue(process.env.AI_SMART_MODEL, "openai/gpt-oss-120b"),
+  aiReasoningEffort: optionalValue(process.env.AI_REASONING_EFFORT, ""),
+  embeddingApiKey: optionalValue(process.env.EMBEDDING_API_KEY, ""),
+  embeddingUrl: optionalValue(
+    process.env.EMBEDDING_URL,
+    "https://router.huggingface.co/hf-inference/models/BAAI/bge-small-en-v1.5/pipeline/feature-extraction",
+  ),
 };

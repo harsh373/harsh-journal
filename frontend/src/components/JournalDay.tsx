@@ -14,6 +14,7 @@ import { useMoods } from "./MoodProvider";
 import RecentDays from "./RecentDays";
 import TodayChecklist from "./TodayChecklist";
 import TracksOverview from "./TrackOverview";
+import { analyzeDay } from "../api/insights.api";
 
 const LIMIT_SUMMARY = 50_000;
 const LIMIT_LOCATION = 120;
@@ -158,7 +159,10 @@ export default function JournalDay({ day }: { day: DayKey }) {
 
   async function finishEditing() {
     await flush();
-    if (JSON.stringify(draftRef.current) === savedJsonRef.current) setEditing(false);
+    if (JSON.stringify(draftRef.current) === savedJsonRef.current) {
+      setEditing(false);
+      analyzeDay(day).catch(() => undefined);
+    }
   }
 
   useEffect(() => {

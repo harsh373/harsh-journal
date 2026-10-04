@@ -4,6 +4,9 @@ import { AuthProvider, useAuth } from "./components/AuthProvider";
 import { MoodProvider } from "./components/MoodProvider";
 import Archive from "./pages/Archive";
 import Gate from "./pages/Gate";
+import Insights from "./pages/Insights";
+import InsightsMemory from "./pages/InsightsMemory";
+import InsightsOpenLoops from "./pages/InsightsOpenLoops";
 import Journal from "./pages/Journal";
 import Photos from "./pages/Photos";
 import Placeholder from "./pages/Placeholder";
@@ -36,6 +39,9 @@ function AppRoutes() {
             <Route path="photos" element={<Photos />} />
             <Route path="stats" element={<Placeholder title="Stats" />} />
             <Route path="search" element={<Placeholder title="Search" />} />
+            <Route path="insights" element={<Insights />} />
+            <Route path="insights/memory" element={<InsightsMemory />} />
+            <Route path="insights/open-loops" element={<InsightsOpenLoops />} />
             <Route path="settings" element={<Placeholder title="Settings" />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>

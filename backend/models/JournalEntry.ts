@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import { detachDate, refreshStats } from "../ai/memoryStore";
 
 export const MOODS = ["good", "neutral", "tough", "special"] as const;
 export type Mood = (typeof MOODS)[number];
@@ -20,6 +21,10 @@ export interface JournalEntryFields {
   location: string;
   photos: JournalPhoto[];
   tags: string[];
+  // Set by the insights pipeline, never by the journal editor.
+  analyzedHash?: string;
+  analyzedAt?: Date;
+  embedding?: number[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,8 +46,22 @@ const journalEntrySchema = new Schema<JournalEntryFields>(
     location: { type: String, default: "", maxlength: 120 },
     photos: { type: [photoSchema], default: [] },
     tags: { type: [String], default: [] },
+    analyzedHash: { type: String },
+    analyzedAt: { type: Date },
+    embedding: { type: [Number], select: false, default: undefined },
   },
   { timestamps: true },
 );
+
+// A deleted day must stop counting as evidence for any memory or open loop.
+journalEntrySchema.post("findOneAndDelete", async function (doc: JournalEntryFields | null) {
+  if (!doc) return;
+  try {
+    await detachDate(doc.date);
+    await refreshStats();
+  } catch (error) {
+    console.warn("Could not clean insights after delete:", error instanceof Error ? error.message : "unknown error");
+  }
+});
 
 export const JournalEntry = model<JournalEntryFields>("JournalEntry", journalEntrySchema);
