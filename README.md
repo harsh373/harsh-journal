@@ -46,3 +46,9 @@ Open http://localhost:5173
 
     cd backend && npm run typecheck
     cd frontend && npx tsc -b
+
+## checking purpose on different folder 
+
+here i am expecting the change on shared one too if it is not same memory 
+
+
