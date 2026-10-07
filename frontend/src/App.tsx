@@ -16,6 +16,7 @@ import TrackDetail from "./pages/TrackDetail";
 import Tracks from "./pages/Tracks";
 import Weekly from "./pages/Weekly";
 import WakePage from "./pages/WakePage";
+import Now from "./pages/Now";
 
 function AppRoutes() {
   const { status } = useAuth();
@@ -31,6 +32,7 @@ function AppRoutes() {
           <Route path="day/:date" element={<Journal />} />
           <Route path="archive" element={<Archive />} />
           <Route path="weekly" element={<Weekly />} />
+            <Route path="now" element={<Now />} />
           <Route path="scenarios" element={<Placeholder title="Scenarios" />} />
           <Route path="side-quests" element={<SideQuests />} />
           <Route path="tracks" element={<Tracks />} />

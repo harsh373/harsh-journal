@@ -16,6 +16,7 @@ import sideQuestRoutes from "./routes/sideQuest.routes";
 import todayRoutes from "./routes/today.routes";
 import trackRoutes from "./routes/track.routes";
 import weeklyRoutes from "./routes/weekly.routes";
+import nowRoutes from "./routes/now.routes";
 
 const app = express();
 
@@ -49,6 +50,7 @@ app.use("/api/settings", settingsRoutes);
 app.use("/api/weekly", weeklyRoutes);
 app.use("/api/today", todayRoutes);
 app.use("/api/insights", insightsRoutes);
+app.use("/api/now", nowRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

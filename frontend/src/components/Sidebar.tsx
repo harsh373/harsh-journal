@@ -1,12 +1,11 @@
 import {
   BookOpen,
-  ChartColumn,
   Compass,
   Image as PhotosIcon,
   ListChecks,
   Lock,
   Moon,
-  Search,
+  Circle,
  
   Sparkles,
   Sun,
@@ -30,12 +29,11 @@ interface NavEntry {
 
 const NAV: NavEntry[] = [
   { label: "Journal", to: "/", icon: BookOpen },
+  { label: "Now", to: "/now", icon: Circle },
   { label: "Weekly", to: "/weekly", icon: ListChecks },
   { label: "Tracks", to: "/tracks", icon: CalendarCheck },
   { label: "Side Quests", to: "/side-quests", icon: Compass },
   { label: "Photos", to: "/photos", icon: PhotosIcon },
-  { label: "Stats", to: "/stats", icon: ChartColumn },
-  { label: "Search", to: "/search", icon: Search },
   { label: "Insights", to: "/insights", icon: Sparkles },
 ];
 
