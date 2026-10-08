@@ -1,5 +1,6 @@
-import { MapPin, Pencil } from "lucide-react";
+import { Circle, MapPin, Pencil } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ComponentProps } from "react";
+import { Link } from "react-router-dom";
 import { fetchArchivePage, fetchEntry, saveEntry } from "../api/journal.api";
 import type { ArchiveEntry, EntryFields, JournalEntry, JournalPhoto, Mood } from "../api/journal.api";
 import { formatLongDate, formatWeekday, getJournalToday } from "../config/dates";
@@ -266,8 +267,18 @@ export default function JournalDay({ day }: { day: DayKey }) {
               )}
 
               {isToday && !editing && (
-                <div className="mt-6">
-                  <Countdown />
+                <div className="mt-6 flex items-stretch gap-3">
+                  <div>
+                    <Countdown />
+                  </div>
+                  <Link
+                    to="/now"
+                    aria-label="Open Now"
+                    title="Now"
+                    className="flex aspect-square min-w-[56px] items-center justify-center rounded-[18px] border border-border bg-surface text-secondary transition-colors duration-150 hover:bg-hover hover:text-text active:scale-95"
+                  >
+                    <Circle size={20} strokeWidth={1.5} />
+                  </Link>
                 </div>
               )}
             </header>

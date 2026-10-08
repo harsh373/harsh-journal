@@ -3,8 +3,10 @@ import type { ArchiveEntry } from "../api/journal.api";
 import { formatDayMonth } from "../config/dates";
 import MoodDot from "./MoodDot";
 
+// The day's title (the "one good line") comes first.
 function previewText(entry: ArchiveEntry): string {
-  return entry.dailySummary || entry.whatIDidToday || entry.whatDrainedMe || entry.tomorrowDifferent;
+  const title = entry.whatIDidToday.trim();
+  return title || entry.dailySummary || entry.whatDrainedMe || entry.tomorrowDifferent;
 }
 
 export default function RecentDays({ entries }: { entries: ArchiveEntry[] }) {

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { MoodBadge } from "../components/MoodPicker";
 import { fetchArchivePage } from "../api/journal.api";
 import type { ArchiveEntry } from "../api/journal.api";
 import { formatLongDate, formatWeekday, getJournalToday } from "../config/dates";
@@ -62,39 +61,49 @@ export default function Archive() {
       )}
 
       <div className="mt-8">
-        {entries.map((entry, index) => (
-          <Link
-            key={entry.date}
-            to={entry.date === today ? "/" : `/day/${entry.date}`}
-            className={"block py-8 " + (index > 0 ? "border-t border-border" : "")}
-          >
-            <div className="flex items-center gap-3">
-              <p className="text-[15px] text-secondary">{formatWeekday(entry.date)}</p>
-              <p className="text-[15px] text-secondary">·</p>
-              <p className="text-[15px] text-secondary">{formatLongDate(entry.date)}</p>
-              <span className="ml-auto">
-                <MoodBadge mood={entry.mood} />
-              </span>
-            </div>
+        {entries.map((entry, index) => {
+          // The day's title is the "one good line" written at the top of the day.
+          const title = entry.whatIDidToday.trim();
 
-            {entry.photos.length > 0 && (
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                {entry.photos.slice(0, 2).map((photo) => (
-                  <div
-                    key={photo.id}
-                    className="aspect-[4/3] overflow-hidden rounded-[14px] border border-border bg-surface"
-                  >
-                    <img src={photo.url} alt={photo.caption ?? ""} className="h-full w-full object-cover" loading="lazy" />
-                  </div>
-                ))}
+          return (
+            <Link
+              key={entry.date}
+              to={entry.date === today ? "/" : `/day/${entry.date}`}
+              className={"block py-8 " + (index > 0 ? "border-t border-border" : "")}
+            >
+              <div className="flex items-center gap-3">
+                <p className="shrink-0 whitespace-nowrap text-[15px] text-secondary">{formatWeekday(entry.date)}</p>
+                <p className="shrink-0 text-[15px] text-secondary">·</p>
+                <p className="shrink-0 whitespace-nowrap text-[15px] text-secondary">{formatLongDate(entry.date)}</p>
+                {title && (
+                  <p className="ml-auto min-w-0 truncate pl-2 text-right text-[15px] font-medium text-text">{title}</p>
+                )}
               </div>
-            )}
 
-            {previewText(entry) && (
-              <p className="mt-4 line-clamp-3 text-[16px] leading-relaxed text-text">{previewText(entry)}</p>
-            )}
-          </Link>
-        ))}
+              {entry.photos.length > 0 && (
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  {entry.photos.slice(0, 2).map((photo) => (
+                    <div
+                      key={photo.id}
+                      className="aspect-[4/3] overflow-hidden rounded-[14px] border border-border bg-surface"
+                    >
+                      <img
+                        src={photo.url}
+                        alt={photo.caption ?? ""}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {previewText(entry) && (
+                <p className="mt-4 line-clamp-3 text-[16px] leading-relaxed text-text">{previewText(entry)}</p>
+              )}
+            </Link>
+          );
+        })}
       </div>
 
       <div ref={sentinelRef} className="h-1" />
