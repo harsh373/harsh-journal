@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { Link } from "react-router-dom";
 import {
   attachPresentState,
   createTimeTravelEntry,
@@ -6,8 +8,10 @@ import {
   fetchTodayEscapeCount,
 } from "../api/now.api";
 import type { RecentDay, TimeTravelEntry } from "../api/now.api";
-import { getJournalToday, parseDayKey } from "../config/dates";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
+import GalaxyBackground from "../components/GalaxyBackground";
+import { getJournalToday, parseDayKey } from "../config/dates";
+import { pickFutureQuote } from "../config/futureQuotes";
 
 const THOUGHT_LIMIT = 2000;
 const PRESENT_LIMIT = 1000;
@@ -16,9 +20,8 @@ type Screen = "present" | "traveling" | "future";
 
 const recentLabelFormat = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 
-// Deliberately US month-first, deliberately uppercase — "OCT 8", not "8 October".
-// A one-off for this page's own quiet little history list, not the app's usual
-// date convention, so it stays local here rather than living in config/dates.ts.
+// Deliberately US month-first, deliberately uppercase: "OCT 8", not "8 October".
+// A one-off for this page's own quiet history list, not the app's usual date style.
 function formatRecentLabel(dayKey: string): string {
   const parts = parseDayKey(dayKey);
   if (!parts) return dayKey;
@@ -37,6 +40,7 @@ export default function Now() {
   const [presentDraft, setPresentDraft] = useState("");
   const [travelDraft, setTravelDraft] = useState("");
   const [activeEntry, setActiveEntry] = useState<TimeTravelEntry | null>(null);
+  const [quote, setQuote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,8 +56,7 @@ export default function Now() {
         setStatsLoaded(true);
       })
       .catch(() => {
-        // Quiet failure — this is a small supporting stat, not the point of the
-        // page. Nothing here is worth an error banner breaking the calm.
+        // Quiet failure: this is a small supporting stat, not the point of the page.
       });
   }, [today]);
 
@@ -65,7 +68,7 @@ export default function Now() {
       try {
         await attachPresentState(activeEntry.id, text);
       } catch {
-        // Quiet failure — this field is explicitly secondary per the spec.
+        // Quiet failure: this field is explicitly secondary per the spec.
       }
     }
 
@@ -93,6 +96,7 @@ export default function Now() {
     try {
       const entry = await createTimeTravelEntry(today, text);
       setActiveEntry(entry);
+      setQuote((previous) => pickFutureQuote(previous));
       setTravelDraft("");
       setScreen("future");
       setTodayCount((count) => count + 1);
@@ -210,23 +214,34 @@ export default function Now() {
         </div>
       )}
 
-      {screen === "future" && activeEntry && (
-        <div key="future" className="page-in text-center">
-          <h1 className="text-[34px] font-light tracking-tight text-text sm:text-[40px]">YOU ARE IN THE FUTURE.</h1>
+      {screen === "future" &&
+        activeEntry &&
+        createPortal(
+          <div key="future" className="page-in fixed inset-0 z-50 bg-black text-white">
+            <GalaxyBackground />
+            <div className="absolute inset-0 overflow-y-auto overscroll-contain">
+              <div className="mx-auto flex min-h-full w-full max-w-[560px] flex-col items-center justify-center px-6 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-[max(2.5rem,env(safe-area-inset-top))] text-center [text-shadow:0_1px_14px_rgba(0,0,0,0.65)]">
+                <h1 className="text-[34px] font-light tracking-tight sm:text-[40px]">YOU ARE IN THE FUTURE.</h1>
 
-          <p className="mx-auto mt-10 max-w-[440px] text-left text-[19px] italic leading-relaxed text-text">
-            &ldquo;{activeEntry.futureThought}&rdquo;
-          </p>
+                <p className="mt-10 max-w-[440px] text-left text-[19px] italic leading-relaxed text-white/90">
+                  &ldquo;{activeEntry.futureThought}&rdquo;
+                </p>
 
-          <button
-            type="button"
-            onClick={handleReturn}
-            className={`${pillButton} mt-12 border border-border text-text hover:bg-hover`}
-          >
-            Return To Now
-          </button>
-        </div>
-      )}
+                {quote && <p className="mt-10 max-w-[360px] text-[15px] leading-relaxed text-white/60">{quote}</p>}
+
+                <button
+                  type="button"
+                  onClick={handleReturn}
+                  autoFocus
+                  className={`${pillButton} mt-12 border border-white/30 text-white hover:bg-white/10`}
+                >
+                  Return To Now
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
 
       {showStats && recent.length > 0 && (
         <div className="page-in mt-24 border-t border-border pt-6 text-center">
@@ -240,6 +255,12 @@ export default function Now() {
               </li>
             ))}
           </ul>
+          <Link
+            to="/now/archive"
+            className="mt-4 inline-block text-[12px] text-tertiary underline-offset-4 transition-colors duration-150 hover:text-text hover:underline"
+          >
+            View all
+          </Link>
         </div>
       )}
     </div>

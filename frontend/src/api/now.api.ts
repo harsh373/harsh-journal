@@ -32,3 +32,24 @@ export async function fetchRecentEscapes(): Promise<RecentDay[]> {
   const { data } = await api.get<{ days: RecentDay[] }>("/now/recent");
   return data.days;
 }
+
+export interface NowArchiveEntry {
+  id: string;
+  futureThought: string;
+  createdAt: string;
+}
+
+export interface NowArchiveDay {
+  date: string;
+  count: number;
+  entries: NowArchiveEntry[];
+}
+
+export async function fetchNowArchivePage(
+  cursor: string | null,
+): Promise<{ days: NowArchiveDay[]; nextCursor: string | null }> {
+  const { data } = await api.get<{ days: NowArchiveDay[]; nextCursor: string | null }>("/now/archive", {
+    params: cursor ? { cursor } : undefined,
+  });
+  return data;
+}

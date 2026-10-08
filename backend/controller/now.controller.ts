@@ -7,6 +7,7 @@ import { isValidDayKey } from "../utility/dayKey";
 const THOUGHT_LIMIT = 2000;
 const PRESENT_LIMIT = 1000;
 const RECENT_DAYS = 14;
+const ARCHIVE_PAGE_SIZE = 10;
 
 interface EntryResponse {
   id: string;
@@ -104,5 +105,61 @@ export async function getRecent(_req: Request, res: Response): Promise<void> {
 
   res.status(200).json({
     days: results.map((row) => ({ date: row._id, count: row.count })),
+  });
+}
+
+interface ArchiveEntryPreview {
+  id: string;
+  futureThought: string;
+  createdAt: Date;
+}
+
+interface ArchiveDayResponse {
+  date: string;
+  count: number;
+  entries: ArchiveEntryPreview[];
+}
+
+// GET /api/now/archive?cursor=2026-10-05  ->  every escape, grouped by day,
+// newest first, 10 days per page — same cursor convention as the journal
+// archive. This is the full history; /recent above stays a short quiet list.
+export async function getArchive(req: Request, res: Response): Promise<void> {
+  const cursor = req.query.cursor;
+  const match = typeof cursor === "string" && isValidDayKey(cursor) ? { date: { $lt: cursor } } : {};
+
+  const results = await TimeTravelEntry.aggregate<{
+    _id: string;
+    count: number;
+    entries: { id: unknown; futureThought: string; createdAt: Date }[];
+  }>([
+    { $match: match },
+    { $sort: { date: -1, createdAt: 1 } },
+    {
+      $group: {
+        _id: "$date",
+        count: { $sum: 1 },
+        entries: { $push: { id: "$_id", futureThought: "$futureThought", createdAt: "$createdAt" } },
+      },
+    },
+    { $sort: { _id: -1 } },
+    { $limit: ARCHIVE_PAGE_SIZE + 1 },
+  ]);
+
+  const hasMore = results.length > ARCHIVE_PAGE_SIZE;
+  const page = hasMore ? results.slice(0, ARCHIVE_PAGE_SIZE) : results;
+
+  const days: ArchiveDayResponse[] = page.map((row) => ({
+    date: row._id,
+    count: row.count,
+    entries: row.entries.map((entry) => ({
+      id: String(entry.id),
+      futureThought: entry.futureThought,
+      createdAt: entry.createdAt,
+    })),
+  }));
+
+  res.status(200).json({
+    days,
+    nextCursor: hasMore ? (page.at(-1)?._id ?? null) : null,
   });
 }
