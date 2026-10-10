@@ -62,13 +62,13 @@ export default function Countdown() {
 
   if (editing) {
     return (
-      <div className="rounded-[14px] border border-border bg-surface px-4 py-3 shadow-card">
+      <div className="rounded-card border border-border bg-surface px-4 py-3">
         <div className="flex flex-wrap items-center gap-2">
           <input
             type="date"
             value={draftDate}
             onChange={(event) => setDraftDate(event.target.value)}
-            className="h-8 rounded-lg border border-border bg-bg px-2 text-[13px] text-text focus:outline-none"
+            className="h-9 rounded-control border border-border bg-bg px-2 text-[16px] text-text focus:border-secondary focus:outline-none sm:text-[13px]"
           />
           <input
             type="text"
@@ -76,20 +76,20 @@ export default function Countdown() {
             maxLength={LIMIT_LABEL}
             placeholder="What's the day? (optional)"
             onChange={(event) => setDraftLabel(event.target.value)}
-            className="h-8 min-w-[140px] flex-1 rounded-lg border border-border bg-bg px-2 text-[13px] text-text placeholder:text-tertiary focus:outline-none"
+            className="h-9 min-w-[140px] flex-1 rounded-control border border-border bg-bg px-2 text-[16px] text-text placeholder:text-tertiary focus:border-secondary focus:outline-none sm:text-[13px]"
           />
           <button
             type="button"
             onClick={() => void handleSave()}
             disabled={saving}
-            className="h-8 rounded-lg bg-text px-3 text-[13px] font-medium text-bg transition-opacity hover:opacity-85 disabled:opacity-50"
+            className="h-9 rounded-control bg-text px-3 text-[13px] font-medium text-bg transition-opacity hover:opacity-85 disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save"}
           </button>
           <button
             type="button"
             onClick={handleCancel}
-            className="h-8 rounded-lg px-3 text-[13px] text-secondary transition-colors hover:bg-hover hover:text-text"
+            className="h-9 rounded-control px-3 text-[13px] text-secondary transition-colors hover:bg-hover hover:text-text"
           >
             Cancel
           </button>
@@ -105,7 +105,7 @@ export default function Countdown() {
       <button
         type="button"
         onClick={() => setEditing(true)}
-        className="flex items-center gap-1.5 text-[13px] text-secondary transition-colors hover:text-text"
+        className="flex h-9 items-center gap-1.5 text-[13px] text-secondary transition-colors hover:text-text"
       >
         <Pencil size={13} strokeWidth={1.75} />
         Set a countdown
@@ -121,10 +121,10 @@ export default function Countdown() {
     <button
       type="button"
       onClick={() => setEditing(true)}
-      className="group flex items-center gap-2 rounded-[14px] border border-border bg-surface px-4 py-2.5 text-left shadow-card transition-colors hover:bg-hover"
+      className="group flex items-center gap-2 rounded-card border border-border bg-surface px-4 py-2.5 text-left transition-colors hover:bg-hover"
     >
       <div>
-        <p className="text-[19px] font-light leading-none tracking-tight">{phrase}</p>
+        <p className="text-[19px] font-medium leading-none tracking-tight">{phrase}</p>
         {settings.countdownLabel && <p className="mt-1 text-[12px] text-secondary">{settings.countdownLabel}</p>}
       </div>
       <Pencil

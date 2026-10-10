@@ -19,21 +19,21 @@ export default function MonthDots({
 
   return (
     <div className="w-full max-w-[320px]">
-      <div className="grid grid-cols-7 pb-1 text-center text-[10px] font-medium text-tertiary">
+      <div className="grid grid-cols-7 pb-1 text-center text-[11px] font-medium text-tertiary">
         {WEEKDAYS.map((weekday, index) => (
           <span key={index}>{weekday}</span>
         ))}
       </div>
       <div className="grid grid-cols-7">
         {cells.map((day, index) => {
-          if (!day) return <span key={"blank-" + index} className="h-9" />;
+          if (!day) return <span key={"blank-" + index} className="h-10" />;
 
           const logged = loggedDays.has(day);
           const isToday = day === today;
           const style = logged
             ? "bg-text font-semibold text-bg"
             : isToday
-              ? "font-semibold text-special"
+              ? "font-semibold text-alert"
               : day > today
                 ? "text-tertiary"
                 : "text-secondary";
@@ -42,7 +42,7 @@ export default function MonthDots({
             <div
               key={day}
               title={formatLongDate(day) + (logged ? " · logged" : "")}
-              className="flex h-9 items-center justify-center"
+              className="flex h-10 items-center justify-center"
             >
               <span
                 className={

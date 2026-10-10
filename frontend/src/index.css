@@ -3,23 +3,27 @@
 /*
   Design tokens. Every colour in the app comes from these variables, so light
   and dark mode are two sets of values for the same design.
-  Layers: desktop backdrop -> background -> surface -> elevated surface.
+  Layers (light): desktop backdrop -> bg (paper) -> surface (faint tint) -> elevated (white)
+  Layers (dark):  desktop backdrop -> bg -> surface -> elevated, each a small step lighter.
 */
 :root,
 :root[data-theme="light"] {
-  --desktop: #dcdce1;
-  --bg: #eeeef1;
-  --surface: #ffffff;
+  --desktop: #dadbe0;
+  --desktop-deep: #cfd1d8;
+  --bg: #fcfcfd;
+  --surface: #f4f4f6;
   --elevated: #ffffff;
+  --sidebar: #f1f1f4;
   --text: #1d1d1f;
-  --text-secondary: #56565b;
-  --text-tertiary: #7a7a80;
-  --border: rgba(0, 0, 0, 0.1);
-  --window-border: rgba(0, 0, 0, 0.16);
-  --hover: rgba(0, 0, 0, 0.045);
-  --selected: rgba(0, 0, 0, 0.08);
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 6px 20px rgba(0, 0, 0, 0.06);
-  --window-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  --text-secondary: #55555a;
+  --text-tertiary: #6e6e73;
+  --border: rgba(0, 0, 0, 0.09);
+  --window-border: rgba(0, 0, 0, 0.14);
+  --hover: rgba(0, 0, 0, 0.04);
+  --selected: rgba(0, 0, 0, 0.07);
+  --shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --window-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12), 0 32px 80px -24px rgba(0, 0, 0, 0.3),
+    0 10px 30px rgba(0, 0, 0, 0.08);
   --green: #34c759;
   --blue: #0a84ff;
   --orange: #ff9f0a;
@@ -28,19 +32,26 @@
 }
 
 :root[data-theme="dark"] {
-  --desktop: #131316;
-  --bg: #000000;
-  --surface: #08080a;
-  --elevated: #1c1c1f;
-  --text: #f5f5f7;
-  --text-secondary: #98989d;
-  --text-tertiary: #6e6e73;
-  --border: rgba(255, 255, 255, 0.1);
-  --window-border: rgba(255, 255, 255, 0.16);
+  --desktop: #0e0f11;
+  --desktop-deep: #08090a;
+  --bg: #1a1a1c;
+  --surface: #232326;
+  --elevated: #2b2b2f;
+  --sidebar: #212124;
+  --text: #f3f3f5;
+  --text-secondary: #a3a3aa;
+  --text-tertiary: #86868e;
+  --border: rgba(255, 255, 255, 0.08);
+  --window-border: rgba(255, 255, 255, 0.13);
   --hover: rgba(255, 255, 255, 0.05);
   --selected: rgba(255, 255, 255, 0.09);
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.35);
-  --window-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  --shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.05), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --window-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.7), 0 32px 80px -16px rgba(0, 0, 0, 0.7),
+    0 12px 30px rgba(0, 0, 0, 0.4);
+  --green: #30d158;
+  --blue: #0a84ff;
+  --orange: #ff9f0a;
+  --red: #ff453a;
   color-scheme: dark;
 }
 
@@ -50,6 +61,7 @@
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-elevated: var(--elevated);
+  --color-sidebar: var(--sidebar);
   --color-text: var(--text);
   --color-secondary: var(--text-secondary);
   --color-tertiary: var(--text-tertiary);
@@ -57,18 +69,59 @@
   --color-window: var(--window-border);
   --color-hover: var(--hover);
   --color-selected: var(--selected);
+  --color-accent: var(--blue);
   --color-good: var(--green);
   --color-special: var(--blue);
   --color-tough: var(--orange);
   --color-alert: var(--red);
   --shadow-card: var(--shadow);
   --shadow-window: var(--window-shadow);
-  --radius-card: 18px;
-  --radius-control: 10px;
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+  --radius-card: 14px;
+  --radius-control: 9px;
+  --font-sans: -apple-system, BlinkMacSystemFont, system-ui, "Inter", "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "New York", ui-serif, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
 }
 
+/* ---------- Type scale ---------- */
+/* Page title / big date. Fluid so it never wastes a phone screen. */
+@utility type-display {
+  font-size: clamp(1.75rem, 1.35rem + 1.6vw, 2.5rem);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+}
+
+/* Small uppercase label above a title or section. */
+@utility type-eyebrow {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+/* Long-form writing. Serif, generous leading, capped line length (~68 characters). */
+@utility type-journal {
+  font-family: var(--font-serif);
+  font-size: 1.1875rem;
+  line-height: 1.72;
+  letter-spacing: -0.003em;
+  max-width: 38rem;
+  text-wrap: pretty;
+  color: var(--text);
+}
+
+/* Supporting text and metadata. */
+@utility type-meta {
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  color: var(--text-secondary);
+}
+
+/* ---------- Base ---------- */
 html,
 body,
 #root {
@@ -76,10 +129,10 @@ body,
 }
 
 body {
-  background: var(--desktop);
+  background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
-  font-weight: 450;
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -87,14 +140,38 @@ body {
 }
 
 h1,
-h2 {
+h2,
+h3 {
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
-:focus-visible {
-  outline: 2px solid var(--blue);
-  outline-offset: 2px;
+::selection {
+  background: color-mix(in srgb, var(--blue) 28%, transparent);
+}
+
+/* In the base layer so any element with Tailwind's focus:outline-none can opt out.
+   Buttons and links don't opt out, so keyboard users still see where they are. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+  }
+}
+
+/* On phones the app is the whole screen. From 1024px up it floats on a desktop backdrop. */
+.desktop-backdrop {
+  background: var(--bg);
+}
+
+@media (min-width: 1024px) {
+  body {
+    background: var(--desktop);
+  }
+
+  .desktop-backdrop {
+    background: linear-gradient(180deg, var(--desktop), var(--desktop-deep));
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -102,15 +179,17 @@ h2 {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
-/* Page transition: a very short fade with a 4px rise. */
+/* Page transition: a very short fade with a 3px rise. */
 @keyframes page-in {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(3px);
   }
   to {
     opacity: 1;
@@ -119,7 +198,7 @@ h2 {
 }
 
 .page-in {
-  animation: page-in 260ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: page-in 220ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 /* Thin, quiet scrollbars like macOS. */
@@ -128,8 +207,8 @@ h2 {
   scrollbar-color: var(--border) transparent;
 }
 
-/* Slowly drifting stars on the desktop backdrop, dark mode only. Sits behind the
-   floating app panel; the panel itself never moves. */
+/* Kept only in case another screen (e.g. Now) still uses it. AppShell no longer renders it.
+   If nothing else uses .starfield, delete this whole block. */
 @keyframes starfield-drift {
   from {
     background-position: 0 0, 40px 60px, 130px 270px, 200px 40px, 20px 200px;

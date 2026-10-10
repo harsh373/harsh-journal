@@ -29,8 +29,11 @@ function formatRecentLabel(dayKey: string): string {
   return recentLabelFormat.format(date).toUpperCase();
 }
 
-const pillButton =
-  "inline-flex h-11 items-center rounded-full px-8 text-[13px] font-medium uppercase tracking-[0.06em] transition-opacity duration-150";
+const actionButton =
+  "inline-flex h-11 items-center justify-center rounded-[12px] px-8 text-[13px] font-medium uppercase tracking-[0.06em] transition-opacity duration-150";
+
+// Shared by all three headlines. Uppercase text needs slightly positive tracking.
+const headline = "text-balance text-[2rem] font-semibold leading-[1.1] tracking-[0.02em] sm:text-[2.5rem]";
 
 export default function Now() {
   const today = getJournalToday();
@@ -122,11 +125,11 @@ export default function Now() {
   const showStats = screen === "present" && statsLoaded;
 
   return (
-    <div className="mx-auto w-full max-w-[560px] px-6 pb-24 pt-10 lg:pt-16">
+    <div className="mx-auto w-full max-w-[560px] px-6 pb-24 pt-[8vh] lg:pt-[12vh]">
       {showStats && (
-        <div className="page-in mb-16 text-center">
-          <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-tertiary">Today</p>
-          <p className="mt-1 text-5xl font-light tracking-tight text-text">{todayCount}</p>
+        <div className="page-in mb-14 text-center">
+          <p className="type-eyebrow">Today</p>
+          <p className="mt-1 text-4xl font-light tabular-nums tracking-tight text-text">{todayCount}</p>
           <p className="mt-0.5 text-[12px] text-tertiary">
             {todayCount === 1 ? "future escape" : "future escapes"}
           </p>
@@ -135,11 +138,9 @@ export default function Now() {
 
       {screen === "present" && (
         <div key="present" className="page-in text-center">
-          <h1 className="text-[34px] font-light tracking-tight text-text sm:text-[40px]">
-            {justReturned ? "WELCOME BACK." : "YOU ARE HERE."}
-          </h1>
+          <h1 className={`${headline} text-text`}>{justReturned ? "WELCOME BACK." : "YOU ARE HERE."}</h1>
           {justReturned && <p className="mt-2 text-[15px] text-secondary">You are here.</p>}
-          <p className="mt-4 text-[15px] text-tertiary">What are you doing right now?</p>
+          <p className="mt-4 text-[17px] text-secondary">What are you doing right now?</p>
 
           <div className="mx-auto mt-10 max-w-[440px] text-left">
             <AutoGrowTextarea
@@ -147,24 +148,24 @@ export default function Now() {
               onChange={(event) => setPresentDraft(event.target.value)}
               placeholder="Write what is happening right now..."
               maxLength={PRESENT_LIMIT}
-              className="min-h-[64px] border-b border-border px-0 py-2 text-[17px] leading-relaxed placeholder:text-tertiary"
+              className="min-h-[64px] border-b border-tertiary/40 px-0 py-2 font-serif text-[1.25rem] leading-relaxed transition-colors duration-150 placeholder:text-tertiary focus:border-secondary"
             />
           </div>
 
           <button
             type="button"
             onClick={() => void handleStayHere()}
-            className={`${pillButton} mt-10 bg-text text-bg hover:opacity-85 active:opacity-70`}
+            className={`${actionButton} mt-10 bg-text text-bg hover:opacity-85 active:opacity-70`}
           >
             Stay Here
           </button>
 
           {!justReturned && (
-            <div className="mt-7">
+            <div className="mt-5">
               <button
                 type="button"
                 onClick={startTimeTravel}
-                className="text-[13px] font-medium uppercase tracking-[0.06em] text-secondary underline-offset-4 transition-colors duration-150 hover:text-text hover:underline"
+                className="inline-flex h-10 items-center text-[13px] font-medium uppercase tracking-[0.06em] text-secondary underline-offset-4 transition-colors duration-150 hover:text-text hover:underline"
               >
                 Time Travel
               </button>
@@ -175,7 +176,7 @@ export default function Now() {
 
       {screen === "traveling" && (
         <div key="traveling" className="page-in text-center">
-          <h1 className="text-[34px] font-light tracking-tight text-text sm:text-[40px]">WHERE ARE YOU GOING?</h1>
+          <h1 className={`${headline} text-text`}>WHERE ARE YOU GOING?</h1>
           <p className="mx-auto mt-4 max-w-[360px] text-[15px] leading-relaxed text-secondary">
             You noticed yourself leaving the present. Tell me what you are about to imagine.
           </p>
@@ -187,7 +188,7 @@ export default function Now() {
               placeholder="What are you imagining?"
               maxLength={THOUGHT_LIMIT}
               autoFocus
-              className="min-h-[96px] border-b border-border px-0 py-2 text-[17px] leading-relaxed placeholder:text-tertiary"
+              className="min-h-[96px] border-b border-tertiary/40 px-0 py-2 font-serif text-[1.25rem] leading-relaxed transition-colors duration-150 placeholder:text-tertiary focus:border-secondary"
             />
           </div>
 
@@ -197,16 +198,16 @@ export default function Now() {
             type="button"
             onClick={() => void handleEnterFuture()}
             disabled={!travelDraft.trim() || submitting}
-            className={`${pillButton} mt-10 bg-text text-bg hover:opacity-85 active:opacity-70 disabled:cursor-not-allowed disabled:opacity-30`}
+            className={`${actionButton} mt-10 bg-text text-bg hover:opacity-85 active:opacity-70 disabled:cursor-not-allowed disabled:opacity-30`}
           >
             {submitting ? "Entering…" : "Enter Future"}
           </button>
 
-          <div className="mt-7">
+          <div className="mt-5">
             <button
               type="button"
               onClick={cancelTimeTravel}
-              className="text-[13px] text-tertiary underline-offset-4 transition-colors duration-150 hover:text-text hover:underline"
+              className="inline-flex h-10 items-center text-[13px] text-tertiary underline-offset-4 transition-colors duration-150 hover:text-text hover:underline"
             >
               Back
             </button>
@@ -221,7 +222,7 @@ export default function Now() {
             <GalaxyBackground />
             <div className="absolute inset-0 overflow-y-auto overscroll-contain">
               <div className="mx-auto flex min-h-full w-full max-w-[560px] flex-col items-center justify-center px-6 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-[max(2.5rem,env(safe-area-inset-top))] text-center [text-shadow:0_1px_14px_rgba(0,0,0,0.65)]">
-                <h1 className="text-[34px] font-light tracking-tight sm:text-[40px]">YOU ARE IN THE FUTURE.</h1>
+                <h1 className={headline}>YOU ARE IN THE FUTURE.</h1>
 
                 <p className="mt-10 max-w-[440px] text-left text-[19px] italic leading-relaxed text-white/90">
                   &ldquo;{activeEntry.futureThought}&rdquo;
@@ -233,7 +234,7 @@ export default function Now() {
                   type="button"
                   onClick={handleReturn}
                   autoFocus
-                  className={`${pillButton} mt-12 border border-white/30 text-white hover:bg-white/10`}
+                  className={`${actionButton} mt-12 border border-white/30 text-white hover:bg-white/10`}
                 >
                   Return To Now
                 </button>
@@ -244,8 +245,8 @@ export default function Now() {
         )}
 
       {showStats && recent.length > 0 && (
-        <div className="page-in mt-24 border-t border-border pt-6 text-center">
-          <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-tertiary">Recent</p>
+        <div className="page-in mt-20 border-t border-border pt-6 text-center">
+          <p className="type-eyebrow">Recent</p>
           <ul className="mt-3 space-y-1.5">
             {recent.map((day) => (
               <li key={day.date} className="text-[13px] text-secondary">

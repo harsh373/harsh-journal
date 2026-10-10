@@ -110,7 +110,7 @@ export default function QuestPostCard({ questId, post, startInEditMode, onChange
   }
 
   return (
-    <article className="rounded-[18px] border border-border bg-surface p-6 shadow-card">
+    <article className="border-t border-border pb-3 pt-7">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-[13px] text-secondary">{formatLongDate(post.date)}</p>
@@ -124,10 +124,12 @@ export default function QuestPostCard({ questId, post, startInEditMode, onChange
                 scheduleSave();
               }}
               placeholder="Entry title"
-              className="mt-1 w-full bg-transparent text-[20px] font-medium text-text placeholder:text-tertiary focus:outline-none"
+              className="mt-1 w-full bg-transparent font-serif text-[1.375rem] font-medium leading-snug tracking-tight text-text placeholder:text-tertiary focus:outline-none"
             />
           ) : (
-            <h3 className="mt-1 text-[20px] font-medium text-text">{post.title}</h3>
+            <h3 className="mt-1 font-serif text-[1.375rem] font-medium leading-snug tracking-tight text-text">
+              {post.title}
+            </h3>
           )}
         </div>
 
@@ -137,7 +139,7 @@ export default function QuestPostCard({ questId, post, startInEditMode, onChange
           <button
             type="button"
             onClick={() => (editing ? void handleDone() : setEditing(true))}
-            className="flex h-7 items-center gap-1 rounded-md px-2 text-[12px] text-secondary transition-colors hover:bg-hover hover:text-text"
+            className="flex h-9 items-center gap-1 rounded-control px-2.5 text-[13px] text-secondary transition-colors hover:bg-hover hover:text-text lg:h-7 lg:text-[12px]"
           >
             {editing ? (
               "Done"
@@ -151,7 +153,7 @@ export default function QuestPostCard({ questId, post, startInEditMode, onChange
             type="button"
             onClick={() => void handleDelete()}
             aria-label="Delete entry"
-            className="flex h-7 w-7 items-center justify-center rounded-md text-secondary transition-colors hover:bg-hover hover:text-alert"
+            className="flex h-9 w-9 items-center justify-center rounded-control text-secondary transition-colors hover:bg-hover hover:text-alert lg:h-7 lg:w-7"
           >
             <Trash2 size={13} strokeWidth={1.75} />
           </button>
@@ -169,19 +171,19 @@ export default function QuestPostCard({ questId, post, startInEditMode, onChange
               contentRef.current = event.target.value;
               scheduleSave();
             }}
-            className="text-[16px] leading-relaxed placeholder:text-tertiary"
+            className="type-journal placeholder:text-tertiary"
           />
         ) : (
-          post.content && <p className="whitespace-pre-wrap text-[16px] leading-relaxed text-text">{post.content}</p>
+          post.content && <p className="type-journal whitespace-pre-wrap">{post.content}</p>
         )}
       </div>
 
       {(post.photos.length > 0 || editing) && (
-        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {post.photos.map((photo) => (
             <div
               key={photo.id}
-              className="group relative aspect-[4/3] overflow-hidden rounded-[12px] border border-border bg-bg"
+              className="group relative aspect-[4/3] overflow-hidden rounded-card border border-border bg-surface"
             >
               <img src={photo.url} alt="" className="h-full w-full object-cover" loading="lazy" />
               {editing && (
@@ -189,7 +191,7 @@ export default function QuestPostCard({ questId, post, startInEditMode, onChange
                   type="button"
                   onClick={() => void handleDeletePhoto(photo)}
                   aria-label="Remove photo"
-                  className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/45 text-white opacity-0 backdrop-blur-sm transition-opacity duration-150 group-hover:opacity-100"
+                  className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-black/45 text-white opacity-100 backdrop-blur-sm transition-opacity duration-150 focus-visible:opacity-100 group-hover:opacity-100 [@media(hover:hover)]:opacity-0"
                 >
                   ×
                 </button>
@@ -198,8 +200,8 @@ export default function QuestPostCard({ questId, post, startInEditMode, onChange
           ))}
 
           {editing && post.photos.length < MAX_PHOTOS && (
-            <label className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center gap-1 rounded-[12px] border border-dashed border-border text-tertiary transition-colors hover:bg-hover hover:text-text">
-              <span className="text-[12px]">{uploading ? "Uploading…" : "Add photo"}</span>
+            <label className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center gap-1 rounded-card border border-dashed border-tertiary/50 text-tertiary transition-colors hover:bg-hover hover:text-text">
+              <span className="text-[13px]">{uploading ? "Uploading…" : "Add photo"}</span>
               <input
                 type="file"
                 accept="image/*"

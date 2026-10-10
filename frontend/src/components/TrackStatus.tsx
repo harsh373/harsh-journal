@@ -9,7 +9,7 @@ const OPTIONS: { value: TrackStatus; label: string }[] = [
 export function TrackStatusBadge({ status }: { status: TrackStatus }) {
   const label = OPTIONS.find((option) => option.value === status)?.label ?? status;
   return (
-    <span className="inline-flex h-6 items-center rounded-full bg-hover px-2.5 text-[12px] text-secondary">
+    <span className="inline-flex h-6 items-center rounded-full bg-hover px-2.5 text-[12px] font-medium text-secondary">
       {label}
     </span>
   );
@@ -24,7 +24,7 @@ export function TrackStatusPicker({
   onChange: (status: TrackStatus) => void;
 }) {
   return (
-    <div role="radiogroup" aria-label="Status" className="inline-flex rounded-lg bg-selected p-0.5">
+    <div role="radiogroup" aria-label="Status" className="inline-flex rounded-control bg-selected p-0.5">
       {OPTIONS.map((option) => {
         const active = option.value === value;
         return (
@@ -35,8 +35,8 @@ export function TrackStatusPicker({
             aria-checked={active}
             onClick={() => onChange(option.value)}
             className={
-              "h-7 rounded-md px-3 text-[13px] transition-all duration-150 " +
-              (active ? "bg-elevated text-text shadow-sm" : "text-secondary hover:text-text")
+              "h-8 rounded-[7px] px-3 text-[13px] font-medium transition-colors duration-150 lg:h-7 " +
+              (active ? "bg-bg text-text shadow-sm ring-1 ring-border" : "text-secondary hover:text-text")
             }
           >
             {option.label}

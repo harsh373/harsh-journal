@@ -89,18 +89,18 @@ export default function Photos() {
   const activePhoto = activeIndex !== null ? (photos[activeIndex] ?? null) : null;
 
   return (
-    <div className="mx-auto w-full max-w-[1100px] px-6 pb-24 pt-8 lg:px-12 lg:pt-14">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-light tracking-tight">Photos</h1>
-        <div className="flex items-center gap-1 rounded-[10px] bg-selected p-1">
+    <div className="mx-auto w-full max-w-[1100px] px-5 pb-24 pt-6 sm:px-8 lg:px-12 lg:pt-12">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-4">
+        <h1 className="type-display">Photos</h1>
+        <div className="flex items-center gap-0.5 rounded-control bg-selected p-0.5">
           {FILTERS.map((f) => (
             <button
               key={f.value}
               type="button"
               onClick={() => setFilter(f.value)}
               className={
-                "rounded-[8px] px-3 py-1.5 text-[13px] transition " +
-                (filter === f.value ? "bg-surface text-text shadow-card" : "text-secondary hover:text-text")
+                "flex h-8 items-center whitespace-nowrap rounded-[7px] px-3 text-[13px] font-medium transition-colors duration-150 " +
+                (filter === f.value ? "bg-bg text-text shadow-sm ring-1 ring-border" : "text-secondary hover:text-text")
               }
             >
               {f.label}
@@ -113,17 +113,17 @@ export default function Photos() {
         <p className="mt-10 text-[15px] text-secondary">No photos here yet.</p>
       )}
 
-      <div className="mt-8 space-y-10">
+      <div className="mt-8 space-y-12">
         {months.map((group) => (
           <div key={group.label}>
-            <h2 className="mb-3 text-[13px] font-medium text-secondary">{group.label}</h2>
-            <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4 lg:grid-cols-5">
+            <h2 className="mb-3 text-[17px] font-semibold tracking-tight">{group.label}</h2>
+            <div className="grid grid-cols-3 gap-1 sm:grid-cols-4 lg:grid-cols-5">
               {group.items.map(({ photo, index }) => (
                 <button
                   key={photo.id + photo.date}
                   type="button"
                   onClick={() => setActiveIndex(index)}
-                  className="aspect-square overflow-hidden rounded-[10px] border border-border bg-surface transition hover:opacity-90"
+                  className="aspect-square overflow-hidden rounded-[8px] bg-surface transition-opacity duration-150 hover:opacity-90"
                 >
                   <img
                     src={photo.url}

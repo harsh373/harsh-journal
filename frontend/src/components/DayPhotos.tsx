@@ -71,13 +71,13 @@ export default function DayPhotos({ day, photos, editing, onPhotosChange, onPhot
   if (!editing && photos.length === 0) return null;
 
   return (
-    <section className="mb-10">
+    <section className="mb-4">
       <div className="grid grid-cols-2 gap-3">
         {photos.map((photo, index) => (
           <figure
             key={photo.id}
             className={
-              "group relative aspect-[4/3] overflow-hidden rounded-[18px] border border-border bg-surface shadow-card" +
+              "group relative aspect-[4/3] overflow-hidden rounded-card border border-border bg-surface" +
               (!editing ? " cursor-zoom-in" : "")
             }
             onClick={!editing ? () => onPhotoClick?.(index) : undefined}
@@ -100,7 +100,7 @@ export default function DayPhotos({ day, photos, editing, onPhotosChange, onPhot
                 type="button"
                 onClick={() => void handleDelete(photo)}
                 aria-label="Remove photo"
-                className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/45 text-white opacity-0 backdrop-blur-sm transition-opacity duration-150 hover:bg-black/60 group-hover:opacity-100"
+                className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/45 text-white opacity-100 backdrop-blur-sm transition-opacity duration-150 hover:bg-black/60 focus-visible:opacity-100 group-hover:opacity-100 [@media(hover:hover)]:opacity-0"
               >
                 <X size={14} strokeWidth={2} />
               </button>
@@ -109,7 +109,7 @@ export default function DayPhotos({ day, photos, editing, onPhotosChange, onPhot
         ))}
 
         {pending.map((item) => (
-          <div key={item.key} className="relative aspect-[4/3] overflow-hidden rounded-[18px] border border-border bg-surface">
+          <div key={item.key} className="relative aspect-[4/3] overflow-hidden rounded-card border border-border bg-surface">
             <img src={item.previewUrl} alt="" className="h-full w-full object-cover opacity-50" />
             <div className="absolute inset-0 flex items-center justify-center bg-black/20">
               <Loader2 size={20} className="animate-spin text-white" strokeWidth={2} />
@@ -132,8 +132,8 @@ export default function DayPhotos({ day, photos, editing, onPhotosChange, onPhot
               void handleFiles(event.dataTransfer.files);
             }}
             className={
-              "flex aspect-[4/3] flex-col items-center justify-center gap-2 rounded-[18px] border border-dashed text-secondary transition-colors duration-150 " +
-              (dragOver ? "border-text bg-hover text-text" : "border-border hover:bg-hover hover:text-text")
+              "flex aspect-[4/3] flex-col items-center justify-center gap-2 rounded-card border border-dashed text-secondary transition-colors duration-150 " +
+              (dragOver ? "border-text bg-hover text-text" : "border-tertiary/50 hover:bg-hover hover:text-text")
             }
           >
             <ImagePlus size={22} strokeWidth={1.5} />

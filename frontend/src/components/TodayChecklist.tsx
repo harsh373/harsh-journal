@@ -114,26 +114,20 @@ export default function TodayChecklist() {
 
   return (
     <section className="mb-10">
-      <h2 className="text-[13px] font-medium text-secondary">Today</h2>
-      <p className="mt-1 text-[14px] text-tertiary">What do you need to do today?</p>
+      <h2 className="type-eyebrow">To do</h2>
+      <p className="mt-1 text-[15px] text-tertiary">What do you need to do today?</p>
 
       {items.length > 0 || adding ? (
-        <ul className="mt-3 overflow-hidden rounded-[18px] border border-border bg-surface shadow-card">
-          {items.map((item, index) => (
-            <li
-              key={item.id}
-              className={
-                "page-in group flex items-start gap-3 px-5 py-4 transition-colors duration-150 hover:bg-hover" +
-                (index > 0 ? " border-t border-border" : "")
-              }
-            >
+        <ul className="mt-3 border-t border-border">
+          {items.map((item) => (
+            <li key={item.id} className="page-in group flex items-start gap-3 border-b border-border py-3.5">
               <button
                 type="button"
                 onClick={() => void toggleComplete(item)}
                 aria-label={item.completed ? "Mark as not done" : "Mark as done"}
                 className={
-                  `mt-[3px] flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border transition-all duration-200 ${EASE} active:scale-90 ` +
-                  (item.completed ? "border-text bg-text" : "border-border hover:border-text/40")
+                  `mt-0.5 flex h-[22px] w-[22px] flex-shrink-0 items-center justify-center rounded-full border transition-all duration-200 ${EASE} active:scale-90 ` +
+                  (item.completed ? "border-text bg-text" : "border-tertiary hover:border-secondary")
                 }
               >
                 <Check
@@ -161,14 +155,14 @@ export default function TodayChecklist() {
                     }
                     if (event.key === "Escape") setEditingId(null);
                   }}
-                  className="flex-1 bg-transparent text-[15px] text-text focus:outline-none"
+                  className="flex-1 bg-transparent text-[16px] leading-relaxed text-text focus:outline-none"
                 />
               ) : (
                 <button
                   type="button"
                   onClick={() => startEditing(item)}
                   className={
-                    `flex-1 whitespace-normal break-words text-left text-[15px] leading-relaxed transition-all duration-200 ${EASE} ` +
+                    `flex-1 whitespace-normal break-words text-left text-[16px] leading-relaxed transition-all duration-200 ${EASE} ` +
                     (item.completed ? "text-tertiary line-through" : "text-text")
                   }
                 >
@@ -180,18 +174,16 @@ export default function TodayChecklist() {
                 type="button"
                 onClick={() => void removeItem(item)}
                 aria-label="Remove item"
-                className="mt-[1px] flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-tertiary opacity-0 transition-opacity duration-150 hover:bg-hover hover:text-text group-hover:opacity-100"
+                className="-mr-1 mt-px flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-tertiary opacity-100 transition-opacity duration-150 hover:bg-hover hover:text-text focus-visible:opacity-100 group-hover:opacity-100 [@media(hover:hover)]:opacity-0"
               >
-                <X size={13} strokeWidth={2} />
+                <X size={14} strokeWidth={2} />
               </button>
             </li>
           ))}
 
           {adding ? (
-            <li
-              className={"flex items-center gap-3 px-5 py-4" + (items.length > 0 ? " border-t border-border" : "")}
-            >
-              <span className="h-5 w-5 flex-shrink-0 rounded-full border border-dashed border-border" />
+            <li className="flex items-center gap-3 border-b border-border py-3.5">
+              <span className="h-[22px] w-[22px] flex-shrink-0 rounded-full border border-dashed border-tertiary" />
               <input
                 ref={addInputRef}
                 type="text"
@@ -210,20 +202,20 @@ export default function TodayChecklist() {
                     setDraftText("");
                   }
                 }}
-                className="flex-1 bg-transparent text-[15px] text-text placeholder:text-tertiary focus:outline-none"
+                className="flex-1 bg-transparent text-[16px] text-text placeholder:text-tertiary focus:outline-none"
               />
             </li>
           ) : (
-            <li className={items.length > 0 ? "border-t border-border" : ""}>
+            <li>
               <button
                 type="button"
                 onClick={() => setAdding(true)}
-                className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors duration-150 hover:bg-hover"
+                className="flex w-full items-center gap-3 py-3.5 text-left text-secondary transition-colors duration-150 hover:text-text"
               >
-                <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-dashed border-border text-secondary">
+                <span className="flex h-[22px] w-[22px] flex-shrink-0 items-center justify-center rounded-full border border-dashed border-tertiary">
                   <Plus size={11} strokeWidth={2.5} />
                 </span>
-                <span className="text-[15px] text-secondary">Add something</span>
+                <span className="text-[16px]">Add something</span>
               </button>
             </li>
           )}
@@ -232,7 +224,7 @@ export default function TodayChecklist() {
         <button
           type="button"
           onClick={() => setAdding(true)}
-          className="mt-3 flex w-full items-center gap-3 rounded-[18px] border border-dashed border-border px-5 py-4 text-left text-secondary transition-colors duration-150 hover:bg-hover hover:text-text"
+          className="mt-3 flex w-full items-center gap-3 border-y border-border py-4 text-left text-[16px] text-secondary transition-colors duration-150 hover:text-text"
         >
           <Plus size={15} strokeWidth={2} />
           What do you need to do today?

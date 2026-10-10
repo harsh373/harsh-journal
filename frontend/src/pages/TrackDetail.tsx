@@ -177,12 +177,12 @@ export default function TrackDetail() {
   if (loadState === "not-found") return <Navigate to="/tracks" replace />;
 
   if (loadState === "loading" || !track || !draft) {
-    return <div className="mx-auto w-full max-w-[820px] px-6 py-14 lg:px-12" aria-busy="true" />;
+    return <div className="mx-auto w-full max-w-[820px] px-5 py-14 sm:px-8 lg:px-12" aria-busy="true" />;
   }
 
   if (loadState === "error") {
     return (
-      <div className="mx-auto w-full max-w-[820px] px-6 py-14 lg:px-12">
+      <div className="mx-auto w-full max-w-[820px] px-5 py-14 sm:px-8 lg:px-12">
         <p className="text-[15px] text-alert">Couldn&apos;t load this track.</p>
       </div>
     );
@@ -192,11 +192,11 @@ export default function TrackDetail() {
   const days = loggedDays.size;
 
   return (
-    <div className="mx-auto w-full max-w-[820px] px-6 pb-24 lg:px-12">
-      <div className="sticky top-0 z-10 -mx-6 flex h-14 items-center justify-between gap-3 bg-bg/80 px-6 backdrop-blur-xl lg:-mx-12 lg:px-12">
+    <div className="mx-auto w-full max-w-[820px] px-5 pb-24 sm:px-8 lg:px-12">
+      <div className="sticky top-0 z-10 -mx-5 flex h-12 items-center justify-between gap-3 bg-bg/85 px-5 backdrop-blur-xl sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
         <Link
           to="/tracks"
-          className="flex items-center gap-1.5 text-[13px] text-secondary transition-colors hover:text-text"
+          className="flex h-9 items-center gap-1.5 text-[13px] text-secondary transition-colors hover:text-text"
         >
           <ArrowLeft size={15} strokeWidth={1.75} />
           Tracks
@@ -207,7 +207,7 @@ export default function TrackDetail() {
               <button
                 type="button"
                 onClick={() => void handleDeleteTrack()}
-                className="flex h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] text-alert transition-colors hover:bg-hover"
+                className="flex h-9 items-center gap-1.5 rounded-control px-3 text-[13px] text-alert transition-colors hover:bg-hover lg:h-8"
               >
                 <Trash2 size={13} strokeWidth={1.75} />
                 Delete
@@ -215,7 +215,7 @@ export default function TrackDetail() {
               <button
                 type="button"
                 onClick={cancelEditing}
-                className="h-8 rounded-lg px-3 text-[13px] text-secondary transition-colors hover:bg-hover hover:text-text"
+                className="h-9 rounded-control px-3 text-[13px] text-secondary transition-colors hover:bg-hover hover:text-text lg:h-8"
               >
                 Cancel
               </button>
@@ -226,8 +226,8 @@ export default function TrackDetail() {
             onClick={() => (editing ? void finishEditing() : setEditing(true))}
             className={
               editing
-                ? "h-8 rounded-lg bg-text px-4 text-[13px] font-medium text-bg transition-opacity duration-150 hover:opacity-85"
-                : "flex h-8 items-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-[13px] text-text transition-colors duration-150 hover:bg-hover"
+                ? "h-9 rounded-control bg-text px-4 text-[13px] font-medium text-bg transition-opacity duration-150 hover:opacity-85 lg:h-8"
+                : "flex h-9 items-center gap-1.5 rounded-control border border-border px-3 text-[13px] font-medium text-text transition-colors duration-150 hover:bg-hover lg:h-8"
             }
           >
             {editing ? (
@@ -241,8 +241,8 @@ export default function TrackDetail() {
         </div>
       </div>
 
-      <header className="pb-8 pt-4 lg:pt-8">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-hover">
+      <header className="pb-8 pt-2 lg:pt-6">
+        <span className="flex h-12 w-12 items-center justify-center rounded-card bg-hover">
           <TrackIcon name={shownIcon} size={22} />
         </span>
 
@@ -254,10 +254,10 @@ export default function TrackDetail() {
             autoFocus
             onFocus={(event) => event.target.select()}
             onChange={(event) => updateDraft({ title: event.target.value })}
-            className={metaField + " mt-5 text-4xl font-light tracking-tight lg:text-5xl"}
+            className={metaField + " type-display mt-5"}
           />
         ) : (
-          <h1 className="mt-5 text-4xl font-light tracking-tight lg:text-5xl">{track.title}</h1>
+          <h1 className="type-display mt-5">{track.title}</h1>
         )}
 
         {editing ? (
@@ -266,16 +266,16 @@ export default function TrackDetail() {
             maxLength={160}
             placeholder="A short description (optional)"
             onChange={(event) => updateDraft({ subtitle: event.target.value })}
-            className={metaField + " mt-2 text-[17px] text-secondary"}
+            className={metaField + " mt-2 font-serif text-[1.125rem] text-secondary"}
           />
         ) : (
-          track.subtitle && <p className="mt-2 text-[17px] text-secondary">{track.subtitle}</p>
+          track.subtitle && <p className="mt-2 font-serif text-[1.125rem] text-secondary">{track.subtitle}</p>
         )}
 
         {editing ? (
           <div className="mt-6 space-y-5">
             <div>
-              <p className="mb-2 text-[13px] font-medium text-secondary">Icon</p>
+              <p className="type-eyebrow mb-2">Icon</p>
               <div className="flex flex-wrap gap-1.5">
                 {TRACK_ICON_KEYS.map((key) => (
                   <button
@@ -285,7 +285,7 @@ export default function TrackDetail() {
                     aria-label={key}
                     aria-pressed={draft.icon === key}
                     className={
-                      "flex h-10 w-10 items-center justify-center rounded-lg transition-colors duration-150 " +
+                      "flex h-10 w-10 items-center justify-center rounded-control transition-colors duration-150 " +
                       (draft.icon === key ? "bg-text text-bg" : "bg-hover text-secondary hover:text-text")
                     }
                   >
@@ -296,13 +296,13 @@ export default function TrackDetail() {
             </div>
 
             <div>
-              <p className="mb-2 text-[13px] font-medium text-secondary">Unit (optional)</p>
+              <p className="type-eyebrow mb-2">Unit (optional)</p>
               <input
                 value={draft.unit}
                 maxLength={20}
                 placeholder="problems, minutes, hours…"
                 onChange={(event) => updateDraft({ unit: event.target.value })}
-                className="h-9 w-56 rounded-lg border border-border bg-transparent px-3 text-[16px] placeholder:text-tertiary focus:border-tertiary focus:outline-none sm:text-[13px]"
+                className="h-10 w-56 rounded-control border border-border bg-transparent px-3 text-[16px] placeholder:text-tertiary focus:border-secondary focus:outline-none sm:text-[13px]"
               />
               <p className="mt-1.5 text-[12px] text-tertiary">
                 Leave empty if you only want to record that you showed up.
@@ -310,7 +310,7 @@ export default function TrackDetail() {
             </div>
 
             <div>
-              <p className="mb-2 text-[13px] font-medium text-secondary">Status</p>
+              <p className="type-eyebrow mb-2">Status</p>
               <TrackStatusPicker value={draft.status} onChange={(status) => updateDraft({ status })} />
             </div>
           </div>
@@ -327,7 +327,7 @@ export default function TrackDetail() {
 
       <section>
         <div className="flex items-center justify-between">
-          <h2 className="text-[15px]">
+          <h2 className="text-[17px] tracking-tight">
             <span className="font-semibold">{formatMonthName(view.month)}</span>{" "}
             <span className="text-secondary">{view.year}</span>
           </h2>
@@ -336,7 +336,7 @@ export default function TrackDetail() {
               type="button"
               aria-label="Previous month"
               onClick={() => setView((current) => shiftMonth(current.year, current.month, -1))}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-secondary transition-colors hover:bg-hover hover:text-text"
+              className="flex h-9 w-9 items-center justify-center rounded-control text-secondary transition-colors hover:bg-hover hover:text-text active:bg-selected"
             >
               <ChevronLeft size={16} strokeWidth={2} />
             </button>
@@ -344,7 +344,7 @@ export default function TrackDetail() {
               type="button"
               aria-label="Next month"
               onClick={() => setView((current) => shiftMonth(current.year, current.month, 1))}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-secondary transition-colors hover:bg-hover hover:text-text"
+              className="flex h-9 w-9 items-center justify-center rounded-control text-secondary transition-colors hover:bg-hover hover:text-text active:bg-selected"
             >
               <ChevronRight size={16} strokeWidth={2} />
             </button>
@@ -361,8 +361,8 @@ export default function TrackDetail() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-[18px] border border-border bg-surface p-6 shadow-card">
-        <h2 className="mb-4 text-[13px] font-medium text-secondary">Add a log</h2>
+      <section className="mt-12 border-t border-border pt-6">
+        <h2 className="type-eyebrow mb-4">Add a log</h2>
         <TrackLogForm
           key={track.unit}
           unit={track.unit}
@@ -373,13 +373,13 @@ export default function TrackDetail() {
         />
       </section>
 
-      <section className="mt-8">
+      <section className="mt-10">
         {logs.length === 0 ? (
-          <div className="rounded-[18px] border border-dashed border-border px-6 py-10 text-center text-[15px] text-secondary">
+          <div className="border-t border-border py-10 text-center text-[15px] text-secondary">
             Nothing logged in {formatMonthName(view.month)} {view.year}.
           </div>
         ) : (
-          <div className="divide-y divide-border overflow-hidden rounded-[18px] border border-border bg-surface shadow-card">
+          <div className="divide-y divide-border overflow-hidden rounded-card bg-surface">
             {logs.map((log) => (
               <TrackLogRow
                 key={log.id}

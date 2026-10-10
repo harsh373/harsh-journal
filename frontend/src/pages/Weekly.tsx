@@ -113,22 +113,22 @@ export default function Weekly() {
   }
 
   return (
-    <div className="page-in mx-auto w-full max-w-[680px] px-6 pb-24 pt-4 lg:pt-8">
-      <header className="pb-10">
-        <p className="text-[13px] font-medium uppercase tracking-[0.08em] text-secondary">Weekly</p>
-        <h1 className="mt-2 text-4xl font-light tracking-tight lg:text-5xl">{formatWeekRange(weekStart)}</h1>
-        <p className="mt-3 text-[15px] text-tertiary">What do I want to accomplish before Sunday?</p>
+    <div className="page-in mx-auto w-full max-w-[680px] px-5 pb-24 pt-4 sm:px-8 lg:pt-10">
+      <header className="pb-8">
+        <p className="type-eyebrow">Weekly</p>
+        <h1 className="type-display mt-2">{formatWeekRange(weekStart)}</h1>
+        <p className="mt-3 font-serif text-[1.125rem] text-secondary">What do I want to accomplish before Sunday?</p>
       </header>
 
       {loadState === "loading" && <div className="h-40" aria-busy="true" />}
 
       {loadState === "error" && (
-        <div className="rounded-[18px] border border-border bg-surface p-8 shadow-card">
-          <p className="text-[17px]">This week couldn&apos;t be loaded.</p>
+        <div className="border-t border-border py-8">
+          <p className="font-serif text-[20px]">This week couldn&apos;t be loaded.</p>
           <button
             type="button"
             onClick={load}
-            className="mt-5 h-8 rounded-lg border border-border px-4 text-[13px] transition-colors hover:bg-hover"
+            className="mt-5 h-9 rounded-control border border-border px-4 text-[13px] transition-colors hover:bg-hover"
           >
             Try again
           </button>
@@ -138,15 +138,15 @@ export default function Weekly() {
       {loadState === "ready" && (
         <>
           {items.length === 0 && !adding && (
-            <div className="flex flex-col items-center rounded-[18px] border border-border bg-surface px-8 py-12 text-center shadow-card">
+            <div className="flex flex-col items-center border-t border-border px-4 py-10 text-center">
               <ListChecks size={28} strokeWidth={1.5} className="text-tertiary" />
-              <p className="mt-4 text-[17px]">Nothing planned yet.</p>
+              <p className="mt-4 font-serif text-[1.375rem]">Nothing planned yet.</p>
               <p className="mt-1 text-[14px] text-secondary">What do you want to reach by Sunday?</p>
               <button
                 type="button"
                 onClick={() => setAdding(true)}
                 className={
-                  "mt-6 inline-flex h-9 items-center gap-1.5 rounded-lg bg-text px-4 text-[13px] font-medium text-bg transition-opacity duration-150 " +
+                  "mt-6 inline-flex h-10 items-center gap-1.5 rounded-control bg-text px-4 text-[13px] font-medium text-bg transition-opacity duration-150 " +
                   "hover:opacity-85 active:opacity-70"
                 }
               >
@@ -157,22 +157,16 @@ export default function Weekly() {
           )}
 
           {(items.length > 0 || adding) && (
-            <ul className="overflow-hidden rounded-[18px] border border-border bg-surface shadow-card">
-              {items.map((item, index) => (
-                <li
-                  key={item.id}
-                  className={
-                    "page-in group flex items-start gap-3 px-5 py-4 transition-colors duration-150 hover:bg-hover" +
-                    (index > 0 ? " border-t border-border" : "")
-                  }
-                >
+            <ul className="border-t border-border">
+              {items.map((item) => (
+                <li key={item.id} className="page-in group flex items-start gap-3 border-b border-border py-3.5">
                   <button
                     type="button"
                     onClick={() => void toggleComplete(item)}
                     aria-label={item.completed ? "Mark as not done" : "Mark as done"}
                     className={
-                      `mt-[3px] flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border transition-all duration-200 ${EASE} active:scale-90 ` +
-                      (item.completed ? "border-text bg-text" : "border-border hover:border-text/40")
+                      `mt-0.5 flex h-[22px] w-[22px] flex-shrink-0 items-center justify-center rounded-full border transition-all duration-200 ${EASE} active:scale-90 ` +
+                      (item.completed ? "border-text bg-text" : "border-tertiary hover:border-secondary")
                     }
                   >
                     <Check
@@ -200,14 +194,14 @@ export default function Weekly() {
                         }
                         if (event.key === "Escape") setEditingId(null);
                       }}
-                      className="flex-1 bg-transparent text-[15px] text-text focus:outline-none"
+                      className="flex-1 bg-transparent text-[16px] leading-relaxed text-text focus:outline-none"
                     />
                   ) : (
                     <button
                       type="button"
                       onClick={() => startEditing(item)}
                       className={
-                        `flex-1 whitespace-normal break-words text-left text-[15px] leading-relaxed transition-all duration-200 ${EASE} ` +
+                        `flex-1 whitespace-normal break-words text-left text-[16px] leading-relaxed transition-all duration-200 ${EASE} ` +
                         (item.completed ? "text-tertiary line-through" : "text-text")
                       }
                     >
@@ -219,18 +213,16 @@ export default function Weekly() {
                     type="button"
                     onClick={() => void removeItem(item)}
                     aria-label="Remove item"
-                    className="mt-[1px] flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-tertiary opacity-0 transition-opacity duration-150 hover:bg-hover hover:text-text group-hover:opacity-100"
+                    className="-mr-1 mt-px flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-tertiary opacity-100 transition-opacity duration-150 hover:bg-hover hover:text-text focus-visible:opacity-100 group-hover:opacity-100 [@media(hover:hover)]:opacity-0"
                   >
-                    <X size={13} strokeWidth={2} />
+                    <X size={14} strokeWidth={2} />
                   </button>
                 </li>
               ))}
 
               {adding ? (
-                <li
-                  className={"flex items-center gap-3 px-5 py-4" + (items.length > 0 ? " border-t border-border" : "")}
-                >
-                  <span className="h-5 w-5 flex-shrink-0 rounded-full border border-dashed border-border" />
+                <li className="flex items-center gap-3 border-b border-border py-3.5">
+                  <span className="h-[22px] w-[22px] flex-shrink-0 rounded-full border border-dashed border-tertiary" />
                   <input
                     ref={addInputRef}
                     type="text"
@@ -249,20 +241,20 @@ export default function Weekly() {
                         setDraftText("");
                       }
                     }}
-                    className="flex-1 bg-transparent text-[15px] text-text placeholder:text-tertiary focus:outline-none"
+                    className="flex-1 bg-transparent text-[16px] text-text placeholder:text-tertiary focus:outline-none"
                   />
                 </li>
               ) : (
-                <li className={items.length > 0 ? "border-t border-border" : ""}>
+                <li>
                   <button
                     type="button"
                     onClick={() => setAdding(true)}
-                    className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors duration-150 hover:bg-hover"
+                    className="flex w-full items-center gap-3 py-3.5 text-left text-secondary transition-colors duration-150 hover:text-text"
                   >
-                    <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-dashed border-border text-secondary">
+                    <span className="flex h-[22px] w-[22px] flex-shrink-0 items-center justify-center rounded-full border border-dashed border-tertiary">
                       <Plus size={11} strokeWidth={2.5} />
                     </span>
-                    <span className="text-[15px] text-secondary">Add something</span>
+                    <span className="text-[16px]">Add something</span>
                   </button>
                 </li>
               )}

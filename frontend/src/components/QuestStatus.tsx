@@ -17,7 +17,7 @@ const DOT_STYLES: Record<QuestStatus, string> = {
 export function QuestStatusBadge({ status }: { status: QuestStatus }) {
   const option = OPTIONS.find((item) => item.value === status);
   return (
-    <span className="inline-flex h-7 items-center gap-2 rounded-full bg-hover px-3 text-[13px] text-text">
+    <span className="inline-flex h-7 items-center gap-2 rounded-full bg-hover px-3 text-[13px] font-medium text-text">
       <span className={"block h-2 w-2 shrink-0 rounded-full " + DOT_STYLES[status]} />
       {option?.label}
     </span>
@@ -32,7 +32,7 @@ export function QuestStatusPicker({
   onChange: (status: QuestStatus) => void;
 }) {
   return (
-    <div role="radiogroup" aria-label="Quest status" className="inline-flex flex-wrap rounded-lg bg-selected p-0.5">
+    <div role="radiogroup" aria-label="Quest status" className="inline-flex flex-wrap rounded-control bg-selected p-0.5">
       {OPTIONS.map((option) => {
         const active = option.value === value;
         return (
@@ -43,8 +43,8 @@ export function QuestStatusPicker({
             aria-checked={active}
             onClick={() => onChange(option.value)}
             className={
-              "flex h-7 items-center gap-1.5 rounded-md px-2.5 text-[13px] transition-all duration-150 " +
-              (active ? "bg-elevated text-text shadow-sm" : "text-secondary hover:text-text")
+              "flex h-8 items-center gap-1.5 rounded-[7px] px-2.5 text-[13px] font-medium transition-colors duration-150 lg:h-7 " +
+              (active ? "bg-bg text-text shadow-sm ring-1 ring-border" : "text-secondary hover:text-text")
             }
           >
             <span className={"block h-2 w-2 shrink-0 rounded-full " + DOT_STYLES[option.value]} />

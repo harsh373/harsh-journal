@@ -15,7 +15,7 @@ interface TrackLogFormProps {
 }
 
 const fieldStyle =
-  "h-9 rounded-lg border border-border bg-transparent px-3 text-[16px] text-text placeholder:text-tertiary focus:border-tertiary focus:outline-none sm:text-[13px]";
+  "h-10 rounded-control border border-border bg-transparent px-3 text-[16px] text-text placeholder:text-tertiary transition-colors duration-150 focus:border-secondary focus:outline-none sm:h-9 sm:text-[13px]";
 
 // Used both for adding a log and for editing one.
 export default function TrackLogForm({
@@ -101,7 +101,7 @@ export default function TrackLogForm({
         <button
           type="submit"
           disabled={busy}
-          className="h-8 rounded-lg bg-text px-4 text-[13px] font-medium text-bg transition-opacity duration-150 hover:opacity-85 disabled:opacity-50"
+          className="h-9 rounded-control bg-text px-4 text-[13px] font-medium text-bg transition-opacity duration-150 hover:opacity-85 disabled:opacity-50"
         >
           {busy ? "Saving…" : submitLabel}
         </button>
@@ -109,7 +109,7 @@ export default function TrackLogForm({
           <button
             type="button"
             onClick={onCancel}
-            className="h-8 rounded-lg px-3 text-[13px] text-secondary transition-colors hover:bg-hover hover:text-text"
+            className="h-9 rounded-control px-3 text-[13px] text-secondary transition-colors hover:bg-hover hover:text-text"
           >
             Cancel
           </button>

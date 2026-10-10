@@ -189,23 +189,21 @@ export default function JournalDay({ day }: { day: DayKey }) {
   const showEmptyState = ready && !hasEntry && !editing;
   const hasOneLiner = draft.whatIDidToday.trim().length > 0;
   const showRecent = !editing && recentDays.length > 0;
-  // Visible all day on today's page, no matter what you're doing on it.
-  // It stops on its own once the day rolls past 4 AM, because at that point
-  // this page is no longer "today" — the isToday check above already covers
-  // that, nothing extra needed here.
-  const showTodayChecklist = isToday && ready;
+  // Visible on today's page, but hidden while you're writing so the writing
+  // area comes first. It comes back when you press Done.
+  const showTodayChecklist = isToday && ready && !editing;
 
   return (
     <>
-      <div className="mx-auto w-full max-w-[1180px] px-6 pb-24 lg:px-12">
-        <div className="sticky top-0 z-10 -mx-6 flex h-14 items-center justify-end gap-3 bg-bg/80 px-6 backdrop-blur-xl lg:-mx-12 lg:px-12">
+      <div className="mx-auto w-full max-w-[1180px] px-5 pb-24 sm:px-8 lg:px-12">
+        <div className="sticky top-0 z-10 -mx-5 flex h-12 items-center justify-end gap-3 bg-bg/85 px-5 backdrop-blur-xl sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
           {editing ? (
             <>
               <SaveStatus state={saveState} onRetry={() => void flush()} />
               <button
                 type="button"
                 onClick={() => void finishEditing()}
-                className="h-8 rounded-lg bg-text px-4 text-[13px] font-medium text-bg transition-opacity duration-150 hover:opacity-85"
+                className="h-9 rounded-control bg-text px-4 text-[13px] font-medium text-bg transition-opacity duration-150 hover:opacity-85 lg:h-8"
               >
                 Done
               </button>
@@ -216,7 +214,7 @@ export default function JournalDay({ day }: { day: DayKey }) {
               <button
                 type="button"
                 onClick={() => setEditing(true)}
-                className="flex h-8 items-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-[13px] text-text transition-colors duration-150 hover:bg-hover"
+                className="flex h-9 items-center gap-1.5 rounded-control border border-border px-3 text-[13px] font-medium text-text transition-colors duration-150 hover:bg-hover lg:h-8"
               >
                 <Pencil size={13} strokeWidth={1.75} />
                 Edit
@@ -225,11 +223,11 @@ export default function JournalDay({ day }: { day: DayKey }) {
           )}
         </div>
 
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-16">
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_260px] lg:items-start lg:gap-14">
           <div className="mx-auto w-full max-w-[760px] lg:mx-0">
-            <header className="pb-8 pt-4 lg:pt-8">
-              <p className="text-[17px] text-secondary">{formatWeekday(day)}</p>
-              <h1 className="mt-1 text-4xl font-light tracking-tight lg:text-5xl">{formatLongDate(day)}</h1>
+            <header className="pb-8 pt-2 lg:pt-6">
+              <p className="text-[15px] font-medium text-secondary">{formatWeekday(day)}</p>
+              <h1 className="type-display mt-1">{formatLongDate(day)}</h1>
 
               {ready && (editing || hasEntry) && (
                 <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
@@ -275,7 +273,7 @@ export default function JournalDay({ day }: { day: DayKey }) {
                     to="/now"
                     aria-label="Open Now"
                     title="Now"
-                    className="flex aspect-square min-w-[56px] items-center justify-center rounded-[18px] border border-border bg-surface text-secondary transition-colors duration-150 hover:bg-hover hover:text-text active:scale-95"
+                    className="flex aspect-square min-w-[56px] items-center justify-center rounded-card border border-border bg-surface text-secondary transition-colors duration-150 hover:bg-hover hover:text-text active:scale-95"
                   >
                     <Circle size={20} strokeWidth={1.5} />
                   </Link>
@@ -288,13 +286,13 @@ export default function JournalDay({ day }: { day: DayKey }) {
             {loadState === "loading" && <div className="h-64" aria-busy="true" />}
 
             {loadState === "error" && (
-              <div className="rounded-[18px] border border-border bg-surface p-8 shadow-card">
-                <p className="text-[17px]">This day couldn&apos;t be loaded.</p>
+              <div className="border-t border-border py-8">
+                <p className="font-serif text-[20px]">This day couldn&apos;t be loaded.</p>
                 <p className="mt-1 text-[15px] text-secondary">Check that the server is running, then try again.</p>
                 <button
                   type="button"
                   onClick={load}
-                  className="mt-5 h-8 rounded-lg border border-border px-4 text-[13px] transition-colors hover:bg-hover"
+                  className="mt-5 h-9 rounded-control border border-border px-4 text-[13px] transition-colors hover:bg-hover"
                 >
                   Try again
                 </button>
@@ -302,12 +300,12 @@ export default function JournalDay({ day }: { day: DayKey }) {
             )}
 
             {showEmptyState && (
-              <div className="rounded-[18px] border border-border bg-surface p-8 shadow-card">
-                <p className="text-[17px]">Nothing written for this day yet.</p>
+              <div className="border-t border-border py-8">
+                <p className="font-serif text-[22px] leading-snug text-secondary">Nothing written for this day yet.</p>
                 <button
                   type="button"
                   onClick={() => setEditing(true)}
-                  className="mt-5 h-9 rounded-lg bg-text px-4 text-[13px] font-medium text-bg transition-opacity duration-150 hover:opacity-85"
+                  className="mt-5 h-10 rounded-control bg-text px-5 text-[14px] font-medium text-bg transition-opacity duration-150 hover:opacity-85"
                 >
                   Start writing
                 </button>
@@ -325,8 +323,8 @@ export default function JournalDay({ day }: { day: DayKey }) {
                 />
 
                 {editing || hasOneLiner ? (
-                  <section className="rounded-[18px] border border-border bg-surface px-6 py-5 shadow-card">
-                    <h2 className="text-[13px] font-medium text-secondary">Today</h2>
+                  <section className="mt-6">
+                    <h2 className="type-eyebrow">Today</h2>
                     {editing ? (
                       <input
                         type="text"
@@ -340,17 +338,19 @@ export default function JournalDay({ day }: { day: DayKey }) {
                         placeholder="One good line about today."
                         autoFocus
                         onChange={(event) => update({ whatIDidToday: event.target.value })}
-                        className="mt-2 w-full bg-transparent text-[19px] leading-relaxed text-text placeholder:text-tertiary focus:outline-none"
+                        className="mt-2 w-full border-b border-border bg-transparent pb-2 font-serif text-[1.5rem] leading-snug tracking-tight text-text transition-colors duration-150 placeholder:text-tertiary focus:border-secondary focus:outline-none"
                       />
                     ) : (
-                      <p className="mt-2 text-[19px] leading-relaxed">{draft.whatIDidToday}</p>
+                      <p className="mt-2 border-b border-transparent pb-2 font-serif text-[1.5rem] leading-snug tracking-tight">
+                        {draft.whatIDidToday}
+                      </p>
                     )}
                   </section>
                 ) : (
                   <button
                     type="button"
                     onClick={() => setEditing(true)}
-                    className="flex w-full items-center justify-between rounded-[18px] border border-dashed border-border px-6 py-5 text-left text-secondary transition-colors duration-150 hover:bg-hover hover:text-text"
+                    className="mt-6 flex w-full items-center justify-between border-y border-border py-4 text-left text-secondary transition-colors duration-150 hover:text-text"
                   >
                     <span className="text-[15px]">You haven&apos;t written about this day yet.</span>
                     <span className="text-[13px] font-medium">Add a line →</span>
@@ -358,20 +358,18 @@ export default function JournalDay({ day }: { day: DayKey }) {
                 )}
 
                 {(editing || draft.dailySummary) && (
-                  <section className="mt-14">
-                    <h2 className="text-[13px] font-medium text-secondary">Daily Summary</h2>
+                  <section className="mt-12">
+                    <h2 className="type-eyebrow">Daily Summary</h2>
                     {editing ? (
                       <AutoGrowTextarea
                         value={draft.dailySummary}
                         maxLength={LIMIT_SUMMARY}
                         placeholder="Tell the story of the day."
                         onChange={(event) => update({ dailySummary: event.target.value })}
-                        className="mt-3 max-w-[65ch] text-[20px] leading-[1.75] placeholder:text-tertiary"
+                        className="type-journal mt-3 w-full placeholder:text-tertiary"
                       />
                     ) : (
-                      <p className="mt-3 max-w-[65ch] whitespace-pre-wrap text-[20px] leading-[1.75]">
-                        {draft.dailySummary}
-                      </p>
+                      <p className="type-journal mt-3 whitespace-pre-wrap">{draft.dailySummary}</p>
                     )}
                   </section>
                 )}
@@ -389,7 +387,7 @@ export default function JournalDay({ day }: { day: DayKey }) {
           </div>
 
           {showRecent && (
-            <aside className="hidden pt-4 lg:sticky lg:top-20 lg:block lg:pt-8">
+            <aside className="hidden pt-2 lg:sticky lg:top-16 lg:block lg:pt-6">
               <RecentDays entries={recentDays} />
             </aside>
           )}

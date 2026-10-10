@@ -22,14 +22,14 @@ export default function TracksOverview() {
   if (!loaded || tracks.length === 0) return null;
 
   return (
-    <section className="mt-14">
-      <h2 className="text-[13px] font-medium text-secondary">Tracks</h2>
+    <section className="mt-12">
+      <h2 className="type-eyebrow">Tracks</h2>
       <div className="mt-3 flex flex-wrap gap-2">
         {tracks.map((track) => (
           <Link
             key={track.id}
             to={`/tracks/${track.id}`}
-            className="flex h-8 items-center gap-2 rounded-full border border-border bg-surface px-3 text-[13px] transition-colors duration-150 hover:bg-hover"
+            className="flex h-9 items-center gap-2 rounded-control bg-hover px-3 text-[13px] transition-colors duration-150 hover:bg-selected"
           >
             <TrackIcon name={track.icon} size={14} className="text-secondary" />
             {track.title}

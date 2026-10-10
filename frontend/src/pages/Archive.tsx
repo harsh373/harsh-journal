@@ -53,8 +53,8 @@ export default function Archive() {
   const today = getJournalToday();
 
   return (
-    <div className="mx-auto w-full max-w-[720px] px-6 pb-24 pt-8 lg:px-12 lg:pt-14">
-      <h1 className="text-3xl font-light tracking-tight">All Days</h1>
+    <div className="mx-auto w-full max-w-[720px] px-5 pb-24 pt-6 sm:px-8 lg:px-12 lg:pt-12">
+      <h1 className="type-display">All Days</h1>
 
       {entries.length === 0 && state === "done" && (
         <p className="mt-10 text-[15px] text-secondary">Nothing written yet. Your days will appear here.</p>
@@ -69,23 +69,20 @@ export default function Archive() {
             <Link
               key={entry.date}
               to={entry.date === today ? "/" : `/day/${entry.date}`}
-              className={"block py-8 " + (index > 0 ? "border-t border-border" : "")}
+              className={"block py-7 " + (index > 0 ? "border-t border-border" : "")}
             >
-              <div className="flex items-center gap-3">
-                <p className="shrink-0 whitespace-nowrap text-[15px] text-secondary">{formatWeekday(entry.date)}</p>
-                <p className="shrink-0 text-[15px] text-secondary">·</p>
-                <p className="shrink-0 whitespace-nowrap text-[15px] text-secondary">{formatLongDate(entry.date)}</p>
-                {title && (
-                  <p className="ml-auto min-w-0 truncate pl-2 text-right text-[15px] font-medium text-text">{title}</p>
-                )}
-              </div>
+              <p className="text-[13px] text-secondary">
+                {formatWeekday(entry.date)} <span className="text-tertiary">·</span> {formatLongDate(entry.date)}
+              </p>
+
+              {title && <p className="mt-1 font-serif text-[1.375rem] leading-snug tracking-tight text-text">{title}</p>}
 
               {entry.photos.length > 0 && (
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   {entry.photos.slice(0, 2).map((photo) => (
                     <div
                       key={photo.id}
-                      className="aspect-[4/3] overflow-hidden rounded-[14px] border border-border bg-surface"
+                      className="aspect-[4/3] overflow-hidden rounded-card border border-border bg-surface"
                     >
                       <img
                         src={photo.url}
@@ -99,7 +96,13 @@ export default function Archive() {
               )}
 
               {previewText(entry) && (
-                <p className="mt-4 line-clamp-3 text-[16px] leading-relaxed text-text">{previewText(entry)}</p>
+                <p
+                  className={
+                    "mt-3 line-clamp-3 text-[16px] leading-relaxed " + (title ? "text-secondary" : "text-text")
+                  }
+                >
+                  {previewText(entry)}
+                </p>
               )}
             </Link>
           );

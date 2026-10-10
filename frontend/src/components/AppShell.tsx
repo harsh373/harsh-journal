@@ -1,14 +1,17 @@
 import { Menu } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 
 export default function AppShell() {
   const { pathname } = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
 
+  // Close the mobile drawer and reset scroll whenever the route changes.
   useEffect(() => {
     setDrawerOpen(false);
+    mainRef.current?.scrollTo({ top: 0 });
   }, [pathname]);
 
   useEffect(() => {
@@ -28,14 +31,24 @@ export default function AppShell() {
   }, [drawerOpen]);
 
   return (
-    <div className="relative h-dvh w-full overflow-hidden bg-desktop p-2 sm:p-4 lg:p-6">
-      <div className="starfield" aria-hidden="true" />
+    <div className="desktop-backdrop h-dvh w-full overflow-hidden lg:p-7 xl:p-9">
+      {/* One window. Full-screen below 1024px, floating framed window above. */}
+      <div className="relative mx-auto flex h-full w-full overflow-hidden bg-bg text-text lg:max-w-[1440px] lg:rounded-[22px] lg:border lg:border-window lg:shadow-window">
+        {/* Logo in the window's top-left corner. Decorative only, not a control. */}
+        <img
+          src="/logo.png"
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          className="pointer-events-none absolute left-5 top-[9px] z-20 hidden h-6 w-6 select-none rounded-[6px] object-contain lg:block"
+        />
 
-      <div className="relative z-10 flex h-full overflow-hidden rounded-2xl border-[1.5px] border-window bg-bg text-text shadow-window">
-        <aside className="hidden w-[320px] shrink-0 border-r border-border bg-surface/80 backdrop-blur-xl lg:block">
+        {/* Desktop sidebar. pt-11 leaves the top strip for the logo. */}
+        <aside className="hidden w-[280px] shrink-0 border-r border-border bg-sidebar pt-11 lg:block">
           <Sidebar />
         </aside>
 
+        {/* Mobile drawer. */}
         <div
           className={"fixed inset-0 z-40 lg:hidden " + (drawerOpen ? "" : "pointer-events-none")}
           inert={!drawerOpen}
@@ -43,14 +56,14 @@ export default function AppShell() {
           <div
             onClick={() => setDrawerOpen(false)}
             className={
-              "absolute inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 " +
+              "absolute inset-0 bg-black/35 transition-opacity duration-300 " +
               (drawerOpen ? "opacity-100" : "opacity-0")
             }
           />
           <aside
             aria-label="Navigation"
             className={
-              "absolute left-0 top-0 h-full w-[320px] max-w-[85vw] border-r border-border bg-surface shadow-card transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] " +
+              "absolute left-0 top-0 h-full w-[300px] max-w-[85vw] rounded-r-[20px] border-r border-border bg-sidebar pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] shadow-[8px_0_40px_rgba(0,0,0,0.25)] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] " +
               (drawerOpen ? "translate-x-0" : "-translate-x-full")
             }
           >
@@ -59,13 +72,14 @@ export default function AppShell() {
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="border-b border-border bg-bg/80 pt-[env(safe-area-inset-top)] backdrop-blur-xl lg:hidden">
-            <div className="flex h-12 items-center gap-2 px-3">
+          {/* Mobile top bar. */}
+          <header className="border-b border-border bg-bg/85 pt-[env(safe-area-inset-top)] backdrop-blur-xl lg:hidden">
+            <div className="flex h-12 items-center gap-1 px-2">
               <button
                 type="button"
                 onClick={() => setDrawerOpen(true)}
                 aria-label="Open menu"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-secondary transition-colors hover:bg-hover hover:text-text"
+                className="flex h-11 w-11 items-center justify-center rounded-lg text-secondary transition-colors hover:bg-hover hover:text-text active:bg-selected"
               >
                 <Menu size={20} strokeWidth={1.75} />
               </button>
@@ -73,7 +87,7 @@ export default function AppShell() {
             </div>
           </header>
 
-          <main className="flex-1 overflow-y-auto">
+          <main ref={mainRef} className="flex-1 overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]">
             <div key={pathname} className="page-in">
               <Outlet />
             </div>

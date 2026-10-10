@@ -30,9 +30,9 @@ export default function Gate() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-6 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
+    <main className="flex min-h-dvh items-center justify-center bg-bg px-6 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
       <div className="fade-up w-full max-w-sm text-center">
-        <h1 className="text-[40px] font-light leading-tight tracking-tight sm:text-5xl">
+        <h1 className="font-serif text-[2.5rem] font-medium leading-tight tracking-tight sm:text-5xl">
           Harsh&apos;s Journal
         </h1>
         <p className="mt-3 text-[17px] text-secondary">A private archive of my life.</p>
@@ -41,7 +41,7 @@ export default function Gate() {
           <div
             key={shakeKey}
             className={
-              "relative rounded-2xl border bg-surface shadow-card transition-colors focus-within:border-tertiary " +
+              "relative rounded-card border bg-surface transition-colors focus-within:border-secondary " +
               (error ? "shake border-alert/60" : "border-border")
             }
           >
@@ -60,7 +60,7 @@ export default function Gate() {
                 setPassword(event.target.value);
                 if (error) setError("");
               }}
-              className="h-14 w-full rounded-2xl bg-transparent pl-5 pr-14 text-[17px] text-text placeholder:text-tertiary focus:outline-none"
+              className="h-14 w-full rounded-card bg-transparent pl-5 pr-14 text-[17px] text-text placeholder:text-tertiary focus:outline-none"
             />
             <button
               type="submit"

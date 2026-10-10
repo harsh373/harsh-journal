@@ -8,11 +8,11 @@ const OPTIONS: { value: Mood; short: string; long: string }[] = [
   { value: "special", short: "Special", long: "Special day" },
 ];
 
-// Read-only: a small pill showing how the day felt.
+// Read-only: a quiet tag showing how the day felt.
 export function MoodBadge({ mood }: { mood: Mood }) {
   const option = OPTIONS.find((item) => item.value === mood);
   return (
-    <span className="inline-flex h-7 items-center gap-2 rounded-full border border-border bg-elevated px-3 text-[13px] font-medium text-text shadow-sm">
+    <span className="inline-flex h-7 items-center gap-2 rounded-full bg-hover px-3 text-[13px] font-medium text-text">
       <MoodDot mood={mood} className="h-2 w-2" />
       {option?.long}
     </span>
@@ -22,7 +22,7 @@ export function MoodBadge({ mood }: { mood: Mood }) {
 // Editing: a macOS-style segmented control.
 export function MoodPicker({ value, onChange }: { value: Mood; onChange: (mood: Mood) => void }) {
   return (
-    <div role="radiogroup" aria-label="How was the day" className="inline-flex rounded-[10px] bg-selected p-0.5">
+    <div role="radiogroup" aria-label="How was the day" className="inline-flex rounded-control bg-selected p-0.5">
       {OPTIONS.map((option) => {
         const active = option.value === value;
         return (
@@ -33,8 +33,8 @@ export function MoodPicker({ value, onChange }: { value: Mood; onChange: (mood: 
             aria-checked={active}
             onClick={() => onChange(option.value)}
             className={
-              "flex h-7 items-center gap-1.5 rounded-[8px] px-2.5 text-[13px] font-medium transition-all duration-150 " +
-              (active ? "bg-elevated text-text shadow-sm" : "text-secondary hover:text-text")
+              "flex h-8 items-center gap-1.5 rounded-[7px] px-2.5 text-[13px] font-medium transition-colors duration-150 lg:h-7 " +
+              (active ? "bg-bg text-text shadow-sm ring-1 ring-border" : "text-secondary hover:text-text")
             }
           >
             <MoodDot mood={option.value} className="h-2 w-2" />

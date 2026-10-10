@@ -31,7 +31,7 @@ function monthOf(key: DayKey): { year: number; month: number } {
 }
 
 const iconButton =
-  "flex h-6 w-6 items-center justify-center rounded-md text-secondary transition-colors duration-150 hover:bg-hover hover:text-text";
+  "flex h-7 w-7 items-center justify-center rounded-control text-secondary transition-colors duration-150 hover:bg-hover hover:text-text active:bg-selected";
 
 export default function MiniCalendar({
   selected,
@@ -54,7 +54,7 @@ export default function MiniCalendar({
 
   return (
     <section aria-label="Calendar">
-      <div className="mb-2.5 flex items-center justify-between">
+      <div className="mb-2 flex items-center justify-between">
         <h2 className="text-[13px] tracking-tight">
           <span className="font-semibold text-text">{formatMonthName(view.month)}</span>{" "}
           <span className="font-medium text-secondary">{view.year}</span>
@@ -79,7 +79,7 @@ export default function MiniCalendar({
         </div>
       </div>
 
-      <div className="grid grid-cols-7 pb-1.5 text-center text-[10px] font-semibold uppercase tracking-wide text-tertiary">
+      <div className="grid grid-cols-7 pb-1 text-center text-[11px] font-medium text-tertiary">
         {WEEKDAYS.map((weekday) => (
           <span key={weekday}>{weekday[0]}</span>
         ))}
@@ -87,7 +87,7 @@ export default function MiniCalendar({
 
       <div className="grid grid-cols-7">
         {cells.map((day, index) => {
-          if (!day) return <span key={"blank-" + index} className="h-9" />;
+          if (!day) return <span key={"blank-" + index} className="h-10" />;
 
           const parts = parseDayKey(day);
           const isSelected = day === selected;
@@ -97,19 +97,19 @@ export default function MiniCalendar({
           const isLogged = Boolean(moods[day]);
           const isMissed = isWithinTrackedRange && !isLogged;
 
+          // The number itself: today is a red circle, a selected day is an inverted circle.
           const numberStyle = isToday
             ? isSelected
-              ? "bg-red-500 font-semibold text-white shadow-sm ring-2 ring-red-500/30 ring-offset-2 ring-offset-bg"
-              : "bg-red-500 font-semibold text-white shadow-sm group-hover:bg-red-500/90"
+              ? "bg-alert font-semibold text-white ring-2 ring-alert/35 ring-offset-2 ring-offset-sidebar"
+              : "bg-alert font-semibold text-white group-hover:opacity-90"
             : isSelected
-              ? "bg-text font-semibold text-bg shadow-sm ring-2 ring-text/20 ring-offset-2 ring-offset-bg"
-              : isLogged
-                ? "bg-text font-semibold text-bg shadow-sm group-hover:bg-text/90"
-                : isMissed
-                  ? "bg-yellow-400 font-semibold text-black shadow-sm group-hover:bg-yellow-400/90"
-                  : isFuture
-                    ? "font-medium text-tertiary group-hover:bg-hover"
-                    : "font-medium text-text group-hover:bg-hover"; // covers dates before START_DATE too
+              ? "bg-text font-semibold text-bg"
+              : isFuture
+                ? "font-medium text-tertiary group-hover:bg-hover"
+                : "font-medium text-text group-hover:bg-hover"; // covers dates before START_DATE too
+
+          // Recorded state lives in a small dot under the number, not a big filled circle.
+          const dotStyle = isLogged ? "bg-secondary" : isMissed ? "bg-tough" : "";
 
           return (
             <button
@@ -119,7 +119,7 @@ export default function MiniCalendar({
               aria-label={formatLongDate(day)}
               aria-pressed={isSelected}
               aria-current={isToday ? "date" : undefined}
-              className="group relative flex h-9 items-start justify-center pt-0.5"
+              className="group relative flex h-10 items-start justify-center pt-0.5"
             >
               <span
                 className={
@@ -129,6 +129,12 @@ export default function MiniCalendar({
               >
                 {parts?.day}
               </span>
+              {dotStyle && (
+                <span
+                  aria-hidden="true"
+                  className={"absolute bottom-0.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full " + dotStyle}
+                />
+              )}
             </button>
           );
         })}

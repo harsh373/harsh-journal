@@ -134,7 +134,7 @@ export default function SideQuestDetail() {
     setEditing(false);
   }
 
-   async function handleCoverChange(fileList: FileList | null) {
+  async function handleCoverChange(fileList: FileList | null) {
     if (!fileList || !id) return;
     const file = fileList.item(0);
     if (!file || !file.type.startsWith("image/")) return;
@@ -192,23 +192,23 @@ export default function SideQuestDetail() {
   if (loadState === "not-found") return <Navigate to="/side-quests" replace />;
 
   if (loadState === "loading" || !quest) {
-    return <div className="mx-auto w-full max-w-[820px] px-6 py-14 lg:px-12" aria-busy="true" />;
+    return <div className="mx-auto w-full max-w-[820px] px-5 py-14 sm:px-8 lg:px-12" aria-busy="true" />;
   }
 
   if (loadState === "error") {
     return (
-      <div className="mx-auto w-full max-w-[820px] px-6 py-14 lg:px-12">
+      <div className="mx-auto w-full max-w-[820px] px-5 py-14 sm:px-8 lg:px-12">
         <p className="text-[15px] text-alert">Couldn&apos;t load this quest.</p>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto w-full max-w-[820px] px-6 pb-24 lg:px-12">
-      <div className="sticky top-0 z-10 -mx-6 flex h-14 items-center justify-between gap-3 bg-bg/80 px-6 backdrop-blur-xl lg:-mx-12 lg:px-12">
+    <div className="mx-auto w-full max-w-[820px] px-5 pb-24 sm:px-8 lg:px-12">
+      <div className="sticky top-0 z-10 -mx-5 flex h-12 items-center justify-between gap-3 bg-bg/85 px-5 backdrop-blur-xl sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
         <Link
           to="/side-quests"
-          className="flex items-center gap-1.5 text-[13px] text-secondary transition-colors hover:text-text"
+          className="flex h-9 items-center gap-1.5 text-[13px] text-secondary transition-colors hover:text-text"
         >
           <ArrowLeft size={15} strokeWidth={1.75} />
           Side Quests
@@ -218,7 +218,7 @@ export default function SideQuestDetail() {
             <button
               type="button"
               onClick={() => void handleDeleteQuest()}
-              className="flex h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] text-alert transition-colors hover:bg-hover"
+              className="flex h-9 items-center gap-1.5 rounded-control px-3 text-[13px] text-alert transition-colors hover:bg-hover lg:h-8"
             >
               <Trash2 size={13} strokeWidth={1.75} />
               Delete
@@ -229,8 +229,8 @@ export default function SideQuestDetail() {
             onClick={() => (editing ? void handleDone() : setEditing(true))}
             className={
               editing
-                ? "h-8 rounded-lg bg-text px-4 text-[13px] font-medium text-bg transition-opacity duration-150 hover:opacity-85"
-                : "flex h-8 items-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-[13px] text-text transition-colors duration-150 hover:bg-hover"
+                ? "h-9 rounded-control bg-text px-4 text-[13px] font-medium text-bg transition-opacity duration-150 hover:opacity-85 lg:h-8"
+                : "flex h-9 items-center gap-1.5 rounded-control border border-border px-3 text-[13px] font-medium text-text transition-colors duration-150 hover:bg-hover lg:h-8"
             }
           >
             {editing ? (
@@ -244,7 +244,7 @@ export default function SideQuestDetail() {
         </div>
       </div>
 
-      <div className="group relative mt-4 aspect-[16/9] overflow-hidden rounded-[18px] border border-border bg-hover">
+      <div className="group relative mt-2 aspect-[16/9] overflow-hidden rounded-card border border-border bg-hover">
         {quest.coverImage ? (
           <img src={quest.coverImage.url} alt="" className="h-full w-full object-cover" />
         ) : (
@@ -254,7 +254,7 @@ export default function SideQuestDetail() {
         )}
 
         {editing && (
-          <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/0 opacity-0 transition-opacity duration-150 group-hover:bg-black/30 group-hover:opacity-100">
+          <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/0 opacity-100 transition-opacity duration-150 group-hover:bg-black/30 group-hover:opacity-100 [@media(hover:hover)]:opacity-0">
             <label className="flex h-9 cursor-pointer items-center gap-1.5 rounded-lg bg-white/90 px-3 text-[13px] font-medium text-black">
               <Camera size={14} strokeWidth={2} />
               {coverUploading ? "Uploading…" : "Change"}
@@ -285,10 +285,10 @@ export default function SideQuestDetail() {
             value={quest.title}
             maxLength={120}
             onChange={(event) => update({ title: event.target.value })}
-            className="w-full bg-transparent text-4xl font-light tracking-tight text-text focus:outline-none lg:text-5xl"
+            className="type-display w-full bg-transparent text-text focus:outline-none"
           />
         ) : (
-          <h1 className="text-4xl font-light tracking-tight lg:text-5xl">{quest.title}</h1>
+          <h1 className="type-display">{quest.title}</h1>
         )}
 
         {editing ? (
@@ -297,10 +297,10 @@ export default function SideQuestDetail() {
             maxLength={160}
             placeholder="A short subtitle"
             onChange={(event) => update({ subtitle: event.target.value })}
-            className="mt-2 w-full bg-transparent text-[17px] text-secondary placeholder:text-tertiary focus:outline-none"
+            className="mt-2 w-full bg-transparent font-serif text-[1.125rem] text-secondary placeholder:text-tertiary focus:outline-none"
           />
         ) : (
-          quest.subtitle && <p className="mt-2 text-[17px] text-secondary">{quest.subtitle}</p>
+          quest.subtitle && <p className="mt-2 font-serif text-[1.125rem] text-secondary">{quest.subtitle}</p>
         )}
 
         <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
@@ -316,14 +316,14 @@ export default function SideQuestDetail() {
                 type="date"
                 value={quest.startDate}
                 onChange={(event) => update({ startDate: event.target.value })}
-                className="rounded-md border border-border bg-transparent px-2 py-1 text-[13px] focus:outline-none"
+                className="h-9 rounded-control border border-border bg-transparent px-2 text-[16px] text-text focus:border-secondary focus:outline-none sm:text-[13px]"
               />
               <span>–</span>
               <input
                 type="date"
                 value={quest.endDate}
                 onChange={(event) => update({ endDate: event.target.value })}
-                className="rounded-md border border-border bg-transparent px-2 py-1 text-[13px] focus:outline-none"
+                className="h-9 rounded-control border border-border bg-transparent px-2 text-[16px] text-text focus:border-secondary focus:outline-none sm:text-[13px]"
               />
             </div>
           ) : (
@@ -338,49 +338,45 @@ export default function SideQuestDetail() {
       </header>
 
       {(editing || quest.challenge || quest.approach) && (
-        <section className="mb-10 overflow-hidden rounded-[18px] border border-border bg-surface shadow-card">
-          <div className="px-6 py-5">
-            <h2 className="text-[13px] font-medium text-secondary">The challenge</h2>
+        <section className="mb-12 border-t border-border">
+          <div className="py-6">
+            <h2 className="type-eyebrow">The challenge</h2>
             {editing ? (
               <AutoGrowTextarea
                 value={quest.challenge}
                 maxLength={5000}
                 placeholder="What are you trying to do?"
                 onChange={(event) => update({ challenge: event.target.value })}
-                className="mt-2 text-[16px] leading-relaxed placeholder:text-tertiary"
+                className="type-journal mt-3 w-full placeholder:text-tertiary"
               />
             ) : (
-              quest.challenge && (
-                <p className="mt-2 whitespace-pre-wrap text-[16px] leading-relaxed">{quest.challenge}</p>
-              )
+              quest.challenge && <p className="type-journal mt-3 whitespace-pre-wrap">{quest.challenge}</p>
             )}
           </div>
-          <div className="border-t border-border px-6 py-5">
-            <h2 className="text-[13px] font-medium text-secondary">How it&apos;s going</h2>
+          <div className="border-t border-border py-6">
+            <h2 className="type-eyebrow">How it&apos;s going</h2>
             {editing ? (
               <AutoGrowTextarea
                 value={quest.approach}
                 maxLength={5000}
                 placeholder="Your approach, and how it's going so far."
                 onChange={(event) => update({ approach: event.target.value })}
-                className="mt-2 text-[16px] leading-relaxed placeholder:text-tertiary"
+                className="type-journal mt-3 w-full placeholder:text-tertiary"
               />
             ) : (
-              quest.approach && (
-                <p className="mt-2 whitespace-pre-wrap text-[16px] leading-relaxed">{quest.approach}</p>
-              )
+              quest.approach && <p className="type-journal mt-3 whitespace-pre-wrap">{quest.approach}</p>
             )}
           </div>
         </section>
       )}
 
       <div className="mb-5 flex items-center justify-between">
-        <h2 className="text-[15px] font-medium text-secondary">The story</h2>
+        <h2 className="type-eyebrow">The story</h2>
         <button
           type="button"
           onClick={() => void handleAddPost()}
           disabled={addingPost}
-          className="flex h-8 items-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-[13px] text-text transition-colors hover:bg-hover disabled:opacity-50"
+          className="flex h-9 items-center gap-1.5 rounded-control border border-border px-3 text-[13px] font-medium text-text transition-colors hover:bg-hover disabled:opacity-50 lg:h-8"
         >
           <Plus size={14} strokeWidth={2} />
           Add entry
@@ -388,7 +384,7 @@ export default function SideQuestDetail() {
       </div>
 
       {posts.length === 0 ? (
-        <div className="rounded-[18px] border border-dashed border-border px-6 py-10 text-center text-secondary">
+        <div className="border-t border-border py-10 text-center text-secondary">
           <p className="text-[15px]">No entries yet. Add the first one.</p>
         </div>
       ) : (
