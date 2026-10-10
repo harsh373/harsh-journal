@@ -347,14 +347,23 @@ export default function JournalDay({ day }: { day: DayKey }) {
                     )}
                   </section>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => setEditing(true)}
-                    className="mt-6 flex w-full items-center justify-between border-y border-border py-4 text-left text-secondary transition-colors duration-150 hover:text-text"
-                  >
-                    <span className="text-[15px]">You haven&apos;t written about this day yet.</span>
-                    <span className="text-[13px] font-medium">Add a line →</span>
-                  </button>
+                  <section className="mt-6">
+                    <h2 className="type-eyebrow">Today</h2>
+                    <button
+                      type="button"
+                      onClick={() => setEditing(true)}
+                      className="group mt-2 flex w-full items-center justify-between gap-4 border-b border-border pb-2 text-left transition-colors duration-150 hover:border-secondary"
+                    >
+                      <span className="font-serif text-[1.5rem] leading-snug tracking-tight text-tertiary transition-colors duration-150 group-hover:text-secondary">
+                        One good line about today.
+                      </span>
+                      <Pencil
+                        size={15}
+                        strokeWidth={1.75}
+                        className="shrink-0 text-tertiary transition-colors duration-150 group-hover:text-text"
+                      />
+                    </button>
+                  </section>
                 )}
 
                 {(editing || draft.dailySummary) && (

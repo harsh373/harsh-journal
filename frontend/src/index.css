@@ -234,7 +234,18 @@ h3 {
   transition: opacity 500ms ease;
 }
 
-:root[data-theme="dark"] .starfield {
-  opacity: 1;
-  animation: starfield-drift 200s linear infinite;
+:root[data-theme="dark"] {
+  --desktop: #000000;
+  --desktop-deep: #000000;
+  --bg: #000000;
+  --surface: #000000;
+  --elevated: #16181c;
+  --sidebar: #000000;
+  --text: #e7e9ea;
+  --text-secondary: #71767b;
+  --text-tertiary: #71767b;
+  --border: #2f3336;
+  --window-border: #2f3336;
+  --hover: rgba(231, 233, 234, 0.06);
+  --selected: rgba(231, 233, 234, 0.1);
 }

@@ -87,7 +87,7 @@ export default function MiniCalendar({
 
       <div className="grid grid-cols-7">
         {cells.map((day, index) => {
-          if (!day) return <span key={"blank-" + index} className="h-10" />;
+          if (!day) return <span key={"blank-" + index} className="h-9" />;
 
           const parts = parseDayKey(day);
           const isSelected = day === selected;
@@ -97,19 +97,20 @@ export default function MiniCalendar({
           const isLogged = Boolean(moods[day]);
           const isMissed = isWithinTrackedRange && !isLogged;
 
-          // The number itself: today is a red circle, a selected day is an inverted circle.
+          // Full circle behind the number: red = today, solid = logged, yellow = missed.
           const numberStyle = isToday
             ? isSelected
               ? "bg-alert font-semibold text-white ring-2 ring-alert/35 ring-offset-2 ring-offset-sidebar"
               : "bg-alert font-semibold text-white group-hover:opacity-90"
             : isSelected
-              ? "bg-text font-semibold text-bg"
-              : isFuture
-                ? "font-medium text-tertiary group-hover:bg-hover"
-                : "font-medium text-text group-hover:bg-hover"; // covers dates before START_DATE too
-
-          // Recorded state lives in a small dot under the number, not a big filled circle.
-          const dotStyle = isLogged ? "bg-secondary" : isMissed ? "bg-tough" : "";
+              ? "bg-text font-semibold text-bg ring-2 ring-text/25 ring-offset-2 ring-offset-sidebar"
+              : isLogged
+                ? "bg-text font-semibold text-bg group-hover:opacity-90"
+                : isMissed
+                  ? "bg-yellow-400 font-semibold text-black group-hover:opacity-90"
+                  : isFuture
+                    ? "font-medium text-tertiary group-hover:bg-hover"
+                    : "font-medium text-text group-hover:bg-hover"; // covers dates before START_DATE too
 
           return (
             <button
@@ -119,7 +120,7 @@ export default function MiniCalendar({
               aria-label={formatLongDate(day)}
               aria-pressed={isSelected}
               aria-current={isToday ? "date" : undefined}
-              className="group relative flex h-10 items-start justify-center pt-0.5"
+              className="group relative flex h-9 items-start justify-center pt-0.5"
             >
               <span
                 className={
@@ -129,12 +130,6 @@ export default function MiniCalendar({
               >
                 {parts?.day}
               </span>
-              {dotStyle && (
-                <span
-                  aria-hidden="true"
-                  className={"absolute bottom-0.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full " + dotStyle}
-                />
-              )}
             </button>
           );
         })}

@@ -113,9 +113,8 @@ export default function TodayChecklist() {
   if (loadState === "loading" || loadState === "error") return null;
 
   return (
-    <section className="mb-10">
+    <section className="mb-8">
       <h2 className="type-eyebrow">To do</h2>
-      <p className="mt-1 text-[15px] text-tertiary">What do you need to do today?</p>
 
       {items.length > 0 || adding ? (
         <ul className="mt-3 border-t border-border">
@@ -224,10 +223,12 @@ export default function TodayChecklist() {
         <button
           type="button"
           onClick={() => setAdding(true)}
-          className="mt-3 flex w-full items-center gap-3 border-y border-border py-4 text-left text-[16px] text-secondary transition-colors duration-150 hover:text-text"
+          className="mt-2 flex w-full items-center gap-3 border-b border-border pb-3 pt-1 text-left text-[16px] text-tertiary transition-colors duration-150 hover:text-text"
         >
-          <Plus size={15} strokeWidth={2} />
-          What do you need to do today?
+          <span className="flex h-[22px] w-[22px] flex-shrink-0 items-center justify-center rounded-full border border-dashed border-tertiary">
+            <Plus size={11} strokeWidth={2.5} />
+          </span>
+          Add a to-do
         </button>
       )}
 

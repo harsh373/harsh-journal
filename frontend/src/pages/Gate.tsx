@@ -30,14 +30,21 @@ export default function Gate() {
   }
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-bg px-6 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
-      <div className="fade-up w-full max-w-sm text-center">
-        <h1 className="font-serif text-[2.5rem] font-medium leading-tight tracking-tight sm:text-5xl">
+    <main className="flex min-h-full items-center justify-center bg-bg px-6 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
+      <div className="fade-up w-full max-w-sm py-10 text-center">
+        <img
+          src="/logo.png"
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          className="mx-auto h-16 w-16 select-none rounded-[16px] object-contain ring-1 ring-border"
+        />
+        <h1 className="mt-6 font-serif text-[2.25rem] font-medium leading-tight tracking-tight sm:text-[2.75rem]">
           Harsh&apos;s Journal
         </h1>
         <p className="mt-3 text-[17px] text-secondary">A private archive of my life.</p>
 
-        <form onSubmit={handleSubmit} className="mt-12">
+        <form onSubmit={handleSubmit} className="mt-10">
           <div
             key={shakeKey}
             className={
