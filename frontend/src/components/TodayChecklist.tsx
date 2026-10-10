@@ -6,6 +6,9 @@ import { getJournalToday } from "../config/dates";
 
 const TEXT_LIMIT = 500;
 const EASE = "ease-[cubic-bezier(0.2,0.7,0.2,1)]";
+// The to-do section is a morning planning tool: after this hour it only stays
+// if there is still something unfinished.
+const CUTOFF_HOUR = 11;
 type LoadState = "loading" | "ready" | "error";
 
 // Rendered only on today's journal page, only before you've started writing.
@@ -20,9 +23,13 @@ export default function TodayChecklist() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [hour, setHour] = useState(() => new Date().getHours());
 
   const addInputRef = useRef<HTMLInputElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
+  // Once the section is on screen after the cutoff, keep it until you leave the page,
+  // so ticking your last item doesn't make it vanish under your finger.
+  const keepVisibleRef = useRef(false);
 
   useEffect(() => {
     fetchTodayPlan(date)
@@ -32,6 +39,12 @@ export default function TodayChecklist() {
       })
       .catch(() => setLoadState("error"));
   }, [date]);
+
+  // Re-check the clock every minute so it hides itself at the cutoff.
+  useEffect(() => {
+    const id = window.setInterval(() => setHour(new Date().getHours()), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
 
   useEffect(() => {
     if (adding) addInputRef.current?.focus();
@@ -111,6 +124,13 @@ export default function TodayChecklist() {
   // Quiet failure/loading: this is a small helper widget sitting above the
   // real journal content, not something that should block or flash the page.
   if (loadState === "loading" || loadState === "error") return null;
+
+  // Before the cutoff: always shown (including the "Add a to-do" prompt).
+  // After it: only shown while something is unfinished or you're mid-edit.
+  const isMorning = hour < CUTOFF_HOUR;
+  const hasUnfinished = items.some((item) => !item.completed);
+  if (!isMorning && (hasUnfinished || adding || editingId !== null)) keepVisibleRef.current = true;
+  if (!isMorning && !keepVisibleRef.current) return null;
 
   return (
     <section className="mb-8">
