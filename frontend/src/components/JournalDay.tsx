@@ -6,6 +6,7 @@ import type { ArchiveEntry, EntryFields, JournalEntry, JournalPhoto, Mood } from
 import { formatLongDate, formatWeekday, getJournalToday } from "../config/dates";
 import type { DayKey } from "../config/dates";
 import AutoGrowTextarea from "./AutoGrowTextarea";
+import LineField from "./LineField";
 import Countdown from "./Countdown";
 import DayNav from "./DayNav";
 import DayPhotos from "./DayPhotos";
@@ -238,20 +239,17 @@ export default function JournalDay({ day }: { day: DayKey }) {
                   )}
 
                   {editing ? (
-                    <label className="flex h-7 items-center gap-1.5 text-secondary">
+                    <label className="flex items-center gap-1.5 text-secondary">
                       <MapPin size={14} strokeWidth={1.75} />
-                      <input
-                        type="text"
-                        name="journal-location"
-                        autoComplete="off"
-                        autoCorrect="off"
-                        inputMode="text"
-                        value={draft.location}
-                        maxLength={LIMIT_LOCATION}
-                        placeholder="Add location"
-                        onChange={(event) => update({ location: event.target.value })}
-                        className="w-44 bg-transparent text-[16px] text-text placeholder:text-tertiary focus:outline-none sm:text-[13px]"
-                      />
+                      <div className="w-44">
+                        <LineField
+                          value={draft.location}
+                          maxLength={LIMIT_LOCATION}
+                          placeholder="Add location"
+                          onChange={(event) => update({ location: event.target.value })}
+                          className="text-[16px] leading-7 text-text placeholder:text-tertiary sm:text-[13px]"
+                        />
+                      </div>
                     </label>
                   ) : (
                     draft.location && (
@@ -326,20 +324,16 @@ export default function JournalDay({ day }: { day: DayKey }) {
                   <section className="mt-6">
                     <h2 className="type-eyebrow">Today</h2>
                     {editing ? (
-                      <input
-                        type="text"
-                        name="journal-entry"
-                        autoComplete="off"
-                        autoCorrect="on"
-                        autoCapitalize="sentences"
-                        inputMode="text"
-                        value={draft.whatIDidToday}
-                        maxLength={LIMIT_ONE_LINER}
-                        placeholder="One good line about today."
-                        autoFocus
-                        onChange={(event) => update({ whatIDidToday: event.target.value })}
-                        className="mt-2 w-full border-b border-border bg-transparent pb-2 font-serif text-[1.5rem] leading-snug tracking-tight text-text transition-colors duration-150 placeholder:text-tertiary focus:border-secondary focus:outline-none"
-                      />
+                      <div className="mt-2 border-b border-border pb-2 transition-colors duration-150 focus-within:border-secondary">
+                        <LineField
+                          value={draft.whatIDidToday}
+                          maxLength={LIMIT_ONE_LINER}
+                          placeholder="One good line about today."
+                          autoFocus
+                          onChange={(event) => update({ whatIDidToday: event.target.value })}
+                          className="font-serif text-[1.5rem] leading-snug tracking-tight text-text placeholder:text-tertiary"
+                        />
+                      </div>
                     ) : (
                       <p className="mt-2 border-b border-transparent pb-2 font-serif text-[1.5rem] leading-snug tracking-tight">
                         {draft.whatIDidToday}

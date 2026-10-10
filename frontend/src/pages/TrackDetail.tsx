@@ -13,6 +13,7 @@ import {
   updateTrack,
 } from "../api/tracks.api";
 import type { LogValues, Track, TrackIconKey, TrackLog, TrackPatch, TrackStatus } from "../api/tracks.api";
+import LineField from "../components/LineField";
 import MonthDots from "../components/MonthDots";
 import TrackIcon, { TRACK_ICON_KEYS } from "../components/TrackIcon";
 import TrackLogForm from "../components/TrackLogForm";
@@ -247,7 +248,7 @@ export default function TrackDetail() {
         </span>
 
         {editing ? (
-          <input
+          <LineField
             value={draft.title}
             maxLength={60}
             placeholder="Track name"
@@ -261,7 +262,7 @@ export default function TrackDetail() {
         )}
 
         {editing ? (
-          <input
+          <LineField
             value={draft.subtitle}
             maxLength={160}
             placeholder="A short description (optional)"
@@ -297,13 +298,15 @@ export default function TrackDetail() {
 
             <div>
               <p className="type-eyebrow mb-2">Unit (optional)</p>
-              <input
-                value={draft.unit}
-                maxLength={20}
-                placeholder="problems, minutes, hours…"
-                onChange={(event) => updateDraft({ unit: event.target.value })}
-                className="h-10 w-56 rounded-control border border-border bg-transparent px-3 text-[16px] placeholder:text-tertiary focus:border-secondary focus:outline-none sm:text-[13px]"
-              />
+              <div className="flex min-h-10 w-56 items-center rounded-control border border-border px-3 transition-colors duration-150 focus-within:border-secondary">
+                <LineField
+                  value={draft.unit}
+                  maxLength={20}
+                  placeholder="problems, minutes, hours…"
+                  onChange={(event) => updateDraft({ unit: event.target.value })}
+                  className="py-2 text-[16px] leading-snug text-text placeholder:text-tertiary sm:text-[13px]"
+                />
+              </div>
               <p className="mt-1.5 text-[12px] text-tertiary">
                 Leave empty if you only want to record that you showed up.
               </p>

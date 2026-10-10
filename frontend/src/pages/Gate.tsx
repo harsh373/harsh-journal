@@ -1,8 +1,12 @@
 import { ArrowRight, LoaderCircle } from "lucide-react";
 import { useState } from "react";
-import type { FormEvent } from "react";
+import type { ChangeEvent, KeyboardEvent } from "react";
 import { loginErrorMessage } from "../api/auth.api";
 import { useAuth } from "../components/AuthProvider";
+
+// Chrome/Safari/Android can mask 
+const CAN_MASK_TEXTAREA =
+  typeof CSS !== "undefined" && typeof CSS.supports === "function" && CSS.supports("-webkit-text-security", "disc");
 
 export default function Gate() {
   const { unlock } = useAuth();
@@ -13,8 +17,7 @@ export default function Gate() {
 
   const canSubmit = password.length > 0 && !submitting;
 
-  async function handleSubmit(event: FormEvent) {
-    event.preventDefault();
+  async function submit() {
     if (!canSubmit) return;
 
     setSubmitting(true);
@@ -28,6 +31,14 @@ export default function Gate() {
       setSubmitting(false);
     }
   }
+
+  function handleChange(value: string) {
+    setPassword(value);
+    if (error) setError("");
+  }
+
+  const fieldClass =
+    "h-14 w-full rounded-card bg-transparent pl-5 pr-14 text-[17px] text-text placeholder:text-tertiary focus:outline-none";
 
   return (
     <main className="flex min-h-full items-center justify-center bg-bg px-6 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
@@ -44,7 +55,13 @@ export default function Gate() {
         </h1>
         <p className="mt-3 text-[17px] text-secondary">A private archive of my life.</p>
 
-        <form onSubmit={handleSubmit} className="mt-10">
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            void submit();
+          }}
+          className="mt-10"
+        >
           <div
             key={shakeKey}
             className={
@@ -52,23 +69,48 @@ export default function Gate() {
               (error ? "shake border-alert/60" : "border-border")
             }
           >
-            <label htmlFor="password" className="sr-only">
+            <label htmlFor="gate-secret" className="sr-only">
               Password
             </label>
-            <input
-              id="password"
-              type="password"
-              autoFocus
-              autoComplete="current-password"
-              placeholder="Password"
-              value={password}
-              disabled={submitting}
-              onChange={(event) => {
-                setPassword(event.target.value);
-                if (error) setError("");
-              }}
-              className="h-14 w-full rounded-card bg-transparent pl-5 pr-14 text-[17px] text-text placeholder:text-tertiary focus:outline-none"
-            />
+
+            {CAN_MASK_TEXTAREA ? (
+              <textarea
+                id="gate-secret"
+                rows={1}
+                autoFocus
+                placeholder="Password"
+                value={password}
+                disabled={submitting}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                enterKeyHint="go"
+                onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
+                  handleChange(event.target.value.replace(/[\r\n]+/g, ""))
+                }
+                onKeyDown={(event: KeyboardEvent<HTMLTextAreaElement>) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    void submit();
+                  }
+                }}
+                className={fieldClass + " block resize-none overflow-hidden py-4 leading-6 [-webkit-text-security:disc]"}
+              />
+            ) : (
+              <input
+                id="gate-secret"
+                type="password"
+                autoFocus
+                placeholder="Password"
+                value={password}
+                disabled={submitting}
+                autoComplete="off"
+                onChange={(event) => handleChange(event.target.value)}
+                className={fieldClass}
+              />
+            )}
+
             <button
               type="submit"
               disabled={!canSubmit}
