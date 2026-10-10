@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AppShell from "./components/AppShell";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
 import { MoodProvider } from "./components/MoodProvider";
+import { useNoAutofill } from "./config/useNoAutofill";
 import Archive from "./pages/Archive";
 import Gate from "./pages/Gate";
 import Insights from "./pages/Insights";
@@ -72,6 +73,8 @@ function AppRoutes() {
 }
 
 export default function App() {
+  useNoAutofill();
+
   return (
     <BrowserRouter>
       <Routes>
