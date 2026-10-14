@@ -250,6 +250,9 @@ h3 {
   --selected: rgba(231, 233, 234, 0.1);
 }
 
+/* ---------- Floating glass bottom navigation (phones only) ----------
+   Kept at the very end of the file so these values win over the earlier definitions. */
+
 :root,
 :root[data-theme="light"] {
   --nav-glass: rgba(250, 250, 252, 0.6);
@@ -261,12 +264,12 @@ h3 {
 }
 
 :root[data-theme="dark"] {
-  --nav-glass: rgba(34, 34, 38, 0.55);
-  --nav-edge: rgba(255, 255, 255, 0.1);
-  --nav-highlight: rgba(255, 255, 255, 0.09);
-  --nav-shadow: 0 14px 34px -10px rgba(0, 0, 0, 0.85), 0 2px 8px rgba(0, 0, 0, 0.5);
-  --nav-active: rgba(255, 255, 255, 0.12);
-  --nav-active-highlight: rgba(255, 255, 255, 0.08);
+  --nav-glass: rgba(20, 20, 22, 0.72);
+  --nav-edge: rgba(255, 255, 255, 0.12);
+  --nav-highlight: rgba(255, 255, 255, 0.07);
+  --nav-shadow: 0 14px 34px -10px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.6);
+  --nav-active: rgba(255, 255, 255, 0.1);
+  --nav-active-highlight: rgba(255, 255, 255, 0.05);
 }
 
 .glass-nav {
@@ -299,12 +302,4 @@ h3 {
   .glass-nav-active {
     transition: none;
   }
-}
-:root[data-theme="dark"] {
-  --nav-glass: rgba(58, 58, 64, 0.5);
-  --nav-edge: rgba(255, 255, 255, 0.14);
-  --nav-highlight: rgba(255, 255, 255, 0.14);
-  --nav-shadow: 0 14px 34px -10px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.6);
-  --nav-active: rgba(255, 255, 255, 0.09);
-  --nav-active-highlight: rgba(255, 255, 255, 0.06);
 }

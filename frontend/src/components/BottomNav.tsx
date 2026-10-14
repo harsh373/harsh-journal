@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { RefObject } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { isActive, PRIMARY_NAV } from "../config/nav";
 
@@ -54,9 +55,60 @@ function useKeyboardOpen(): boolean {
   return open;
 }
 
-export default function BottomNav() {
+// Like Safari on iPhone: slides away while scrolling down, returns on any scroll up,
+// at the top of the page, and on every route change.
+function useScrollHidden(scrollRef: RefObject<HTMLElement | null>, pathname: string): boolean {
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    setHidden(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let last = el.scrollTop;
+    let frame = 0;
+
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        const y = Math.max(el.scrollTop, 0);
+        const delta = y - last;
+        if (y < 24) {
+          setHidden(false);
+          last = y;
+        } else if (delta > 10) {
+          setHidden(true);
+          last = y;
+        } else if (delta < -10) {
+          setHidden(false);
+          last = y;
+        }
+      });
+    };
+
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [scrollRef]);
+
+  return hidden;
+}
+
+interface BottomNavProps {
+  /** The element that scrolls the page content (AppShell's <main>). */
+  scrollRef: RefObject<HTMLElement | null>;
+}
+
+export default function BottomNav({ scrollRef }: BottomNavProps) {
   const { pathname } = useLocation();
   const keyboardOpen = useKeyboardOpen();
+  const scrollHidden = useScrollHidden(scrollRef, pathname);
+  const away = keyboardOpen || scrollHidden;
   const barRef = useRef<HTMLElement>(null);
 
   const activeIndex = PRIMARY_NAV.findIndex((n) => isActive(n.to, pathname));
@@ -87,10 +139,10 @@ export default function BottomNav() {
     <div
       className={
         "pointer-events-none fixed inset-x-0 z-30 flex justify-center px-5 transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] lg:hidden " +
-        (keyboardOpen ? "translate-y-6 opacity-0" : "translate-y-0 opacity-100")
+        (away ? "translate-y-[calc(100%+40px)] opacity-0" : "translate-y-0 opacity-100")
       }
       style={{ bottom: `calc(env(safe-area-inset-bottom) + ${BOTTOM_GAP}px)` }}
-      inert={keyboardOpen}
+      inert={away}
     >
       <nav
         ref={barRef}

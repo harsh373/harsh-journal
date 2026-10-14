@@ -101,7 +101,7 @@ export default function AppShell() {
         </div>
 
         {/* Floating glass bar. Phones and small tablets only (hidden from lg up). */}
-        <BottomNav />
+        <BottomNav scrollRef={mainRef} />
       </div>
     </div>
   );
