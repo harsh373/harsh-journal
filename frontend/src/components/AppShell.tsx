@@ -1,6 +1,7 @@
 import { Menu } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
+import BottomNav from "./BottomNav";
 import Sidebar from "./Sidebar";
 
 export default function AppShell() {
@@ -43,12 +44,12 @@ export default function AppShell() {
           className="pointer-events-none absolute left-5 top-[9px] z-20 hidden h-6 w-6 select-none rounded-[6px] object-contain lg:block"
         />
 
-        {/* Desktop sidebar. pt-11 leaves the top strip for the logo. */}
+        {/* Desktop sidebar. pt-11 leaves the top strip for the logo. Unchanged. */}
         <aside className="hidden w-[280px] shrink-0 border-r border-border bg-sidebar pt-11 lg:block">
           <Sidebar />
         </aside>
 
-        {/* Mobile drawer. */}
+        {/* Mobile drawer: everything except the four destinations in the bottom bar. */}
         <div
           className={"fixed inset-0 z-40 lg:hidden " + (drawerOpen ? "" : "pointer-events-none")}
           inert={!drawerOpen}
@@ -67,7 +68,7 @@ export default function AppShell() {
               (drawerOpen ? "translate-x-0" : "-translate-x-full")
             }
           >
-            <Sidebar onNavigate={() => setDrawerOpen(false)} />
+            <Sidebar variant="drawer" onNavigate={() => setDrawerOpen(false)} />
           </aside>
         </div>
 
@@ -87,12 +88,20 @@ export default function AppShell() {
             </div>
           </header>
 
-          <main ref={mainRef} className="flex-1 overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]">
+          {/* Phones pad by the bar's measured height (set by BottomNav). From lg up this is
+              exactly the old padding. */}
+          <main
+            ref={mainRef}
+            className="flex-1 overflow-y-auto overscroll-contain pb-[calc(var(--bottom-nav-space,0px)+env(safe-area-inset-bottom))] lg:pb-[env(safe-area-inset-bottom)]"
+          >
             <div key={pathname} className="page-in">
               <Outlet />
             </div>
           </main>
         </div>
+
+        {/* Floating glass bar. Phones and small tablets only (hidden from lg up). */}
+        <BottomNav />
       </div>
     </div>
   );

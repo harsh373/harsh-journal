@@ -1,19 +1,7 @@
-import {
-  BookOpen,
-  CalendarCheck,
-  Circle,
-  Compass,
-  Image as PhotosIcon,
-  ListChecks,
-  Lock,
-  Moon,
-  Sparkles,
-  Star,
-  Sun,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { Lock, Moon, Sun } from "lucide-react";
 import { Link, useLocation, useMatch, useNavigate } from "react-router-dom";
 import { getJournalToday } from "../config/dates";
+import { isActive, NAV, SECONDARY_NAV } from "../config/nav";
 import { useTheme } from "../config/theme";
 import { useAuth } from "./AuthProvider";
 import MiniCalendar from "./MiniCalendar";
@@ -21,37 +9,20 @@ import { useMoods } from "./MoodProvider";
 
 const VERSION = "v0.1";
 
-interface NavEntry {
-  label: string;
-  to: string;
-  icon: LucideIcon;
-}
-
-const NAV: NavEntry[] = [
-  { label: "Journal", to: "/", icon: BookOpen },
-  { label: "Now", to: "/now", icon: Circle },
-  { label: "Weekly", to: "/weekly", icon: ListChecks },
-  { label: "Tracks", to: "/tracks", icon: CalendarCheck },
-  { label: "Side Quests", to: "/side-quests", icon: Compass },
-  { label: "Photos", to: "/photos", icon: PhotosIcon },
-  { label: "Insights", to: "/insights", icon: Sparkles },
-  { label: "Observatory", to: "/observatory", icon: Star },
-];
-
-// The Journal item stays highlighted on the home page and on any single day.
-function isActive(to: string, pathname: string): boolean {
-  if (to === "/") return pathname === "/" || pathname.startsWith("/day/");
-  return pathname === to || pathname.startsWith(to + "/");
-}
-
 const iconButton =
   "flex h-9 w-9 items-center justify-center rounded-control text-secondary transition-colors duration-150 hover:bg-hover hover:text-text active:bg-selected lg:h-7 lg:w-7";
 
 interface SidebarProps {
   onNavigate?: () => void;
+  /**
+   * "full" (default) is the desktop sidebar with all destinations, unchanged.
+   * "drawer" is the phone drawer: the four primary destinations live in the
+   * bottom bar, so only the rest are listed here, plus the calendar.
+   */
+  variant?: "full" | "drawer";
 }
 
-export default function Sidebar({ onNavigate }: SidebarProps) {
+export default function Sidebar({ onNavigate, variant = "full" }: SidebarProps) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const dayMatch = useMatch("/day/:date");
@@ -61,6 +32,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
 
   const today = getJournalToday();
   const selected = dayMatch?.params.date ?? today;
+  const items = variant === "drawer" ? SECONDARY_NAV : NAV;
 
   function openDay(day: string) {
     navigate(day === today ? "/" : "/day/" + day);
@@ -74,8 +46,8 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
       </div>
 
       <div className="flex-1 overflow-y-auto pb-4">
-        <nav aria-label="Main" className="space-y-0.5 px-3">
-          {NAV.map(({ label, to, icon: Icon }) => {
+        <nav aria-label={variant === "drawer" ? "More" : "Main"} className="space-y-0.5 px-3">
+          {items.map(({ label, to, icon: Icon }) => {
             const active = isActive(to, pathname);
             return (
               <Link
