@@ -6,8 +6,9 @@ import { getJournalToday } from "../config/dates";
 
 const TEXT_LIMIT = 500;
 const EASE = "ease-[cubic-bezier(0.2,0.7,0.2,1)]";
-// The to-do section is a morning planning tool: after this hour it only stays
-// if there is still something unfinished.
+// A morning planning tool: before this hour it always shows (including the
+// "Add a to-do" prompt). After it, it only shows if you have to-dos for the day,
+// finished or not, so at night you can still see what you got done.
 const CUTOFF_HOUR = 11;
 type LoadState = "loading" | "ready" | "error";
 
@@ -27,9 +28,6 @@ export default function TodayChecklist() {
 
   const addInputRef = useRef<HTMLInputElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
-  // Once the section is on screen after the cutoff, keep it until you leave the page,
-  // so ticking your last item doesn't make it vanish under your finger.
-  const keepVisibleRef = useRef(false);
 
   useEffect(() => {
     fetchTodayPlan(date)
@@ -40,7 +38,7 @@ export default function TodayChecklist() {
       .catch(() => setLoadState("error"));
   }, [date]);
 
-  // Re-check the clock every minute so it hides itself at the cutoff.
+  // Re-check the clock every minute so the empty prompt hides itself at the cutoff.
   useEffect(() => {
     const id = window.setInterval(() => setHour(new Date().getHours()), 60_000);
     return () => window.clearInterval(id);
@@ -125,16 +123,21 @@ export default function TodayChecklist() {
   // real journal content, not something that should block or flash the page.
   if (loadState === "loading" || loadState === "error") return null;
 
-  // Before the cutoff: always shown (including the "Add a to-do" prompt).
-  // After it: only shown while something is unfinished or you're mid-edit.
+  // Before the cutoff: always shown. After it: shown whenever there is something
+  // on the list (done or not) or you're mid-edit. An empty list quietly disappears.
   const isMorning = hour < CUTOFF_HOUR;
-  const hasUnfinished = items.some((item) => !item.completed);
-  if (!isMorning && (hasUnfinished || adding || editingId !== null)) keepVisibleRef.current = true;
-  if (!isMorning && !keepVisibleRef.current) return null;
+  if (!isMorning && items.length === 0 && !adding) return null;
+
+  const allDone = items.length > 0 && items.every((item) => item.completed);
 
   return (
     <section className="mb-8">
       <h2 className="type-eyebrow">To do</h2>
+      {allDone && (
+        <p className="mt-1 text-[15px] text-secondary">
+          {items.length === 1 ? "You did it." : `All ${items.length} done.`} Good day&apos;s work.
+        </p>
+      )}
 
       {items.length > 0 || adding ? (
         <ul className="mt-3 border-t border-border">

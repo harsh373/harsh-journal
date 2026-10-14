@@ -8,6 +8,7 @@ import {
   Lock,
   Moon,
   Sparkles,
+  Star,
   Sun,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -34,6 +35,7 @@ const NAV: NavEntry[] = [
   { label: "Side Quests", to: "/side-quests", icon: Compass },
   { label: "Photos", to: "/photos", icon: PhotosIcon },
   { label: "Insights", to: "/insights", icon: Sparkles },
+  { label: "Observatory", to: "/observatory", icon: Star },
 ];
 
 // The Journal item stays highlighted on the home page and on any single day.
