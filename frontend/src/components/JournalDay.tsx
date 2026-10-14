@@ -1,4 +1,4 @@
-import { Circle, MapPin, Pencil } from "lucide-react";
+import { MapPin, Pencil } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ComponentProps } from "react";
 import { Link } from "react-router-dom";
 import { fetchArchivePage, fetchEntry, saveEntry } from "../api/journal.api";
@@ -45,9 +45,6 @@ function toFields(entry: JournalEntry | null): EntryFields {
   };
 }
 
-// Pulled straight from Lightbox's own prop type, so this always matches
-// whatever LibraryPhoto actually requires without importing it directly.
-// If the object built below is missing a field, TypeScript will say exactly which.
 type LightboxPhoto = ComponentProps<typeof Lightbox>["photo"];
 
 function toLightboxPhoto(photo: JournalPhoto, day: DayKey): LightboxPhoto {
@@ -269,11 +266,11 @@ export default function JournalDay({ day }: { day: DayKey }) {
                   </div>
                   <Link
                     to="/now"
-                    aria-label="Open Now"
+                    aria-label="Open Now — present moment"
                     title="Now"
-                    className="flex aspect-square min-w-[56px] items-center justify-center rounded-card border border-border bg-surface text-secondary transition-colors duration-150 hover:bg-hover hover:text-text active:scale-95"
+                    className="group flex aspect-square min-w-[56px] items-center justify-center rounded-card border border-border bg-surface shadow-[inset_0_1px_0_rgb(255_255_255/0.08),0_1px_2px_rgb(0_0_0/0.06)] transition-[transform,background-color,border-color] duration-150 ease-out hover:border-[#0A84FF]/40 hover:bg-hover active:scale-[0.96] active:bg-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A84FF] motion-reduce:transition-none motion-reduce:active:scale-100"
                   >
-                    <Circle size={20} strokeWidth={1.5} />
+                    <NowGlyph />
                   </Link>
                 </div>
               )}
@@ -423,4 +420,39 @@ function SaveStatus({ state, onRetry }: { state: SaveState; onRetry: () => void 
     );
   }
   return null;
+}
+
+
+function NowGlyph() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+      className="h-6 w-6"
+    >
+      {/* Orbit group: rotates as one piece so the break and satellite stay locked together. */}
+      <g className="origin-[12px_12px] transition-transform duration-300 ease-out group-hover:rotate-45 motion-reduce:transition-none motion-reduce:group-hover:rotate-0">
+       
+        <circle
+          cx="12"
+          cy="12"
+          r="8.5"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          pathLength={100}
+          strokeDasharray="90 10"
+          transform="rotate(-27 12 12)"
+          className="opacity-80 transition-opacity duration-300 [stroke:#0A84FF] group-hover:opacity-100 motion-reduce:transition-none"
+        />
+        
+        <circle cx="18.01" cy="5.99" r="1.1" className="[fill:#0A84FF]" />
+      </g>
+    
+      <circle cx="12" cy="12" r="2.25" className="[fill:#FF453A]" />
+    </svg>
+  );
 }
