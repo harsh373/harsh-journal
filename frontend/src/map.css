@@ -1,0 +1,244 @@
+/* The Map Room. Import this right after `@import "tailwindcss";` in index.css.
+   Map-only colours are scoped to .map-room and switch with the app's data-theme. */
+
+.map-room {
+  --map-sea-a: #e3ebeb;
+  --map-sea-b: #d0dddf;
+  --map-shallow: #eaf1ee;
+  --map-land-a: #f7f2e3;
+  --map-land-b: #ece6d1;
+  --map-hyp-line: #c2c3a3;
+  --map-hyp-1: #eae7d0;
+  --map-hyp-2: #e2e1c6;
+  --map-hyp-3: #d9dabd;
+  --map-hyp-4: #d0d3b5;
+  --map-forest: #86a07c;
+  --map-water: #a9c2ca;
+  --map-water-line: #86a4ae;
+  --map-peak: #f5f1e4;
+  --map-peak-line: #8a8573;
+  --map-shade: #aaa38b;
+  --map-coast: #8a8774;
+  --map-ink: #4a4a42;
+  --map-wave: #9db4b8;
+  --map-label-land: #6c6957;
+  --map-label-sea: #7b9399;
+  --map-mark: #b4532a;
+  --map-mark-edge: rgba(255, 255, 255, 0.92);
+  --map-mark-glow: 0 0 0 transparent;
+  --map-vignette: rgba(60, 70, 70, 0.2);
+  --map-panel: color-mix(in srgb, var(--elevated) 90%, transparent);
+  --map-panel-edge: rgba(0, 0, 0, 0.1);
+  --map-grain-invert: 0;
+  background: var(--map-sea-b);
+}
+
+:root[data-theme="dark"] .map-room {
+  --map-sea-a: #0d1b2c;
+  --map-sea-b: #050b15;
+  --map-shallow: #153347;
+  --map-land-a: #1b3036;
+  --map-land-b: #132429;
+  --map-hyp-line: #38605f;
+  --map-hyp-1: #1b3337;
+  --map-hyp-2: #1f3a3c;
+  --map-hyp-3: #234241;
+  --map-hyp-4: #284a46;
+  --map-forest: #2b5247;
+  --map-water: #27506f;
+  --map-water-line: #3f7194;
+  --map-peak: #213a3e;
+  --map-peak-line: #7ea4af;
+  --map-shade: #0b171b;
+  --map-coast: #5f8c97;
+  --map-ink: #9bc2cc;
+  --map-wave: #1f4357;
+  --map-label-land: rgba(176, 208, 214, 0.5);
+  --map-label-sea: rgba(112, 156, 180, 0.55);
+  --map-mark: #f2cf84;
+  --map-mark-edge: rgba(20, 14, 4, 0.55);
+  --map-mark-glow: 0 0 12px 2px rgba(242, 207, 132, 0.42);
+  --map-vignette: rgba(0, 0, 0, 0.62);
+  --map-panel-edge: rgba(255, 255, 255, 0.12);
+  --map-grain-invert: 1;
+}
+
+/* ---------- Artwork ---------- */
+.mr-svg { display: block; }
+.mr-grid { fill: none; stroke: var(--map-ink); stroke-width: 0.6; opacity: 0.07; }
+.mr-wave { fill: none; stroke: var(--map-wave); stroke-width: 1.1; stroke-linecap: round; }
+.mr-halo { fill: none; stroke: var(--map-shallow); stroke-linejoin: round; }
+.mr-land { fill: url(#mr-land-g); }
+.mr-coast { fill: none; stroke: var(--map-coast); stroke-width: 1.3px; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.mr-ribbon { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.mr-hyp-line { stroke: var(--map-hyp-line); }
+.mr-hyp-1 { stroke: var(--map-hyp-1); }
+.mr-hyp-2 { stroke: var(--map-hyp-2); }
+.mr-hyp-3 { stroke: var(--map-hyp-3); }
+.mr-hyp-4 { stroke: var(--map-hyp-4); }
+.mr-river { fill: none; stroke: var(--map-water); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.mr-water { fill: var(--map-water); stroke: var(--map-water-line); stroke-width: 1; }
+.mr-forest { fill: var(--map-forest); opacity: 0.85; }
+.mr-peak { fill: var(--map-peak); stroke: var(--map-peak-line); stroke-width: 1.2; stroke-linejoin: round; }
+.mr-shade { fill: var(--map-shade); opacity: 0.5; }
+.mr-label { font-family: var(--font-serif); font-style: italic; }
+.mr-label-land { fill: var(--map-label-land); font-style: normal; font-weight: 500; }
+.mr-label-sea { fill: var(--map-label-sea); }
+.mr-label-isle { fill: var(--map-label-land); }
+.mr-compass circle,
+.mr-compass-fine { fill: none; stroke: var(--map-label-land); stroke-width: 0.8; }
+.mr-compass-star { fill: var(--map-label-land); opacity: 0.55; }
+.mr-frame { fill: none; stroke: var(--map-label-land); stroke-width: 1.4; opacity: 0.6; }
+.mr-frame-fine { stroke-width: 0.6; }
+
+/* Fine detail eases in as you zoom closer. */
+.mr-lod-1 { opacity: 0; transition: opacity 350ms ease; }
+.mr-svg[data-lod="1"] .mr-lod-1,
+.mr-svg[data-lod="2"] .mr-lod-1 { opacity: 1; }
+
+/* ---------- Atmosphere ---------- */
+.mr-vignette {
+  background: radial-gradient(120% 100% at 50% 45%, transparent 55%, var(--map-vignette) 100%);
+}
+.mr-grain {
+  opacity: 0.06;
+  filter: invert(var(--map-grain-invert));
+  background-size: 240px 240px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* ---------- Landmarks ---------- */
+.mr-mark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin: -20px 0 0 -20px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (pointer: coarse) {
+  .mr-mark { margin: -24px 0 0 -24px; width: 48px; height: 48px; }
+}
+.mr-mark:focus-visible { outline: 2px solid var(--blue); outline-offset: -5px; }
+.mr-mark-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 2.5px;
+  background: var(--map-mark);
+  transform: rotate(45deg);
+  box-shadow: 0 0 0 1.5px var(--map-mark-edge), 0 1px 3px rgba(0, 0, 0, 0.35), var(--map-mark-glow);
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: mr-appear 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.mr-mark-ring {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid var(--map-mark);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 220ms ease, transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.mr-mark:hover .mr-mark-dot,
+.mr-mark:focus-visible .mr-mark-dot { transform: rotate(45deg) scale(1.35); }
+.mr-mark[aria-pressed="true"] .mr-mark-dot { transform: rotate(45deg) scale(1.5); }
+.mr-mark[aria-pressed="true"] .mr-mark-ring { opacity: 0.6; transform: scale(1); }
+.mr-mark-pulse {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1.5px solid var(--map-mark);
+  opacity: 0;
+  pointer-events: none;
+}
+.mr-mark[data-arrived="true"] .mr-mark-pulse { animation: mr-arrive 1.3s ease-out 2; }
+@keyframes mr-arrive { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(2.8); opacity: 0; } }
+@keyframes mr-appear { from { transform: rotate(45deg) scale(0); } to { transform: rotate(45deg) scale(1); } }
+
+.mr-mark-tip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 8px);
+  max-width: 220px;
+  padding: 5px 9px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text);
+  background: var(--map-panel);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  backdrop-filter: blur(16px) saturate(1.5);
+  box-shadow: 0 0 0 0.5px var(--map-panel-edge), 0 6px 18px -6px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  translate: -50% 4px;
+  pointer-events: none;
+  transition: opacity 160ms ease, translate 160ms ease;
+}
+@media (hover: hover) {
+  .mr-mark:hover .mr-mark-tip { opacity: 1; translate: -50% 0; }
+}
+.mr-mark:focus-visible .mr-mark-tip { opacity: 1; translate: -50% 0; }
+.mr-mark[aria-pressed="true"] .mr-mark-tip { opacity: 0; }
+
+/* ---------- Controls ---------- */
+.mr-ctl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: var(--text-secondary);
+  border-radius: 9px;
+  transition: background-color 150ms ease, color 150ms ease, transform 120ms ease, opacity 150ms ease;
+}
+@media (max-width: 1023px) {
+  .mr-ctl { width: 44px; height: 44px; }
+}
+.mr-ctl:hover:not(:disabled) { background: var(--hover); color: var(--text); }
+.mr-ctl:active:not(:disabled) { background: var(--selected); transform: scale(0.94); }
+.mr-ctl:disabled { opacity: 0.35; cursor: default; }
+
+/* ---------- Reading panel ---------- */
+.mr-panel {
+  background: var(--map-panel);
+  -webkit-backdrop-filter: blur(28px) saturate(1.6);
+  backdrop-filter: blur(28px) saturate(1.6);
+  box-shadow: 0 0 0 0.5px var(--map-panel-edge), inset 0 1px 0 var(--nav-highlight), 0 24px 60px -18px rgba(0, 0, 0, 0.4);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .mr-panel, .mr-mark-tip { background: var(--elevated); }
+}
+.mr-panel-in { animation: mr-sheet-in 360ms cubic-bezier(0.32, 0.72, 0, 1) both; }
+@keyframes mr-sheet-in { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@media (min-width: 1024px) {
+  .mr-panel-in { animation-name: mr-panel-in; }
+  @keyframes mr-panel-in { from { transform: translateX(14px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+}
+.mr-fade-in { animation: mr-fade 200ms ease both; }
+@keyframes mr-fade { from { opacity: 0; } to { opacity: 1; } }
+.mr-pop-in { animation: mr-pop 320ms cubic-bezier(0.2, 0.9, 0.25, 1) both; }
+@keyframes mr-pop { from { transform: translateY(10px) scale(0.985); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.mr-quote {
+  font-family: var(--font-serif);
+  letter-spacing: -0.012em;
+  text-wrap: pretty;
+  hanging-punctuation: first;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mr-mark[data-arrived="true"] .mr-mark-pulse { animation: none; }
+}

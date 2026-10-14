@@ -20,6 +20,7 @@ import Weekly from "./pages/Weekly";
 import WakePage from "./pages/WakePage";
 import Now from "./pages/Now";
 import NowArchive from "./pages/NowArchive";
+import MapRoom from "./pages/MapRoom";
 import Observatory from "./pages/Observatory";
 
 // Same floating window the rest of the app lives in, so the lock screen matches.
@@ -61,6 +62,7 @@ function AppRoutes() {
           <Route path="side-quests/:id" element={<SideQuestDetail />} />
           <Route path="photos" element={<Photos />} />
             <Route path="observatory" element={<Observatory />} />
+            <Route path="map-room" element={<MapRoom />} />
           <Route path="stats" element={<Placeholder title="Stats" />} />
           <Route path="search" element={<Placeholder title="Search" />} />
           <Route path="insights" element={<Insights />} />

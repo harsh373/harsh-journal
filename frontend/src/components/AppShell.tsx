@@ -4,10 +4,15 @@ import { Outlet, useLocation } from "react-router-dom";
 import BottomNav from "./BottomNav";
 import Sidebar from "./Sidebar";
 
+// Pages that fill the whole window on phones and manage their own scrolling there.
+// On laptop (lg and up) they sit inside the shell like any other page.
+const FULL_BLEED_PATHS = ["/map-room"];
+
 export default function AppShell() {
   const { pathname } = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
+  const fullBleed = FULL_BLEED_PATHS.includes(pathname);
 
   // Close the mobile drawer and reset scroll whenever the route changes.
   useEffect(() => {
@@ -88,13 +93,28 @@ export default function AppShell() {
             </div>
           </header>
 
-          {/* Phones pad by the bar's measured height (set by BottomNav). From lg up this is
-              exactly the old padding. */}
+          {/* Normal pages scroll here and pad by the bottom bar's measured height.
+              On phones, full-bleed pages (the Map Room) fill this area, never scroll the
+              page, and run underneath the floating bar, so they get no bottom padding.
+              From lg up there is no floating bar, so every page uses the normal shell. */}
           <main
             ref={mainRef}
-            className="flex-1 overflow-y-auto overscroll-contain pb-[calc(var(--bottom-nav-space,0px)+env(safe-area-inset-bottom))] lg:pb-[env(safe-area-inset-bottom)]"
+            className={
+              "min-h-0 flex-1 overscroll-contain " +
+              (fullBleed
+                ? "overflow-hidden lg:p-5 lg:pb-[calc(1.25rem+env(safe-area-inset-bottom))]"
+                : "overflow-y-auto pb-[calc(var(--bottom-nav-space,0px)+env(safe-area-inset-bottom))] lg:pb-[env(safe-area-inset-bottom)]")
+            }
           >
-            <div key={pathname} className="page-in">
+            <div
+              key={pathname}
+              className={
+                "page-in " +
+                (fullBleed
+                  ? "h-full lg:overflow-hidden lg:rounded-[16px] lg:border lg:border-border"
+                  : "")
+              }
+            >
               <Outlet />
             </div>
           </main>
