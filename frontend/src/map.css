@@ -242,3 +242,66 @@
 @media (prefers-reduced-motion: reduce) {
   .mr-mark[data-arrived="true"] .mr-mark-pulse { animation: none; }
 }
+
+/* ===================== Premium cartography pass ===================== */
+.map-room {
+  --map-ripple: #a6bcc0;
+  --map-rim: #ddddbf;
+  --map-meadow: #b7c8a2;
+  --map-stipple: #a7a38b;
+  --map-grove: #9ab38b;
+  --map-snow: #ffffff;
+  --map-halo: rgba(247, 242, 227, 0.85);
+  --map-wash: rgba(255, 246, 224, 0.34);
+}
+:root[data-theme="dark"] .map-room {
+  --map-ripple: #2c5670;
+  --map-rim: #27494e;
+  --map-meadow: #21473e;
+  --map-stipple: #6c98a2;
+  --map-grove: #346055;
+  --map-snow: #c4dce3;
+  --map-halo: rgba(8, 20, 24, 0.7);
+  --map-wash: rgba(110, 165, 200, 0.12);
+}
+
+.mr-vignette {
+  background:
+    radial-gradient(70% 55% at 22% 8%, var(--map-wash), transparent 70%),
+    radial-gradient(120% 100% at 50% 45%, transparent 55%, var(--map-vignette) 100%);
+}
+
+.mr-lift { fill: rgba(40, 40, 30, 0.2); }
+:root[data-theme="dark"] .mr-lift { fill: rgba(0, 0, 0, 0.55); }
+.mr-ripple { fill: none; stroke: var(--map-ripple); stroke-width: 1; stroke-linejoin: round; }
+.mr-rim { fill: none; stroke: var(--map-rim); stroke-linejoin: round; }
+.mr-meadow { fill: var(--map-meadow); opacity: 0.4; }
+.mr-stipple { fill: none; stroke: var(--map-stipple); stroke-width: 1.1; stroke-linecap: round; opacity: 0.55; }
+.mr-grove { fill: var(--map-grove); opacity: 0.85; }
+.mr-snow { fill: var(--map-snow); opacity: 0.95; }
+.mr-shade { fill: var(--map-shade); stroke: var(--map-shade); stroke-width: 0.6; opacity: 0.5; }
+.mr-river-under { fill: none; stroke: var(--map-water); stroke-width: 4.6; stroke-linecap: round; stroke-linejoin: round; opacity: 0.28; }
+.mr-rhumb { fill: none; stroke: var(--map-ink); stroke-width: 0.7; opacity: 0.08; }
+:root[data-theme="dark"] .mr-rhumb { opacity: 0.1; }
+.mr-ship { fill: var(--map-peak); stroke: var(--map-ink); stroke-width: 0.9; stroke-linejoin: round; opacity: 0.8; }
+.mr-ticks { fill: none; stroke: var(--map-label-land); stroke-width: 0.8; opacity: 0.6; }
+.mr-scale-a { fill: var(--map-label-land); }
+.mr-scale-b { fill: none; stroke: var(--map-label-land); stroke-width: 0.8; }
+.mr-label-land,
+.mr-label-isle {
+  paint-order: stroke;
+  stroke: var(--map-halo);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+/* Landmark: a small jewel with a centre point */
+.mr-mark-dot { position: relative; }
+.mr-mark-dot::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 1px;
+  background: var(--map-mark-edge);
+  opacity: 0.85;
+}

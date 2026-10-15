@@ -71,6 +71,8 @@ const FORESTS = [
 
 // Typed as Pt[] so each entry is known to be a real [x, y] pair.
 const LAKE_SPOTS: Pt[] = [[470, 470], [760, 420], [1180, 520], [560, 680], [1290, 500]];
+const SHIP_SPOTS: Pt[] = [[760, 810], [930, 860], [150, 520], [1320, 130], [1470, 600]];
+const RHUMB_CENTRES: Pt[] = [[150, 885], [1450, 520]];
 
 export interface Label {
   id: string;
@@ -164,14 +166,75 @@ function inPoly(x: number, y: number, pts: Pt[]): boolean {
   return inside;
 }
 
+// Soften a ring of points so water-lines read as gentle swells, not jagged copies of the coast.
+function smoothRing(pts: Pt[], passes = 2, w = 4): Pt[] {
+  let cur = pts;
+  for (let p = 0; p < passes; p++) {
+    const src = cur;
+    const n = src.length;
+    cur = src.map((_, i) => {
+      let sx = 0;
+      let sy = 0;
+      let count = 0;
+      for (let j = -w; j <= w; j++) {
+        const q = src[(((i + j) % n) + n) % n];
+        if (!q) continue;
+        sx += q[0];
+        sy += q[1];
+        count++;
+      }
+      return [sx / (count || 1), sy / (count || 1)] as Pt;
+    });
+  }
+  return cur;
+}
+
+// Push a ring outward by d, whichever way it was drawn.
+function offsetRing(pts: Pt[], d: number): Pt[] {
+  const n = pts.length;
+  let area = 0;
+  for (let i = 0; i < n; i++) {
+    const a = pts[i];
+    const b = pts[(i + 1) % n];
+    if (!a || !b) continue;
+    area += a[0] * b[1] - b[0] * a[1];
+  }
+  const sign = area > 0 ? 1 : -1;
+  return pts.map((p, i) => {
+    const a = pts[(i - 2 + n) % n] ?? p;
+    const b = pts[(i + 2) % n] ?? p;
+    const tx = b[0] - a[0];
+    const ty = b[1] - a[1];
+    const len = Math.hypot(tx, ty) || 1;
+    return [p[0] + ((sign * ty) / len) * d, p[1] + ((-sign * tx) / len) * d] as Pt;
+  });
+}
+
+function ship(x: number, y: number): string {
+  const p = (dx: number, dy: number) => `${f(x + dx)} ${f(y + dy)}`;
+  return (
+    `M${p(-7, 0)}Q${p(0, 5)} ${p(7, 0)}L${p(4, -2)}L${p(-4, -2)}Z` +
+    `M${p(0, -2)}L${p(0, -12)}` +
+    `M${p(0, -11)}Q${p(7, -7)} ${p(0, -3)}Z` +
+    `M${p(0, -10)}Q${p(-6, -7)} ${p(0, -3)}Z`
+  );
+}
+
 /* ---------- Build ---------- */
 
 export interface World {
   coast: string;
-  peaks: { body: string; shade: string }[];
+  peaks: { body: string; shade: string; snow: string }[];
   spines: string[];
   spineScale: number[];
   forest: string;
+  grove: string;
+  ripples: string[];
+  stipple: string;
+  meadows: string[];
+  ships: string;
+  rhumb: string;
+  ticks: string;
   lakes: string[];
   rivers: string[];
   waves: string;
@@ -184,6 +247,8 @@ export interface World {
 
 function build(): World {
   const rand = rng(20260915);
+  // Finishing touches use their own seed, so adding detail never moves a peak, forest or landmark site.
+  const rand2 = rng(77001);
 
   // Each landmass keeps its own roughened outline and bounding box together,
   // so there is no separate array to index into.
@@ -247,10 +312,33 @@ function build(): World {
     }
   }
   peakData.sort((a, b) => a.y - b.y);
-  const peaks = peakData.map(({ x, y, w, h }) => ({
-    body: `M${f(x - w)} ${f(y)}L${f(x)} ${f(y - h)}L${f(x + w)} ${f(y)}Z`,
-    shade: `M${f(x)} ${f(y - h)}L${f(x + w)} ${f(y)}L${f(x + w * 0.2)} ${f(y)}Z`,
-  }));
+  const peaks = peakData.map(({ x, y, w, h }) => {
+    const ax = x + (rand2() - 0.5) * w * 0.5;
+    const ay = y - h;
+    const lx = x - w;
+    const rx = x + w;
+    const cx = x + w * 0.2;
+    // Short hatch strokes across the shaded face.
+    let hatch = "";
+    for (const t of [0.38, 0.62, 0.84]) {
+      const py = ay + (y - ay) * t;
+      hatch += `M${f(ax + (cx - ax) * t)} ${f(py)}L${f(ax + (rx - ax) * t)} ${f(py)}`;
+    }
+    // The taller peaks wear a small snow cap.
+    let snow = "";
+    if (h > 13) {
+      const t = 0.3;
+      const sl = ax + (lx - ax) * t;
+      const sr = ax + (rx - ax) * t;
+      const sy = ay + h * t;
+      snow = `M${f(ax)} ${f(ay)}L${f(sl)} ${f(sy)}L${f(sl + (sr - sl) * 0.35)} ${f(sy - h * 0.06)}L${f(sl + (sr - sl) * 0.62)} ${f(sy + h * 0.05)}L${f(sr)} ${f(sy)}Z`;
+    }
+    return {
+      body: `M${f(lx)} ${f(y)}L${f(ax)} ${f(ay)}L${f(rx)} ${f(y)}Z`,
+      shade: `M${f(ax)} ${f(ay)}L${f(rx)} ${f(y)}L${f(cx)} ${f(y)}Z${hatch}`,
+      snow,
+    };
+  });
   const nearPeak = (x: number, y: number, d: number) => peakData.some((p) => Math.hypot(p.x - x, p.y - y) < d);
 
   // Lakes.
@@ -306,8 +394,9 @@ function build(): World {
     .filter((p) => p.length > 8)
     .map((p) => smooth(p, false));
 
-  // Forests.
+  // Forests: conifers and broadleaf groves are drawn in two tones.
   let forest = "";
+  let grove = "";
   for (const fo of FORESTS) {
     let placed = 0;
     for (let tries = 0; tries < fo.n * 14 && placed < fo.n; tries++) {
@@ -318,9 +407,11 @@ function build(): World {
       if (!isLand(x, y) || coastDist(x, y) < 14 || nearPeak(x, y, 16)) continue;
       if (lakeData.some((l) => Math.hypot(l.x - x, l.y - y) < l.r + 6)) continue;
       placed++;
-      forest += fo.conifer || rand() < 0.25
-        ? `M${f(x)} ${f(y - 5)}L${f(x + 3)} ${f(y + 1)}L${f(x - 3)} ${f(y + 1)}Z`
-        : `M${f(x - 2.6)} ${f(y)}a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0Z`;
+      if (fo.conifer || rand() < 0.25) {
+        forest += `M${f(x)} ${f(y - 5)}L${f(x + 3)} ${f(y + 1)}L${f(x - 3)} ${f(y + 1)}Z`;
+      } else {
+        grove += `M${f(x - 2.6)} ${f(y)}a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0Z`;
+      }
     }
   }
 
@@ -351,9 +442,65 @@ function build(): World {
   const sitesA = genSites(46, 7000, []);
   const sitesB = genSites(30, 9000, sitesA);
 
+  /* ----- Premium finishing touches (all from rand2, so nothing above ever moves) ----- */
+
+  // Water-lines: soft swells echoing every coast, like an engraved sea chart.
+  const ripples = [11, 24, 40].map((d) => shapes.map(({ pts }) => smooth(offsetRing(smoothRing(pts), d))).join(""));
+
+  // Fine stipple hugging the shore, thinning inland.
+  let stipple = "";
+  for (let tries = 0, placed = 0; tries < 9000 && placed < 650; tries++) {
+    const x = 40 + rand2() * (WORLD_W - 80);
+    const y = 40 + rand2() * (WORLD_H - 80);
+    if (!isLand(x, y)) continue;
+    const cd = coastDist(x, y);
+    if (cd > 30 || rand2() > 1 - cd / 30 || nearPeak(x, y, 14)) continue;
+    placed++;
+    stipple += `M${f(x)} ${f(y)}h0.1`;
+  }
+
+  // Soft sage meadows across the lowlands.
+  const meadowCentres: Pt[] = [];
+  for (let tries = 0; tries < 600 && meadowCentres.length < 9; tries++) {
+    const x = 60 + rand2() * (WORLD_W - 120);
+    const y = 60 + rand2() * (WORLD_H - 120);
+    if (!isLand(x, y) || coastDist(x, y) < 50 || nearPeak(x, y, 40)) continue;
+    if (meadowCentres.some(([mx, my]) => Math.hypot(mx - x, my - y) < 150)) continue;
+    meadowCentres.push([x, y]);
+  }
+  const meadows = meadowCentres.map(([x, y]) => blob(x, y, 70 + rand2() * 60, rand2));
+
+  // A few small ships, well away from shore.
+  let ships = "";
+  for (const [sx, sy] of SHIP_SPOTS) {
+    if (isLand(sx, sy) || coastDist(sx, sy) < 30) continue;
+    ships += ship(sx, sy);
+  }
+
+  // Portolan rhumb lines radiating from two hidden compass points.
+  let rhumb = "";
+  for (const [cx, cy] of RHUMB_CENTRES) {
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * Math.PI * 2;
+      rhumb += `M${cx} ${cy}L${f(cx + Math.cos(a) * 2600)} ${f(cy + Math.sin(a) * 2600)}`;
+    }
+  }
+
+  // Graduated tick marks between the two border lines.
+  let ticks = "";
+  for (let x = 24; x <= WORLD_W - 24; x += 16) ticks += `M${x} 24V32M${x} ${WORLD_H - 32}V${WORLD_H - 24}`;
+  for (let y = 24; y <= WORLD_H - 24; y += 16) ticks += `M24 ${y}H32M${WORLD_W - 32} ${y}H${WORLD_W - 24}`;
+
   return {
     coast,
     peaks,
+    grove,
+    ripples,
+    stipple,
+    meadows,
+    ships,
+    rhumb,
+    ticks,
     spines: RANGES.map((r) => smooth(r.spine, false)),
     spineScale: RANGES.map((r) => r.size),
     forest,
