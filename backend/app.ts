@@ -18,6 +18,7 @@ import trackRoutes from "./routes/track.routes";
 import weeklyRoutes from "./routes/weekly.routes";
 import nowRoutes from "./routes/now.routes";
 import quoteRoutes from "./routes/quote.routes";
+import circleRoutes from "./routes/circle.routes";
 
 const app = express();
 
@@ -45,6 +46,7 @@ app.use(async (_req: Request, _res: Response, next: NextFunction) => {
 app.use("/api", requireAuth);
 app.use("/api/tracks", trackRoutes);
 app.use("/api/journal", journalRoutes);
+app.use("/api/circle", circleRoutes);
 app.use("/api/side-quests", sideQuestRoutes);
 app.use("/api/photo-library", photoLibraryRoutes);
 app.use("/api/settings", settingsRoutes);

@@ -31,7 +31,7 @@ export const NAV: NavEntry[] = [
   { label: "Tracks", to: "/tracks", icon: CalendarCheck, primary: true, barOrder: 2 },
   { label: "Side Quests", to: "/side-quests", icon: Compass },
   { label: "Photos", to: "/photos", icon: PhotosIcon },
-  { label: "Insights", to: "/insights", icon: Sparkles },
+  { label: "Circles", to: "/circle", icon: Sparkles },
   { label: "Observatory", to: "/observatory", icon: Star, primary: true, barOrder: 3, barIcon: Orbit },
 ];
 
