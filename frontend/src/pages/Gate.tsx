@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { ChangeEvent, KeyboardEvent } from "react";
 import { loginErrorMessage } from "../api/auth.api";
 import { useAuth } from "../components/AuthProvider";
+import "./gate.css";
 
 // Chrome/Safari/Android can mask 
 const CAN_MASK_TEXTAREA =
@@ -41,8 +42,20 @@ export default function Gate() {
     "h-14 w-full rounded-card bg-transparent pl-5 pr-14 text-[17px] text-text placeholder:text-tertiary focus:outline-none";
 
   return (
-    <main className="flex min-h-full items-center justify-center bg-bg px-6 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
-      <div className="fade-up w-full max-w-sm py-10 text-center">
+    <main className="gate relative flex min-h-full items-center justify-center overflow-hidden bg-bg px-6 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
+      <div className="gate-sky" aria-hidden="true">
+        <span className="gate-haze" />
+        <span className="gate-band" />
+        <span className="gate-neb gate-neb-a" />
+        <span className="gate-neb gate-neb-b" />
+        <span className="gate-neb gate-neb-c" />
+        <span className="gate-dust" />
+        <span className="gate-near" />
+        <span className="gate-nova" />
+        <span className="gate-shoot" />
+      </div>
+
+      <div className="fade-up relative z-10 w-full max-w-sm py-10 text-center">
         <img
           src="/logo.png"
           alt=""
@@ -65,7 +78,7 @@ export default function Gate() {
           <div
             key={shakeKey}
             className={
-              "relative rounded-card border bg-surface transition-colors focus-within:border-secondary " +
+              "gate-field relative rounded-card border bg-surface transition-colors focus-within:border-secondary " +
               (error ? "shake border-alert/60" : "border-border")
             }
           >

@@ -1,0 +1,533 @@
+/* Gate: always a night sky, like the Observatory and Circle. Everything is scoped under .gate. */
+
+@property --g-in {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+/* The gate is always dark, so it overrides the theme tokens for itself only. */
+.gate {
+  --bg: #000000;
+  --surface: rgba(22, 24, 28, 0.55);
+  --text: #e7e9ea;
+  --text-secondary: #a3a3aa;
+  --text-tertiary: #8b8f94;
+  --border: rgba(255, 255, 255, 0.14);
+  --selected: rgba(255, 255, 255, 0.1);
+
+  --g-stars: 1;
+  --st-w: rgba(240, 244, 255, 0.78);
+  --st-d: rgba(240, 244, 255, 0.45);
+  --st-c: rgba(196, 210, 255, 0.78);
+  --st-h: rgba(255, 228, 196, 0.8);
+  --st-n: rgba(255, 255, 255, 0.95);
+  --st-g: rgba(200, 215, 255, 0.3);
+
+  color: var(--text);
+  color-scheme: dark;
+  isolation: isolate;
+  background:
+    radial-gradient(58% 48% at 24% 36%, rgba(96, 110, 190, 0.12), transparent 70%),
+    radial-gradient(52% 44% at 80% 70%, rgba(180, 130, 110, 0.07), transparent 72%),
+    radial-gradient(120% 90% at 50% 46%, #07070b 0%, #000000 72%);
+}
+
+/* Dark edges, like a telescope eyepiece. Above the sky, below the panel. */
+.gate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(130% 100% at 50% 48%, transparent 50%, rgba(0, 0, 0, 0.66) 100%);
+}
+
+/* The password box is a soft glass pane over the sky. */
+.gate-field {
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.14), 0 18px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* ---- the sky ------------------------------------------------------------------------ */
+
+.gate-sky {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.gate-sky > span {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Cosmic haze: huge faint colour that turns very slowly, the deepest layer. */
+.gate-haze {
+  z-index: 0;
+  left: 50%;
+  top: 50%;
+  width: 190vmax;
+  height: 190vmax;
+  margin: -95vmax 0 0 -95vmax;
+  background:
+    radial-gradient(34% 30% at 28% 38%, rgba(104, 120, 220, 0.14), transparent 70%),
+    radial-gradient(30% 28% at 74% 62%, rgba(214, 150, 120, 0.08), transparent 70%),
+    radial-gradient(26% 24% at 60% 22%, rgba(120, 190, 220, 0.065), transparent 70%),
+    radial-gradient(22% 20% at 30% 78%, rgba(150, 110, 220, 0.075), transparent 70%);
+  will-change: transform;
+  animation:
+    g-fade 3200ms ease 400ms backwards,
+    g-orbit 360s linear infinite;
+}
+
+/* Milky Way: a soft diagonal river of light with fine dust inside it. */
+.gate-band {
+  z-index: 0;
+  left: 50%;
+  top: 50%;
+  width: 190vmax;
+  height: 34vmax;
+  margin: -17vmax 0 0 -95vmax;
+  transform: rotate(-24deg);
+  background:
+    radial-gradient(0.9px 0.9px at 12% 38%, rgba(255, 255, 255, 0.8) 0, transparent 100%),
+    radial-gradient(0.8px 0.8px at 27% 62%, rgba(200, 214, 255, 0.8) 0, transparent 100%),
+    radial-gradient(1px 1px at 41% 30%, rgba(255, 255, 255, 0.7) 0, transparent 100%),
+    radial-gradient(0.8px 0.8px at 55% 70%, rgba(255, 228, 196, 0.8) 0, transparent 100%),
+    radial-gradient(1px 1px at 68% 42%, rgba(255, 255, 255, 0.8) 0, transparent 100%),
+    radial-gradient(0.8px 0.8px at 80% 58%, rgba(200, 214, 255, 0.75) 0, transparent 100%),
+    radial-gradient(1px 1px at 92% 36%, rgba(255, 255, 255, 0.7) 0, transparent 100%),
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(150, 160, 255, 0.05) 28%,
+      rgba(200, 190, 255, 0.11) 50%,
+      rgba(150, 160, 255, 0.05) 72%,
+      transparent 100%
+    );
+  background-size: 22% 100%, 31% 100%, 27% 100%, 36% 100%, 24% 100%, 33% 100%, 29% 100%, 100% 100%;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+  mask: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+  will-change: opacity;
+  animation:
+    g-fade 3600ms ease 500ms backwards,
+    g-band 24s ease-in-out infinite alternate;
+}
+
+/* Nebulas: three coloured gas clouds that drift, swell and breathe, blended like light. */
+.gate-neb {
+  z-index: 1;
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+
+/* violet and blue, top left */
+.gate-neb-a {
+  left: -22vmax;
+  top: -18vmax;
+  width: 95vmax;
+  height: 78vmax;
+  background:
+    radial-gradient(40% 45% at 36% 46%, rgba(124, 92, 232, 0.3), transparent 70%),
+    radial-gradient(30% 36% at 62% 56%, rgba(70, 132, 242, 0.22), transparent 70%),
+    radial-gradient(22% 28% at 46% 28%, rgba(204, 124, 255, 0.17), transparent 70%);
+  animation:
+    g-fade 3000ms ease 300ms backwards,
+    g-neb-a 38s ease-in-out infinite alternate;
+}
+
+/* rose and amber, bottom right */
+.gate-neb-b {
+  right: -24vmax;
+  bottom: -20vmax;
+  width: 100vmax;
+  height: 80vmax;
+  background:
+    radial-gradient(40% 44% at 60% 54%, rgba(236, 110, 140, 0.24), transparent 70%),
+    radial-gradient(30% 34% at 38% 44%, rgba(255, 160, 96, 0.18), transparent 70%),
+    radial-gradient(20% 26% at 64% 30%, rgba(255, 120, 190, 0.14), transparent 70%);
+  animation:
+    g-fade 3000ms ease 600ms backwards,
+    g-neb-b 46s ease-in-out infinite alternate;
+}
+
+/* teal and cyan, drifting through the middle right */
+.gate-neb-c {
+  right: -10vmax;
+  top: 6vmax;
+  width: 70vmax;
+  height: 56vmax;
+  background:
+    radial-gradient(40% 44% at 50% 50%, rgba(60, 200, 220, 0.16), transparent 70%),
+    radial-gradient(28% 32% at 36% 58%, rgba(80, 150, 255, 0.14), transparent 70%);
+  animation:
+    g-fade 3000ms ease 900ms backwards,
+    g-neb-c 32s ease-in-out infinite alternate;
+}
+
+/* Dust orbiting slowly around the page. */
+.gate-dust {
+  z-index: 2;
+  left: 50%;
+  top: 50%;
+  width: 130vmax;
+  height: 130vmax;
+  margin: -65vmax 0 0 -65vmax;
+  border-radius: 50%;
+  background:
+    radial-gradient(1.8px 1.8px at 96% 50%, var(--st-c) 0, var(--st-c) 40%, transparent 100%),
+    radial-gradient(1.4px 1.4px at 87% 69%, var(--st-w) 0, var(--st-w) 40%, transparent 100%),
+    radial-gradient(1.9px 1.9px at 80% 88%, var(--st-h) 0, var(--st-h) 40%, transparent 100%),
+    radial-gradient(1.4px 1.4px at 58% 93%, var(--st-w) 0, var(--st-w) 40%, transparent 100%),
+    radial-gradient(1.8px 1.8px at 39% 96%, var(--st-c) 0, var(--st-c) 40%, transparent 100%),
+    radial-gradient(1.3px 1.3px at 22% 80%, var(--st-w) 0, var(--st-w) 40%, transparent 100%),
+    radial-gradient(1.9px 1.9px at 6% 68%, var(--st-w) 0, var(--st-w) 40%, transparent 100%),
+    radial-gradient(1.4px 1.4px at 7% 46%, var(--st-h) 0, var(--st-h) 40%, transparent 100%),
+    radial-gradient(1.8px 1.8px at 9% 27%, var(--st-c) 0, var(--st-c) 40%, transparent 100%),
+    radial-gradient(1.3px 1.3px at 28% 14%, var(--st-w) 0, var(--st-w) 40%, transparent 100%),
+    radial-gradient(1.9px 1.9px at 43% 3%, var(--st-w) 0, var(--st-w) 40%, transparent 100%),
+    radial-gradient(1.4px 1.4px at 65% 9%, var(--st-c) 0, var(--st-c) 40%, transparent 100%),
+    radial-gradient(1.8px 1.8px at 85% 19%, var(--st-h) 0, var(--st-h) 40%, transparent 100%),
+    radial-gradient(1.3px 1.3px at 89% 37%, var(--st-w) 0, var(--st-w) 40%, transparent 100%);
+  will-change: transform;
+  animation:
+    g-fade 2600ms ease 900ms backwards,
+    g-orbit 150s linear infinite;
+}
+
+/* Three star layers at three depths. Each is one seamless tile, moved by exactly one tile
+   so it loops with no jump. Only transform and opacity animate. */
+.gate-sky::before,
+.gate-sky::after,
+.gate-near {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  background-repeat: repeat;
+  background-size: var(--tile) var(--tile);
+  will-change: transform, opacity;
+  opacity: calc(var(--g-stars) * 0.85);
+}
+
+/* far: tiny, dim, slowest */
+.gate-sky::before {
+  --tile: 360px;
+  --lo: 0.2;
+  inset: 0 calc(var(--tile) * -1) calc(var(--tile) * -1) 0;
+  background-image:
+    radial-gradient(1px 1px at 24px 40px, var(--st-w) 0, var(--st-w) 42%, transparent 100%),
+    radial-gradient(0.9px 0.9px at 88px 172px, var(--st-d) 0, var(--st-d) 42%, transparent 100%),
+    radial-gradient(1.1px 1.1px at 142px 28px, var(--st-c) 0, var(--st-c) 42%, transparent 100%),
+    radial-gradient(0.9px 0.9px at 198px 118px, var(--st-w) 0, var(--st-w) 42%, transparent 100%),
+    radial-gradient(1px 1px at 262px 64px, var(--st-d) 0, var(--st-d) 42%, transparent 100%),
+    radial-gradient(1.1px 1.1px at 330px 150px, var(--st-w) 0, var(--st-w) 42%, transparent 100%),
+    radial-gradient(0.9px 0.9px at 46px 248px, var(--st-d) 0, var(--st-d) 42%, transparent 100%),
+    radial-gradient(1px 1px at 120px 310px, var(--st-w) 0, var(--st-w) 42%, transparent 100%),
+    radial-gradient(1.1px 1.1px at 178px 224px, var(--st-h) 0, var(--st-h) 42%, transparent 100%),
+    radial-gradient(0.9px 0.9px at 236px 286px, var(--st-d) 0, var(--st-d) 42%, transparent 100%),
+    radial-gradient(1px 1px at 300px 236px, var(--st-c) 0, var(--st-c) 42%, transparent 100%),
+    radial-gradient(0.9px 0.9px at 342px 334px, var(--st-w) 0, var(--st-w) 42%, transparent 100%),
+    radial-gradient(0.9px 0.9px at 66px 96px, var(--st-w) 0, var(--st-w) 42%, transparent 100%),
+    radial-gradient(1px 1px at 214px 18px, var(--st-d) 0, var(--st-d) 42%, transparent 100%),
+    radial-gradient(0.9px 0.9px at 284px 336px, var(--st-d) 0, var(--st-d) 42%, transparent 100%),
+    radial-gradient(1px 1px at 16px 330px, var(--st-c) 0, var(--st-c) 42%, transparent 100%),
+    radial-gradient(0.9px 0.9px at 112px 112px, var(--st-d) 0, var(--st-d) 42%, transparent 100%),
+    radial-gradient(1px 1px at 324px 40px, var(--st-w) 0, var(--st-w) 42%, transparent 100%);
+  animation:
+    g-in 2600ms ease 300ms backwards,
+    g-drift 70s linear infinite,
+    g-twinkle 7s ease-in-out infinite alternate;
+}
+
+/* mid: a little larger and faster, twinkling out of step */
+.gate-sky::after {
+  --tile: 520px;
+  --lo: 0.15;
+  inset: 0 calc(var(--tile) * -1) calc(var(--tile) * -1) 0;
+  background-image:
+    radial-gradient(1.3px 1.3px at 60px 80px, var(--st-w) 0, var(--st-w) 42%, transparent 100%),
+    radial-gradient(1.1px 1.1px at 190px 30px, var(--st-c) 0, var(--st-c) 42%, transparent 100%),
+    radial-gradient(1.4px 1.4px at 330px 110px, var(--st-w) 0, var(--st-w) 42%, transparent 100%),
+    radial-gradient(1.1px 1.1px at 450px 60px, var(--st-h) 0, var(--st-h) 42%, transparent 100%),
+    radial-gradient(1.2px 1.2px at 120px 230px, var(--st-c) 0, var(--st-c) 42%, transparent 100%),
+    radial-gradient(1.4px 1.4px at 260px 200px, var(--st-w) 0, var(--st-w) 42%, transparent 100%),
+    radial-gradient(1.1px 1.1px at 400px 260px, var(--st-w) 0, var(--st-w) 42%, transparent 100%),
+    radial-gradient(1.3px 1.3px at 490px 190px, var(--st-c) 0, var(--st-c) 42%, transparent 100%),
+    radial-gradient(1.2px 1.2px at 40px 380px, var(--st-w) 0, var(--st-w) 42%, transparent 100%),
+    radial-gradient(1.4px 1.4px at 180px 340px, var(--st-h) 0, var(--st-h) 42%, transparent 100%),
+    radial-gradient(1.1px 1.1px at 310px 430px, var(--st-w) 0, var(--st-w) 42%, transparent 100%),
+    radial-gradient(1.3px 1.3px at 440px 400px, var(--st-c) 0, var(--st-c) 42%, transparent 100%),
+    radial-gradient(1.2px 1.2px at 90px 490px, var(--st-w) 0, var(--st-w) 42%, transparent 100%),
+    radial-gradient(1.4px 1.4px at 230px 480px, var(--st-w) 0, var(--st-w) 42%, transparent 100%);
+  animation:
+    g-in 2600ms ease 500ms backwards,
+    g-drift 45s linear infinite,
+    g-twinkle 5.2s ease-in-out -2s infinite alternate;
+}
+
+/* near: few, large, glowing, fastest */
+.gate-near {
+  --tile: 760px;
+  --lo: 0.25;
+  inset: 0 calc(var(--tile) * -1) calc(var(--tile) * -1) 0;
+  background-image:
+    radial-gradient(3px 3px at 110px 140px, var(--st-n) 0, var(--st-g) 30%, transparent 100%),
+    radial-gradient(2.6px 2.6px at 380px 60px, var(--st-n) 0, var(--st-g) 30%, transparent 100%),
+    radial-gradient(3.4px 3.4px at 640px 200px, var(--st-n) 0, var(--st-g) 30%, transparent 100%),
+    radial-gradient(2.8px 2.8px at 250px 420px, var(--st-n) 0, var(--st-g) 30%, transparent 100%),
+    radial-gradient(3px 3px at 560px 520px, var(--st-n) 0, var(--st-g) 30%, transparent 100%),
+    radial-gradient(2.6px 2.6px at 90px 640px, var(--st-n) 0, var(--st-g) 30%, transparent 100%),
+    radial-gradient(3.2px 3.2px at 430px 700px, var(--st-n) 0, var(--st-g) 30%, transparent 100%);
+  animation:
+    g-in 2800ms ease 700ms backwards,
+    g-drift 28s linear infinite,
+    g-twinkle 8.5s ease-in-out -3s infinite alternate;
+}
+
+/* Novas: a star swells with a cross of light, flashes, then blows out. Three places per cycle. */
+.gate-nova {
+  z-index: 3;
+  left: 50%;
+  top: 50%;
+  width: 130px;
+  height: 130px;
+  margin: -65px 0 0 -65px;
+  opacity: 0;
+  background:
+    radial-gradient(closest-side, #fff 0, rgba(200, 214, 255, 0.85) 7%, rgba(150, 172, 255, 0.3) 22%, transparent 62%),
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent) center / 100% 1px no-repeat,
+    linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.9), transparent) center / 1px 100% no-repeat;
+  will-change: transform, opacity;
+  animation: g-nova 16s ease-out 3s infinite;
+}
+
+/* Shooting stars: a bright head with a fading tail. Two streaks per cycle, two directions. */
+.gate-shoot {
+  z-index: 3;
+  inset: 0;
+}
+.gate-shoot::before,
+.gate-shoot::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 190px;
+  height: 14px;
+  opacity: 0;
+  transform-origin: 100% 50%;
+  background:
+    radial-gradient(circle at 100% 50%, rgba(255, 255, 255, 0.98) 0, rgba(190, 208, 255, 0.45) 3px, transparent 8px),
+    linear-gradient(90deg, transparent, rgba(210, 222, 255, 0.7)) center / 100% 1.5px no-repeat;
+  will-change: transform, opacity;
+}
+.gate-shoot::before {
+  animation: g-shoot-a 12s linear 2s infinite;
+}
+.gate-shoot::after {
+  animation: g-shoot-b 17s linear 6s infinite;
+}
+
+/* ---- keyframes ------------------------------------------------------------------------ */
+
+@keyframes g-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes g-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes g-in {
+  from {
+    --g-in: 0;
+  }
+  to {
+    --g-in: 1;
+  }
+}
+@keyframes g-drift {
+  to {
+    transform: translate3d(calc(var(--tile) * -1), calc(var(--tile) * -1), 0);
+  }
+}
+@keyframes g-twinkle {
+  from {
+    opacity: calc(var(--g-in) * var(--g-stars) * var(--lo, 0.6));
+  }
+  to {
+    opacity: calc(var(--g-in) * var(--g-stars));
+  }
+}
+@keyframes g-band {
+  from {
+    opacity: 0.55;
+    transform: rotate(-24deg) translate3d(-3vmax, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-21deg) translate3d(3vmax, 1.5vmax, 0);
+  }
+}
+@keyframes g-neb-a {
+  from {
+    opacity: 0.65;
+    transform: translate3d(-4vmax, 2vmax, 0) scale(1) rotate(0deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(6vmax, -3vmax, 0) scale(1.16) rotate(9deg);
+  }
+}
+@keyframes g-neb-b {
+  from {
+    opacity: 1;
+    transform: translate3d(4vmax, -2vmax, 0) scale(1.12) rotate(0deg);
+  }
+  to {
+    opacity: 0.6;
+    transform: translate3d(-6vmax, 3vmax, 0) scale(0.96) rotate(-8deg);
+  }
+}
+@keyframes g-neb-c {
+  from {
+    opacity: 0.5;
+    transform: translate3d(5vmax, 2vmax, 0) scale(0.95) rotate(0deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(-7vmax, -2vmax, 0) scale(1.2) rotate(12deg);
+  }
+}
+
+@keyframes g-nova {
+  0% {
+    opacity: 0;
+    transform: translate(-24vmin, -28vmin) scale(0.1);
+  }
+  3% {
+    opacity: 1;
+    transform: translate(-24vmin, -28vmin) scale(1);
+  }
+  9% {
+    opacity: 0;
+    transform: translate(-24vmin, -28vmin) scale(1.7);
+  }
+  38% {
+    opacity: 0;
+    transform: translate(32vmin, -20vmin) scale(0.1);
+  }
+  41% {
+    opacity: 1;
+    transform: translate(32vmin, -20vmin) scale(1);
+  }
+  47% {
+    opacity: 0;
+    transform: translate(32vmin, -20vmin) scale(1.7);
+  }
+  70% {
+    opacity: 0;
+    transform: translate(-36vmin, 22vmin) scale(0.1);
+  }
+  73% {
+    opacity: 1;
+    transform: translate(-36vmin, 22vmin) scale(1);
+  }
+  79% {
+    opacity: 0;
+    transform: translate(-36vmin, 22vmin) scale(1.7);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-36vmin, 22vmin) scale(1.7);
+  }
+}
+
+@keyframes g-shoot-a {
+  0%,
+  1% {
+    opacity: 0;
+    transform: translate3d(4vmax, 3vmax, 0) rotate(26.6deg) scaleX(0.5);
+  }
+  2% {
+    opacity: 1;
+    transform: translate3d(7.6vmax, 4.8vmax, 0) rotate(26.6deg) scaleX(0.7);
+  }
+  5.5% {
+    opacity: 0;
+    transform: translate3d(34vmax, 18vmax, 0) rotate(26.6deg) scaleX(1);
+  }
+  50% {
+    opacity: 0;
+    transform: translate3d(14vmax, 24vmax, 0) rotate(26.6deg) scaleX(0.5);
+  }
+  51% {
+    opacity: 1;
+    transform: translate3d(17.6vmax, 25.8vmax, 0) rotate(26.6deg) scaleX(0.7);
+  }
+  54.5% {
+    opacity: 0;
+    transform: translate3d(44vmax, 39vmax, 0) rotate(26.6deg) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(44vmax, 39vmax, 0) rotate(26.6deg) scaleX(1);
+  }
+}
+@keyframes g-shoot-b {
+  0%,
+  1% {
+    opacity: 0;
+    transform: translate3d(58vmax, -4vmax, 0) rotate(153.4deg) scaleX(0.5);
+  }
+  2% {
+    opacity: 1;
+    transform: translate3d(54.4vmax, -2.2vmax, 0) rotate(153.4deg) scaleX(0.7);
+  }
+  5.5% {
+    opacity: 0;
+    transform: translate3d(28vmax, 11vmax, 0) rotate(153.4deg) scaleX(1);
+  }
+  50% {
+    opacity: 0;
+    transform: translate3d(72vmax, 12vmax, 0) rotate(153.4deg) scaleX(0.5);
+  }
+  51% {
+    opacity: 1;
+    transform: translate3d(68.4vmax, 13.8vmax, 0) rotate(153.4deg) scaleX(0.7);
+  }
+  54.5% {
+    opacity: 0;
+    transform: translate3d(42vmax, 27vmax, 0) rotate(153.4deg) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(42vmax, 27vmax, 0) rotate(153.4deg) scaleX(1);
+  }
+}
+
+/* ---- reduced motion: the same sky, perfectly still, no streaks or flashes ------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .gate-sky::before,
+  .gate-sky::after,
+  .gate-near,
+  .gate-haze,
+  .gate-band,
+  .gate-neb,
+  .gate-dust {
+    animation: none;
+    will-change: auto;
+  }
+  .gate-nova,
+  .gate-shoot {
+    display: none;
+  }
+}
