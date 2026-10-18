@@ -19,7 +19,7 @@ const Z_CONCERN = 22;
 const Z_INFLUENCE = 78;
 const Z_DRAG = 120;
 const DRAG_THRESHOLD = 6;
-const PILL_H = 30;
+const PILL_H = 44;
 const GOLDEN = 2.399963;
 
 const RING_LABEL: Record<CircleName, string> = {
