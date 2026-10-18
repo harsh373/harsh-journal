@@ -142,7 +142,7 @@ function makeStars(w: number, h: number, lite: boolean): Star[] {
       a,
       ph: rand() * 6.28,
       sp: 0.6 + rand() * 1.6,
-      vx: (0.0008 + rand() * 0.0012) * depth,
+      vx: (0.003 + rand() * 0.004) * depth,
       depth,
       tint: rand() < 0.74 ? 0 : rand() < 0.55 ? 1 : 2,
     });

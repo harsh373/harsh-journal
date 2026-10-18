@@ -95,7 +95,7 @@
 /* far: tiny, dim, slowest */
 .c-sky::before {
   --tile: 360px;
-  --lo: 0.5;
+  --lo: 0.2;
   z-index: 1;
   inset: 0 calc(var(--tile) * -1) calc(var(--tile) * -1) 0;
   background-image:
@@ -119,14 +119,14 @@
     radial-gradient(1px 1px at 324px 40px, var(--st-w) 0, var(--st-w) 42%, transparent 100%);
   animation:
     c-in 2600ms ease 300ms backwards,
-    c-drift 260s linear infinite,
+    c-drift 70s linear infinite,
     c-twinkle 7s ease-in-out infinite alternate;
 }
 
 /* mid: a little larger, a little faster, twinkling out of step with the far layer */
 .c-sky::after {
   --tile: 520px;
-  --lo: 0.42;
+  --lo: 0.15;
   z-index: 1;
   inset: 0 calc(var(--tile) * -1) calc(var(--tile) * -1) 0;
   background-image:
@@ -146,14 +146,14 @@
     radial-gradient(1.4px 1.4px at 230px 480px, var(--st-w) 0, var(--st-w) 42%, transparent 100%);
   animation:
     c-in 2600ms ease 500ms backwards,
-    c-drift 150s linear infinite,
+    c-drift 45s linear infinite,
     c-twinkle 5.2s ease-in-out -2s infinite alternate;
 }
 
 /* near: few, large, softly glowing, drifting past behind the rings */
 .c-field::before {
   --tile: 760px;
-  --lo: 0.55;
+  --lo: 0.25;
   top: -3.5rem;
   left: 0;
   right: calc(var(--tile) * -1);
@@ -168,7 +168,7 @@
     radial-gradient(3.2px 3.2px at 430px 700px, var(--st-n) 0, var(--st-g) 30%, transparent 100%);
   animation:
     c-in 2800ms ease 700ms backwards,
-    c-drift 90s linear infinite,
+    c-drift 28s linear infinite,
     c-twinkle 8.5s ease-in-out -3s infinite alternate;
 }
 
@@ -236,10 +236,10 @@
   will-change: transform, opacity;
 }
 .c-field::after {
-  animation: c-shoot-a 24s linear 3s infinite;
+  animation: c-shoot-a 14s linear 2s infinite;
 }
 .c-stage::before {
-  animation: c-shoot-b 31s linear 11s infinite;
+  animation: c-shoot-b 19s linear 7s infinite;
 }
 
 .c-bloom {
