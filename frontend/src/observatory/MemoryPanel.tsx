@@ -1,6 +1,7 @@
 import { ArrowRight, X } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import type { ArchiveEntry } from "../api/journal.api";
 import { formatLongDate, formatWeekday } from "../config/dates";
 import type { DayKey } from "../config/dates";
 import { entrySummary, entryTitle } from "./model";
@@ -9,13 +10,50 @@ import type { Memory } from "./model";
 interface MemoryPanelProps {
   memory: Memory;
   today: DayKey;
+  loadDay: (date: DayKey) => Promise<ArchiveEntry[]>;
   onClose: () => void;
 }
 
-// A compact preview: enough to recognise the memory and decide whether to open it.
+// Fetches the full day only when a star is opened. `null` means still loading.
+function useDayEntries(date: DayKey, loadDay: MemoryPanelProps["loadDay"]) {
+  const [entries, setEntries] = useState<ArchiveEntry[] | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    let off = false;
+    setEntries(null);
+    setFailed(false);
+    loadDay(date)
+      .then((list) => {
+        if (!off) setEntries(list);
+      })
+      .catch(() => {
+        if (!off) setFailed(true);
+      });
+    return () => {
+      off = true;
+    };
+  }, [date, loadDay, attempt]);
+
+  return { entries, failed, retry: () => setAttempt((v) => v + 1) };
+}
+
+function Skeleton() {
+  return (
+    <div className="mt-3 animate-pulse space-y-3" aria-hidden="true">
+      <div className="h-5 w-3/4 rounded-md" style={{ background: "var(--obs-border)" }} />
+      <div className="h-3.5 w-full rounded-md" style={{ background: "var(--obs-border)" }} />
+      <div className="h-3.5 w-5/6 rounded-md" style={{ background: "var(--obs-border)" }} />
+      <div className="aspect-[16/9] w-full rounded-[12px]" style={{ background: "var(--obs-border)" }} />
+    </div>
+  );
+}
+
 // Desktop: a floating panel beside the sky. Phones: a bottom sheet above the safe area.
-export default function MemoryPanel({ memory, today, onClose }: MemoryPanelProps) {
+export default function MemoryPanel({ memory, today, loadDay, onClose }: MemoryPanelProps) {
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const { entries, failed, retry } = useDayEntries(memory.date, loadDay);
 
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true });
@@ -29,12 +67,13 @@ export default function MemoryPanel({ memory, today, onClose }: MemoryPanelProps
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const photos = memory.entries.flatMap((entry) => entry.photos).slice(0, 3);
+  const photos = (entries ?? []).flatMap((entry) => entry.photos).slice(0, 3);
   const openTo = memory.date === today ? "/" : `/day/${memory.date}`;
 
   return (
     <aside
       aria-label={`Memory from ${formatLongDate(memory.date)}`}
+      aria-busy={entries === null && !failed}
       className="obs-panel obs-sheet absolute inset-x-0 bottom-0 z-20 flex max-h-[58%] flex-col rounded-t-[22px] pb-[env(safe-area-inset-bottom)] lg:inset-x-auto lg:bottom-5 lg:right-5 lg:top-[88px] lg:max-h-none lg:w-[340px] lg:rounded-[18px] lg:pb-0"
     >
       <div className="mx-auto mt-2 h-1 w-9 shrink-0 rounded-full obs-divider lg:hidden" aria-hidden="true" />
@@ -61,42 +100,55 @@ export default function MemoryPanel({ memory, today, onClose }: MemoryPanelProps
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-4">
-        <div className="mt-3 space-y-5">
-          {memory.entries.map((entry, index) => {
-            const title = entryTitle(entry);
-            const summary = entrySummary(entry);
-            return (
-              <article
-                key={index}
-                className={index > 0 ? "pt-5" : ""}
-                style={index > 0 ? { borderTop: "1px solid var(--obs-border)" } : undefined}
-              >
-                {title && (
-                  <p className="obs-text font-serif text-[1.35rem] leading-snug tracking-tight">{title}</p>
-                )}
-                {summary && (
-                  <p className={"obs-text-2 line-clamp-5 text-[14.5px] leading-relaxed " + (title ? "mt-2" : "")}>{summary}</p>
-                )}
-                {!title && !summary && <p className="obs-text-3 text-[14px]">No written text for this entry.</p>}
-              </article>
-            );
-          })}
-        </div>
+        {entries === null && !failed && <Skeleton />}
 
-        {photos.length > 0 && (
-          <div className={"mt-5 grid gap-2 " + (photos.length === 1 ? "grid-cols-1" : "grid-cols-2")}>
-            {photos.map((photo, index) => (
-              <div
-                key={photo.id}
-                className={
-                  "overflow-hidden rounded-[12px] " + (photos.length === 3 && index === 0 ? "col-span-2 aspect-[16/9]" : "aspect-[4/3]")
-                }
-                style={{ border: "1px solid var(--obs-border)" }}
-              >
-                <img src={photo.url} alt={photo.caption ?? ""} className="h-full w-full object-cover" loading="lazy" />
-              </div>
-            ))}
+        {failed && (
+          <div className="mt-4">
+            <p className="obs-text-2 text-[14px]">This day couldn&apos;t load.</p>
+            <button type="button" onClick={retry} className="obs-chip obs-hoverable mt-3 h-9 rounded-full px-4 text-[13px] font-medium">
+              Try again
+            </button>
           </div>
+        )}
+
+        {entries !== null && (
+          <>
+            <div className="mt-3 space-y-5">
+              {entries.map((entry, index) => {
+                const title = entryTitle(entry);
+                const summary = entrySummary(entry);
+                return (
+                  <article
+                    key={index}
+                    className={index > 0 ? "pt-5" : ""}
+                    style={index > 0 ? { borderTop: "1px solid var(--obs-border)" } : undefined}
+                  >
+                    {title && <p className="obs-text font-serif text-[1.35rem] leading-snug tracking-tight">{title}</p>}
+                    {summary && (
+                      <p className={"obs-text-2 line-clamp-5 text-[14.5px] leading-relaxed " + (title ? "mt-2" : "")}>{summary}</p>
+                    )}
+                    {!title && !summary && <p className="obs-text-3 text-[14px]">No written text for this entry.</p>}
+                  </article>
+                );
+              })}
+            </div>
+
+            {photos.length > 0 && (
+              <div className={"mt-5 grid gap-2 " + (photos.length === 1 ? "grid-cols-1" : "grid-cols-2")}>
+                {photos.map((photo, index) => (
+                  <div
+                    key={photo.id}
+                    className={
+                      "overflow-hidden rounded-[12px] " + (photos.length === 3 && index === 0 ? "col-span-2 aspect-[16/9]" : "aspect-[4/3]")
+                    }
+                    style={{ border: "1px solid var(--obs-border)" }}
+                  >
+                    <img src={photo.url} alt={photo.caption ?? ""} className="h-full w-full object-cover" loading="lazy" />
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
 

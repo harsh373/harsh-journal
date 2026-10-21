@@ -6,7 +6,6 @@ import { formatLongDate, getJournalToday } from "../config/dates";
 import type { DayKey } from "../config/dates";
 import MemoryPanel from "../observatory/MemoryPanel";
 import SkyCanvas from "../observatory/SkyCanvas";
-import { buildMemories, entrySummary } from "../observatory/model";
 import type { Memory } from "../observatory/model";
 import { useArchiveEntries } from "../observatory/useArchiveEntries";
 import "../observatory/observatory.css";
@@ -18,30 +17,14 @@ function plural(count: number, one: string, many: string): string {
   return `${count} ${count === 1 ? one : many}`;
 }
 
-function searchText(memory: Memory): string {
-  return [
-    memory.date,
-    formatLongDate(memory.date),
-    ...memory.entries.flatMap((entry) => [
-      entry.whatIDidToday,
-      entry.dailySummary,
-      entry.whatDrainedMe,
-      entry.tomorrowDifferent,
-    ]),
-  ]
-    .join(" ")
-    .toLowerCase();
-}
-
 function memoryLabel(memory: Memory): string {
-  const first = memory.entries[0];
-  return memory.title || (first ? entrySummary(first) : "") || "Untitled day";
+  return memory.title || "Untitled day";
 }
 
 export default function Observatory() {
   const [params, setParams] = useSearchParams();
-  const { entries, state, retry } = useArchiveEntries();
-  const memories = useMemo(() => buildMemories(entries), [entries]);
+  // `memories` are tiny stubs; full entries are fetched by `loadDay` only when a star is opened.
+  const { memories, state, retry, loadDay } = useArchiveEntries();
   const byDate = useMemo(() => new Map(memories.map((memory) => [memory.date, memory])), [memories]);
 
   const today = getJournalToday();
@@ -81,18 +64,7 @@ export default function Observatory() {
     [byDate, go],
   );
 
-  const closePanel = useCallback(
-    (restoreFocus: boolean) => {
-      const date = selectedMemory?.date;
-      go({});
-      if (restoreFocus && date) {
-        window.setTimeout(() => {
-          document.querySelector<SVGElement>(`[data-star="${date}"]`)?.focus();
-        }, 60);
-      }
-    },
-    [go, selectedMemory],
-  );
+  const closePanel = useCallback(() => go({}), [go]);
 
   const shuffle = () => setSeed((value) => value + 1);
 
@@ -103,12 +75,12 @@ export default function Observatory() {
     if (pick) go({ d: pick.date });
   };
 
-  // --- search over the real entries ------------------------------------------
+  // --- search over the stubs' precomputed text ------------------------------------
   const results = useMemo(() => {
     const needle = query.trim().toLowerCase();
     if (!needle) return [];
     return memories
-      .filter((memory) => searchText(memory).includes(needle))
+      .filter((memory) => memory.searchText.includes(needle))
       .slice(-8)
       .reverse();
   }, [memories, query]);
@@ -145,7 +117,6 @@ export default function Observatory() {
   const toolButton = "obs-text-2 obs-hoverable flex h-9 w-9 items-center justify-center rounded-full";
   const pillButton = "obs-hoverable flex h-10 items-center gap-2 rounded-full px-4 text-[13.5px] font-medium";
 
-  // min-h fills whatever is left under the app bar, so the black sky reaches the bottom of the screen.
   return (
     <div className="obs obs-sky obs-text relative h-full min-h-[calc(100dvh-3.75rem)] overflow-hidden">
       {view === "sky" && state === "ready" && memories.length > 0 && (
@@ -157,7 +128,7 @@ export default function Observatory() {
           seed={seed}
           onPickDay={(date) => go({ d: date })}
           onBackground={() => {
-            if (selectedMemory) closePanel(false);
+            if (selectedMemory) closePanel();
           }}
         />
       )}
@@ -306,6 +277,7 @@ export default function Observatory() {
           }
         >
           <Legend />
+          <p className="obs-text-3 text-[11px] sm:hidden">Drag to explore · pinch to zoom</p>
 
           <div className="pointer-events-auto obs-chip flex items-center gap-0.5 rounded-full p-1">
             <button type="button" onClick={shuffle} className={pillButton}>
@@ -321,7 +293,9 @@ export default function Observatory() {
         </div>
       )}
 
-      {panelOpen && selectedMemory && <MemoryPanel memory={selectedMemory} today={today} onClose={() => closePanel(true)} />}
+      {panelOpen && selectedMemory && (
+        <MemoryPanel memory={selectedMemory} today={today} loadDay={loadDay} onClose={closePanel} />
+      )}
     </div>
   );
 }
@@ -345,6 +319,7 @@ function Legend() {
         </svg>
         With photographs
       </li>
+      <li className={item}>Drag to explore · scroll to zoom</li>
     </ul>
   );
 }

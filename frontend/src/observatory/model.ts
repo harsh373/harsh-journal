@@ -1,9 +1,11 @@
 import type { ArchiveEntry } from "../api/journal.api";
-import { parseDayKey } from "../config/dates";
+import { formatLongDate, parseDayKey } from "../config/dates";
 import type { DayKey } from "../config/dates";
 
 // ---------------------------------------------------------------------------
 // Data: One Memory per distinct calendar date that has at least one entry.
+// A Memory is a small "stub". Full entries and photos are loaded on demand
+// when a star is opened (see useArchiveEntries.loadDay and MemoryPanel).
 // ---------------------------------------------------------------------------
 
 export type Level = "overview" | "year" | "month";
@@ -13,9 +15,10 @@ export interface Memory {
   year: number;
   month: number;
   day: number;
-  entries: ArchiveEntry[];
   title: string;
   photoCount: number;
+  /** Lower-cased text used only by the search box. */
+  searchText: string;
   /** Deterministic visual weight, derived only from the date. */
   radius: number;
   brightness: number;
@@ -54,19 +57,33 @@ export function buildMemories(entries: ArchiveEntry[]): Memory[] {
 
     if (!parts) continue;
 
-    const title = list.map(entryTitle).find((value) => value.length > 0) ?? "";
+    const title =
+      list.map(entryTitle).find((value) => value.length > 0) ??
+      list.map(entrySummary).find((value) => value.length > 0) ??
+      "";
 
     memories.push({
       date,
       year: parts.year,
       month: parts.month,
       day: parts.day,
-      entries: list,
       title,
       photoCount: list.reduce(
         (sum, entry) => sum + entry.photos.length,
         0
       ),
+      searchText: [
+        date,
+        formatLongDate(date),
+        ...list.flatMap((entry) => [
+          entry.whatIDidToday,
+          entry.dailySummary,
+          entry.whatDrainedMe,
+          entry.tomorrowDifferent,
+        ]),
+      ]
+        .join(" ")
+        .toLowerCase(),
       radius: 2.5 + unit(date, "r") * 1.5,
       brightness: 0.74 + unit(date, "b") * 0.26,
     });
@@ -167,7 +184,7 @@ export function unit(key: string, salt: string): number {
 }
 
 // ---------------------------------------------------------------------------
-// Layout
+// Layout (kept for any other view that still uses it)
 // ---------------------------------------------------------------------------
 
 export interface Pt {
