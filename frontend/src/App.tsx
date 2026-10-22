@@ -23,6 +23,8 @@ import NowArchive from "./pages/NowArchive";
 import MapRoom from "./pages/MapRoom";
 import Observatory from "./pages/Observatory";
 import Circle from "./pages/Circle";
+import ThoughtDetail from "./pages/ThoughtDetail";
+import Thoughts from "./pages/Thoughts";
 
 // Same floating window the rest of the app lives in, so the lock screen matches.
 function GateFrame({ children }: { children: ReactNode }) {
@@ -72,6 +74,9 @@ function AppRoutes() {
           <Route path="insights/open-loops" element={<InsightsOpenLoops />} />
           <Route path="settings" element={<Placeholder title="Settings" />} />
           <Route path="*" element={<Navigate to="/" replace />} />
+
+          <Route path="thoughts" element={<Thoughts />} />
+          <Route path="thoughts/:id" element={<ThoughtDetail />} />
         </Route>
       </Routes>
     </MoodProvider>

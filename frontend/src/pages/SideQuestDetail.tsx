@@ -1,8 +1,8 @@
-import { ArrowLeft, Camera, Pencil, Plus, Trash2, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowLeft, Camera, ChevronRight, Pencil, Plus, Trash2, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import {
-  createPost,
   deleteQuest,
   deleteQuestCover,
   fetchPosts,
@@ -12,9 +12,10 @@ import {
 } from "../api/sideQuests.api";
 import type { QuestPatch, QuestPost, QuestStatus, SideQuest } from "../api/sideQuests.api";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
-import QuestPostCard from "../components/QuestPostCard";
+import QuestComposer from "../components/QuestComposer";
+import QuestEntry, { normalizePost } from "../components/QuestEntry";
 import { QuestStatusBadge, QuestStatusPicker } from "../components/QuestStatus";
-import { formatLongDate, getJournalToday } from "../config/dates";
+import { formatLongDate } from "../config/dates";
 import { compressImage } from "../utility/compressImage";
 
 const SAVE_DELAY_MS = 800;
@@ -30,14 +31,40 @@ const PATCH_FIELDS: (keyof QuestPatch)[] = [
 
 type LoadState = "loading" | "ready" | "error" | "not-found";
 
-// Newest first: sort by entry date, falling back to createdAt when dates tie.
-function sortPostsNewestFirst(posts: QuestPost[]): QuestPost[] {
+// Oldest first: the story reads top to bottom, and the composer waits at the end.
+function sortPostsOldestFirst(posts: QuestPost[]): QuestPost[] {
   return [...posts].sort((a, b) => {
-    const dateDiff = b.date.localeCompare(a.date);
+    const dateDiff = a.date.localeCompare(b.date);
     if (dateDiff !== 0) return dateDiff;
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
   });
 }
+
+function snapshot(quest: SideQuest): QuestPatch {
+  return {
+    title: quest.title,
+    subtitle: quest.subtitle,
+    challenge: quest.challenge,
+    approach: quest.approach,
+    status: quest.status,
+    startDate: quest.startDate,
+    endDate: quest.endDate,
+  };
+}
+
+function withDefaults(quest: SideQuest): SideQuest {
+  return {
+    ...quest,
+    title: quest.title ?? "",
+    subtitle: quest.subtitle ?? "",
+    challenge: quest.challenge ?? "",
+    approach: quest.approach ?? "",
+    startDate: quest.startDate ?? "",
+    endDate: quest.endDate ?? "",
+  };
+}
+
+const rise = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
 export default function SideQuestDetail() {
   const { id } = useParams<{ id: string }>();
@@ -49,31 +76,27 @@ export default function SideQuestDetail() {
   const [freshPostId, setFreshPostId] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [coverUploading, setCoverUploading] = useState(false);
-  const [addingPost, setAddingPost] = useState(false);
+  const [titleHidden, setTitleHidden] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const questRef = useRef<SideQuest | null>(null);
   const savedRef = useRef<QuestPatch>({});
   const timerRef = useRef<number | undefined>(undefined);
   const queueRef = useRef<Promise<void>>(Promise.resolve());
+  const titleRef = useRef<HTMLElement>(null);
+  const composerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!id) return;
     setLoadState("loading");
     Promise.all([fetchQuest(id), fetchPosts(id)])
-      .then(([loadedQuest, loadedPosts]) => {
+      .then(([fetchedQuest, loadedPosts]) => {
+        const loadedQuest = withDefaults(fetchedQuest);
         questRef.current = loadedQuest;
-        savedRef.current = {
-          title: loadedQuest.title,
-          subtitle: loadedQuest.subtitle,
-          challenge: loadedQuest.challenge,
-          approach: loadedQuest.approach,
-          status: loadedQuest.status,
-          startDate: loadedQuest.startDate,
-          endDate: loadedQuest.endDate,
-        };
+        savedRef.current = snapshot(loadedQuest);
         setQuest(loadedQuest);
-        setPosts(sortPostsNewestFirst(loadedPosts));
+        setPosts(sortPostsOldestFirst(loadedPosts.map(normalizePost)));
         setLoadState("ready");
       })
       .catch((err: unknown) => {
@@ -81,6 +104,21 @@ export default function SideQuestDetail() {
         setLoadState(status === 404 ? "not-found" : "error");
       });
   }, [id]);
+
+  // Fade the title into the top bar once the page title scrolls away.
+  useEffect(() => {
+    const node = titleRef.current;
+    if (!node || loadState !== "ready") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first) setTitleHidden(!first.isIntersecting);
+      },
+      { rootMargin: "-48px 0px 0px 0px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [loadState]);
 
   const flush = useCallback(() => {
     if (!id) return Promise.resolve();
@@ -100,17 +138,9 @@ export default function SideQuestDetail() {
       if (Object.keys(patch).length === 0) return;
 
       try {
-        const saved = await updateQuest(id, patch);
+        const saved = withDefaults(await updateQuest(id, patch));
         questRef.current = saved;
-        savedRef.current = {
-          title: saved.title,
-          subtitle: saved.subtitle,
-          challenge: saved.challenge,
-          approach: saved.approach,
-          status: saved.status,
-          startDate: saved.startDate,
-          endDate: saved.endDate,
-        };
+        savedRef.current = snapshot(saved);
         setQuest(saved);
       } catch {
         setError("Couldn't save your changes.");
@@ -142,8 +172,7 @@ export default function SideQuestDetail() {
     setCoverUploading(true);
     setError(null);
     try {
-      const compressed = await compressImage(file);
-      const saved = await uploadQuestCover(id, compressed);
+      const saved = withDefaults(await uploadQuestCover(id, await compressImage(file)));
       questRef.current = saved;
       setQuest(saved);
     } catch {
@@ -156,25 +185,11 @@ export default function SideQuestDetail() {
   async function handleRemoveCover() {
     if (!id) return;
     try {
-      const saved = await deleteQuestCover(id);
+      const saved = withDefaults(await deleteQuestCover(id));
       questRef.current = saved;
       setQuest(saved);
     } catch {
       setError("Couldn't remove the cover image.");
-    }
-  }
-
-  async function handleAddPost() {
-    if (!id || addingPost) return;
-    setAddingPost(true);
-    try {
-      const post = await createPost(id, getJournalToday());
-      setPosts((current) => sortPostsNewestFirst([post, ...current]));
-      setFreshPostId(post.id);
-    } catch {
-      setError("Couldn't start a new entry.");
-    } finally {
-      setAddingPost(false);
     }
   }
 
@@ -189,11 +204,17 @@ export default function SideQuestDetail() {
     }
   }
 
-  if (loadState === "not-found") return <Navigate to="/side-quests" replace />;
-
-  if (loadState === "loading" || !quest) {
-    return <div className="mx-auto w-full max-w-[820px] px-5 py-14 sm:px-8 lg:px-12" aria-busy="true" />;
+  function jumpToComposer() {
+    composerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => composerRef.current?.querySelector("textarea")?.focus({ preventScroll: true }), 350);
   }
+
+  const timeline = useMemo(
+    () => posts.map((post, index) => ({ post, showDate: index === 0 || posts[index - 1]?.date !== post.date })),
+    [posts],
+  );
+
+  if (loadState === "not-found") return <Navigate to="/side-quests" replace />;
 
   if (loadState === "error") {
     return (
@@ -203,17 +224,35 @@ export default function SideQuestDetail() {
     );
   }
 
+  if (loadState === "loading" || !quest) {
+    return <div className="mx-auto w-full max-w-[820px] px-5 py-14 sm:px-8 lg:px-12" aria-busy="true" />;
+  }
+
+  const hasDetails = Boolean(quest.challenge || quest.approach);
+  const detailsShown = detailsOpen || editing;
+
   return (
     <div className="mx-auto w-full max-w-[820px] px-5 pb-24 sm:px-8 lg:px-12">
       <div className="sticky top-0 z-10 -mx-5 flex h-12 items-center justify-between gap-3 bg-bg/85 px-5 backdrop-blur-xl sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
-        <Link
-          to="/side-quests"
-          className="flex h-9 items-center gap-1.5 text-[13px] text-secondary transition-colors hover:text-text"
-        >
-          <ArrowLeft size={15} strokeWidth={1.75} />
-          Side Quests
-        </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-4">
+          <Link
+            to="/side-quests"
+            className="flex h-9 shrink-0 items-center gap-1.5 text-[13px] text-secondary transition-colors hover:text-text"
+          >
+            <ArrowLeft size={15} strokeWidth={1.75} />
+            Side Quests
+          </Link>
+          <span
+            aria-hidden={!titleHidden}
+            className={
+              "truncate text-[13px] font-semibold transition-opacity duration-200 " +
+              (titleHidden ? "opacity-100" : "opacity-0")
+            }
+          >
+            {quest.title}
+          </span>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
           {editing && (
             <button
               type="button"
@@ -221,7 +260,17 @@ export default function SideQuestDetail() {
               className="flex h-9 items-center gap-1.5 rounded-control px-3 text-[13px] text-alert transition-colors hover:bg-hover lg:h-8"
             >
               <Trash2 size={13} strokeWidth={1.75} />
-              Delete
+              Delete quest
+            </button>
+          )}
+          {!editing && (
+            <button
+              type="button"
+              onClick={jumpToComposer}
+              className="flex h-9 items-center gap-1.5 rounded-control px-3 text-[13px] font-medium text-text transition-colors hover:bg-hover lg:h-8"
+            >
+              <Plus size={14} strokeWidth={2} />
+              Add
             </button>
           )}
           <button
@@ -244,47 +293,53 @@ export default function SideQuestDetail() {
         </div>
       </div>
 
-      <div className="group relative mt-2 aspect-[16/9] overflow-hidden rounded-card border border-border bg-hover">
-        {quest.coverImage ? (
-          <img src={quest.coverImage.url} alt="" className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-tertiary">
-            {editing ? "Add a cover image" : ""}
-          </div>
-        )}
+      {/* The cover is optional. Without one, the title simply starts the page. */}
+      {(quest.coverImage || editing) && (
+        <div
+          style={rise(0)}
+          className="group quest-rise relative mt-2 aspect-[16/9] overflow-hidden rounded-card bg-hover shadow-card sm:aspect-[2/1]"
+        >
+          {quest.coverImage ? (
+            <img src={quest.coverImage.url} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-[14px] text-tertiary">
+              No cover image
+            </div>
+          )}
+          {editing && (
+            <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/0 opacity-100 transition-opacity duration-150 group-hover:bg-black/30 group-hover:opacity-100 [@media(hover:hover)]:opacity-0">
+              <label className="flex h-9 cursor-pointer items-center gap-1.5 rounded-lg bg-white/90 px-3 text-[13px] font-medium text-black">
+                <Camera size={14} strokeWidth={2} />
+                {coverUploading ? "Uploading…" : quest.coverImage ? "Change" : "Add cover"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(event) => void handleCoverChange(event.target.files)}
+                />
+              </label>
+              {quest.coverImage && (
+                <button
+                  type="button"
+                  onClick={() => void handleRemoveCover()}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/90 text-black"
+                  aria-label="Remove cover"
+                >
+                  <X size={14} strokeWidth={2} />
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
-        {editing && (
-          <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/0 opacity-100 transition-opacity duration-150 group-hover:bg-black/30 group-hover:opacity-100 [@media(hover:hover)]:opacity-0">
-            <label className="flex h-9 cursor-pointer items-center gap-1.5 rounded-lg bg-white/90 px-3 text-[13px] font-medium text-black">
-              <Camera size={14} strokeWidth={2} />
-              {coverUploading ? "Uploading…" : "Change"}
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(event) => void handleCoverChange(event.target.files)}
-              />
-            </label>
-            {quest.coverImage && (
-              <button
-                type="button"
-                onClick={() => void handleRemoveCover()}
-                className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/90 text-black"
-                aria-label="Remove cover"
-              >
-                <X size={14} strokeWidth={2} />
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-
-      <header className="pb-8 pt-6">
+      <header ref={titleRef} style={rise(80)} className="quest-rise pb-8 pt-8 sm:pt-10">
         {editing ? (
           <input
             value={quest.title}
             maxLength={120}
             onChange={(event) => update({ title: event.target.value })}
+            aria-label="Title"
             className="type-display w-full bg-transparent text-text focus:outline-none"
           />
         ) : (
@@ -337,72 +392,88 @@ export default function SideQuestDetail() {
         </div>
       </header>
 
-      {(editing || quest.challenge || quest.approach) && (
-        <section className="mb-12 border-t border-border">
-          <div className="py-6">
-            <h2 className="type-eyebrow">The challenge</h2>
-            {editing ? (
-              <AutoGrowTextarea
-                value={quest.challenge}
-                maxLength={5000}
-                placeholder="What are you trying to do?"
-                onChange={(event) => update({ challenge: event.target.value })}
-                className="type-journal mt-3 w-full placeholder:text-tertiary"
+      {/* The challenge and approach are tucked behind one quiet toggle. */}
+      {(hasDetails || editing) && (
+        <section style={rise(140)} className="quest-rise mb-10">
+          {!editing && (
+            <button
+              type="button"
+              onClick={() => setDetailsOpen((open) => !open)}
+              aria-expanded={detailsOpen}
+              className="flex h-9 items-center gap-1 text-[13px] text-secondary transition-colors hover:text-text"
+            >
+              <ChevronRight
+                size={14}
+                strokeWidth={2}
+                className={"transition-transform duration-200 " + (detailsOpen ? "rotate-90" : "")}
               />
-            ) : (
-              quest.challenge && <p className="type-journal mt-3 whitespace-pre-wrap">{quest.challenge}</p>
-            )}
-          </div>
-          <div className="border-t border-border py-6">
-            <h2 className="type-eyebrow">How it&apos;s going</h2>
-            {editing ? (
-              <AutoGrowTextarea
-                value={quest.approach}
-                maxLength={5000}
-                placeholder="Your approach, and how it's going so far."
-                onChange={(event) => update({ approach: event.target.value })}
-                className="type-journal mt-3 w-full placeholder:text-tertiary"
-              />
-            ) : (
-              quest.approach && <p className="type-journal mt-3 whitespace-pre-wrap">{quest.approach}</p>
-            )}
-          </div>
+              Details
+            </button>
+          )}
+          {detailsShown && (
+            <div className="mt-3 space-y-8">
+              <div>
+                <h2 className="type-meta mb-2 font-medium">The challenge</h2>
+                {editing ? (
+                  <AutoGrowTextarea
+                    value={quest.challenge}
+                    maxLength={5000}
+                    placeholder="What are you trying to do?"
+                    onChange={(event) => update({ challenge: event.target.value })}
+                    className="type-journal w-full placeholder:text-tertiary focus:outline-none"
+                  />
+                ) : (
+                  <p className="type-journal whitespace-pre-wrap">{quest.challenge}</p>
+                )}
+              </div>
+              <div>
+                <h2 className="type-meta mb-2 font-medium">How it&apos;s going</h2>
+                {editing ? (
+                  <AutoGrowTextarea
+                    value={quest.approach}
+                    maxLength={5000}
+                    placeholder="Your approach, and how it's going so far."
+                    onChange={(event) => update({ approach: event.target.value })}
+                    className="type-journal w-full placeholder:text-tertiary focus:outline-none"
+                  />
+                ) : (
+                  <p className="type-journal whitespace-pre-wrap">{quest.approach}</p>
+                )}
+              </div>
+            </div>
+          )}
         </section>
       )}
 
-      <div className="mb-5 flex items-center justify-between">
-        <h2 className="type-eyebrow">The story</h2>
-        <button
-          type="button"
-          onClick={() => void handleAddPost()}
-          disabled={addingPost}
-          className="flex h-9 items-center gap-1.5 rounded-control border border-border px-3 text-[13px] font-medium text-text transition-colors hover:bg-hover disabled:opacity-50 lg:h-8"
-        >
-          <Plus size={14} strokeWidth={2} />
-          Add entry
-        </button>
-      </div>
+      {/* One page: everything flows in a single column, with no per-entry chrome. */}
+      <section aria-label="Story" style={rise(200)} className="quest-rise max-w-[40rem]">
+        {timeline.map(({ post, showDate }) => (
+          <QuestEntry
+            key={post.id}
+            questId={quest.id}
+            post={post}
+            showDate={showDate}
+            fresh={post.id === freshPostId}
+            onChange={(updated) =>
+              setPosts((current) =>
+                sortPostsOldestFirst(current.map((item) => (item.id === updated.id ? normalizePost(updated) : item))),
+              )
+            }
+            onDelete={(postId) => setPosts((current) => current.filter((item) => item.id !== postId))}
+          />
+        ))}
 
-      {posts.length === 0 ? (
-        <div className="border-t border-border py-10 text-center text-secondary">
-          <p className="text-[15px]">No entries yet. Add the first one.</p>
+        <div ref={composerRef}>
+          <QuestComposer
+            questId={quest.id}
+            empty={posts.length === 0}
+            onCreated={(post) => {
+              setPosts((current) => sortPostsOldestFirst([...current, normalizePost(post)]));
+              setFreshPostId(post.id);
+            }}
+          />
         </div>
-      ) : (
-        <div className="space-y-5">
-          {posts.map((post) => (
-            <QuestPostCard
-              key={post.id}
-              questId={quest.id}
-              post={post}
-              startInEditMode={post.id === freshPostId}
-              onChange={(updated) =>
-                setPosts((current) => current.map((item) => (item.id === updated.id ? updated : item)))
-              }
-              onDelete={(postId) => setPosts((current) => current.filter((item) => item.id !== postId))}
-            />
-          ))}
-        </div>
-      )}
+      </section>
 
       {error && <p className="mt-4 text-[13px] text-alert">{error}</p>}
     </div>

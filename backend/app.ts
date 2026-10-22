@@ -19,6 +19,7 @@ import weeklyRoutes from "./routes/weekly.routes";
 import nowRoutes from "./routes/now.routes";
 import quoteRoutes from "./routes/quote.routes";
 import circleRoutes from "./routes/circle.routes";
+import thoughtRoutes from "./routes/thought.routes";
 
 const app = express();
 
@@ -55,6 +56,7 @@ app.use("/api/today", todayRoutes);
 app.use("/api/quotes", quoteRoutes);
 app.use("/api/insights", insightsRoutes);
 app.use("/api/now", nowRoutes);
+app.use("/api/thoughts", thoughtRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

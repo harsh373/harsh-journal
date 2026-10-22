@@ -304,3 +304,34 @@ h3 {
     transition: none;
   }
 }
+
+
+@keyframes track-check-draw {
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
+}
+.track-check-path { stroke-dasharray: 24; stroke-dashoffset: 24; }
+[aria-checked="true"] > svg > .track-check-path {
+  animation: track-check-draw 320ms cubic-bezier(0.65, 0, 0.35, 1) 60ms forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .track-check-path { animation: none !important; }
+  [aria-checked="true"] > svg > .track-check-path { stroke-dashoffset: 0; }
+}
+
+
+@keyframes quest-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.quest-rise {
+  animation: quest-rise 460ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--d, 0ms);
+}

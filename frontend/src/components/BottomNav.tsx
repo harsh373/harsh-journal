@@ -5,6 +5,7 @@ import { isActive, PRIMARY_NAV } from "../config/nav";
 
 const BOTTOM_GAP = 12; // space between the bar and the safe area
 const CONTENT_GAP = 12; // breathing room between page content and the bar
+const COUNT = PRIMARY_NAV.length; // number of items in the bar
 
 const NON_TEXT_INPUTS = ["checkbox", "radio", "button", "submit", "reset", "range", "file", "color", "image"];
 
@@ -147,14 +148,15 @@ export default function BottomNav({ scrollRef }: BottomNavProps) {
       <nav
         ref={barRef}
         aria-label="Primary"
-        className="glass-nav pointer-events-auto relative grid w-full max-w-[400px] grid-cols-4 rounded-[26px] p-1.5"
+        className="glass-nav pointer-events-auto relative grid w-full max-w-[420px] rounded-[26px] p-1.5"
+        style={{ gridTemplateColumns: `repeat(${COUNT}, minmax(0, 1fr))` }}
       >
-        {/* One capsule that slides to the active item. Hidden on pages outside the four. */}
+        {/* One capsule that slides to the active item. Hidden on pages outside the bar. */}
         <span
           aria-hidden="true"
           className="glass-nav-active pointer-events-none absolute bottom-1.5 left-1.5 top-1.5 rounded-[20px]"
           style={{
-            width: "calc((100% - 12px) / 4)",
+            width: `calc((100% - 12px) / ${COUNT})`,
             transform: `translateX(${Math.max(activeIndex, 0) * 100}%)`,
             opacity: activeIndex === -1 ? 0 : 1,
           }}
