@@ -1,8 +1,9 @@
-import { MapPin, Pencil } from "lucide-react";
+import { Check, MapPin, Pencil } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ComponentProps } from "react";
 import { Link } from "react-router-dom";
 import { fetchArchivePage, fetchEntry, saveEntry } from "../api/journal.api";
 import type { ArchiveEntry, EntryFields, JournalEntry, JournalPhoto, Mood } from "../api/journal.api";
+import { fetchTodayPlan } from "../api/today.api";
 import { formatLongDate, formatWeekday, getJournalToday } from "../config/dates";
 import type { DayKey } from "../config/dates";
 import AutoGrowTextarea from "./AutoGrowTextarea";
@@ -61,6 +62,7 @@ function toLightboxPhoto(photo: JournalPhoto, day: DayKey): LightboxPhoto {
 
 type LoadState = "loading" | "ready" | "error";
 type SaveState = "idle" | "saving" | "saved" | "error";
+type Tally = { done: number; total: number };
 
 export default function JournalDay({ day }: { day: DayKey }) {
   const { setDayMood } = useMoods();
@@ -74,6 +76,7 @@ export default function JournalDay({ day }: { day: DayKey }) {
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [recentDays, setRecentDays] = useState<ArchiveEntry[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [tally, setTally] = useState<Tally | null>(null);
 
   const draftRef = useRef<EntryFields>(EMPTY_FIELDS);
   const savedJsonRef = useRef(JSON.stringify(EMPTY_FIELDS));
@@ -81,6 +84,10 @@ export default function JournalDay({ day }: { day: DayKey }) {
   const timerRef = useRef<number | undefined>(undefined);
   const queueRef = useRef<Promise<void>>(Promise.resolve());
   const loadTokenRef = useRef(0);
+
+  const handleTally = useCallback((done: number, total: number) => {
+    setTally({ done, total });
+  }, []);
 
   const load = useCallback(() => {
     const token = ++loadTokenRef.current;
@@ -112,6 +119,25 @@ export default function JournalDay({ day }: { day: DayKey }) {
       .then(({ entries }) => setRecentDays(entries.filter((entry) => entry.date !== day).slice(0, RECENT_DAYS_COUNT)))
       .catch(() => setRecentDays([]));
   }, [day]);
+
+  // Past days: read that day's saved plan. Today is reported live by the checklist.
+  useEffect(() => {
+    setTally(null);
+    if (isToday) return;
+
+    let cancelled = false;
+    fetchTodayPlan(day)
+      .then((plan) => {
+        if (cancelled) return;
+        const planItems = plan?.items ?? [];
+        setTally({ done: planItems.filter((item) => item.completed).length, total: planItems.length });
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [day, isToday]);
 
   const flush: () => Promise<void> = useCallback(() => {
     window.clearTimeout(timerRef.current);
@@ -190,6 +216,9 @@ export default function JournalDay({ day }: { day: DayKey }) {
   // Visible on today's page, but hidden while you're writing so the writing
   // area comes first. It comes back when you press Done.
   const showTodayChecklist = isToday && ready && !editing;
+  // While the checklist is on screen it already shows the count, so the header
+  // line appears everywhere else: past days, and today while you're writing.
+  const showTally = !showTodayChecklist && tally !== null && tally.total > 0;
 
   return (
     <>
@@ -274,9 +303,16 @@ export default function JournalDay({ day }: { day: DayKey }) {
                   </Link>
                 </div>
               )}
+
+              {showTally && tally && (
+                <p className="mt-4 flex items-center gap-1.5 text-[12px] tabular-nums text-tertiary">
+                  <Check size={12} strokeWidth={2.5} />
+                  {tally.done} of {tally.total} to-dos done
+                </p>
+              )}
             </header>
 
-            {showTodayChecklist && <TodayChecklist />}
+            {showTodayChecklist && <TodayChecklist onTallyChange={handleTally} />}
 
             {loadState === "loading" && <div className="h-64" aria-busy="true" />}
 
@@ -422,7 +458,6 @@ function SaveStatus({ state, onRetry }: { state: SaveState; onRetry: () => void 
   return null;
 }
 
-
 function NowGlyph() {
   return (
     <svg
@@ -436,7 +471,6 @@ function NowGlyph() {
     >
       {/* Orbit group: rotates as one piece so the break and satellite stay locked together. */}
       <g className="origin-[12px_12px] transition-transform duration-300 ease-out group-hover:rotate-45 motion-reduce:transition-none motion-reduce:group-hover:rotate-0">
-       
         <circle
           cx="12"
           cy="12"
@@ -448,10 +482,9 @@ function NowGlyph() {
           transform="rotate(-27 12 12)"
           className="opacity-80 transition-opacity duration-300 [stroke:#0A84FF] group-hover:opacity-100 motion-reduce:transition-none"
         />
-        
         <circle cx="18.01" cy="5.99" r="1.1" className="[fill:#0A84FF]" />
       </g>
-    
+
       <circle cx="12" cy="12" r="2.25" className="[fill:#FF453A]" />
     </svg>
   );

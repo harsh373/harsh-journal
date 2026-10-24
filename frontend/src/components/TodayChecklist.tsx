@@ -1,4 +1,4 @@
-import { Check, Plus, X } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { addTodayItem, deleteTodayItem, fetchTodayPlan, updateTodayItem } from "../api/today.api";
 import type { TodayItem } from "../api/today.api";
@@ -6,66 +6,105 @@ import { getJournalToday } from "../config/dates";
 
 const TEXT_LIMIT = 500;
 const EASE = "ease-[cubic-bezier(0.2,0.7,0.2,1)]";
-// A morning planning tool: before this hour it always shows (including the
-// "Add a to-do" prompt). After it, it only shows if you have to-dos for the day,
-// finished or not, so at night you can still see what you got done.
+// Before this hour the circles always show. After it, only if you have tasks.
 const CUTOFF_HOUR = 11;
 type LoadState = "loading" | "ready" | "error";
 
-// Rendered only on today's journal page, only before you've started writing.
-// Self-contained: its own data, its own API calls, no connection to Weekly.
-export default function TodayChecklist() {
+type Props = {
+  onTallyChange?: (done: number, total: number) => void;
+};
+
+// Slot order = priority order. Images live in public/avatars/.
+const SLOTS = [
+  { name: "Loki", src: "/avatars/loki.jpg", ring: "linear-gradient(45deg, #1B8A4B, #D4AF37)" },
+  { name: "Iron Man", src: "/avatars/ironman.jpg", ring: "linear-gradient(45deg, #C62828, #F5B301)" },
+  { name: "Rocket", src: "/avatars/rocket.jpg", ring: "linear-gradient(45deg, #E65100, #FFB74D)" },
+] as const;
+
+type Slot = (typeof SLOTS)[number];
+
+function Avatar({ slot, state }: { slot: Slot; state: "empty" | "todo" | "done" }) {
+  const [broken, setBroken] = useState(false);
+
+  return (
+    <div
+      className="rounded-full p-[3px] transition-all duration-300"
+      style={state === "todo" ? { background: slot.ring } : undefined}
+    >
+      <div
+        className={
+          "rounded-full bg-bg p-[3px] " +
+          (state === "empty" ? "border border-dashed border-tertiary" : "") +
+          (state === "done" ? " ring-1 ring-border" : "")
+        }
+      >
+        <div className="relative h-[72px] w-[72px] overflow-hidden rounded-full bg-surface sm:h-[84px] sm:w-[84px]">
+          {broken ? (
+            <span className="flex h-full w-full items-center justify-center font-serif text-[1.75rem] text-secondary">
+              {slot.name.charAt(0)}
+            </span>
+          ) : (
+            <img
+              src={slot.src}
+              alt=""
+              draggable={false}
+              onError={() => setBroken(true)}
+              className={
+                `h-full w-full object-cover transition-all duration-300 ${EASE} ` +
+                (state === "done" ? "opacity-40 grayscale" : state === "empty" ? "opacity-30 grayscale" : "")
+              }
+            />
+          )}
+          {state === "empty" && (
+            <span className="absolute inset-0 flex items-center justify-center text-text">
+              <Plus size={22} strokeWidth={1.75} />
+            </span>
+          )}
+          {state === "done" && (
+            <span className="absolute inset-0 flex items-center justify-center text-text">
+              <Check size={26} strokeWidth={2.5} />
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function TodayChecklist({ onTallyChange }: Props) {
   const date = getJournalToday();
 
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [items, setItems] = useState<TodayItem[]>([]);
-  const [adding, setAdding] = useState(false);
+  const [editingSlot, setEditingSlot] = useState<number | null>(null);
   const [draftText, setDraftText] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingText, setEditingText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [hour, setHour] = useState(() => new Date().getHours());
 
-  const addInputRef = useRef<HTMLInputElement>(null);
-  const editInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const doneCount = items.filter((item) => item.completed).length;
 
   useEffect(() => {
     fetchTodayPlan(date)
       .then((plan) => {
-        setItems(plan?.items ?? []);
+        setItems((plan?.items ?? []).slice(0, SLOTS.length));
         setLoadState("ready");
       })
       .catch(() => setLoadState("error"));
   }, [date]);
 
-  // Re-check the clock every minute so the empty prompt hides itself at the cutoff.
+  useEffect(() => {
+    if (loadState === "ready") onTallyChange?.(doneCount, items.length);
+  }, [loadState, doneCount, items.length, onTallyChange]);
+
   useEffect(() => {
     const id = window.setInterval(() => setHour(new Date().getHours()), 60_000);
     return () => window.clearInterval(id);
   }, []);
 
   useEffect(() => {
-    if (adding) addInputRef.current?.focus();
-  }, [adding]);
-
-  useEffect(() => {
-    if (editingId) editInputRef.current?.focus();
-  }, [editingId]);
-
-  async function submitAdd() {
-    const text = draftText.trim();
-    setDraftText("");
-    setAdding(false);
-    if (!text) return;
-
-    setError(null);
-    try {
-      const plan = await addTodayItem(date, text);
-      setItems(plan.items);
-    } catch {
-      setError("Couldn't add that. Try again.");
-    }
-  }
+    if (editingSlot !== null) inputRef.current?.focus();
+  }, [editingSlot]);
 
   async function toggleComplete(item: TodayItem) {
     const previous = items;
@@ -76,34 +115,6 @@ export default function TodayChecklist() {
       await updateTodayItem(date, item.id, { completed: !item.completed });
     } catch {
       setError("Couldn't update that. Try again.");
-      setItems(previous);
-    }
-  }
-
-  function startEditing(item: TodayItem) {
-    setEditingId(item.id);
-    setEditingText(item.text);
-  }
-
-  async function submitEdit(item: TodayItem) {
-    const text = editingText.trim();
-    setEditingId(null);
-
-    // Erasing an item's text completely now deletes it, instead of silently
-    // reverting to the old text — that silent revert is exactly what looked
-    // like "the task keeps coming back" when it was actually just discarded.
-    if (!text) {
-      await removeItem(item);
-      return;
-    }
-    if (text === item.text) return;
-
-    const previous = items;
-    setItems((current) => current.map((entry) => (entry.id === item.id ? { ...entry, text } : entry)));
-    try {
-      await updateTodayItem(date, item.id, { text });
-    } catch {
-      setError("Couldn't save that edit. Try again.");
       setItems(previous);
     }
   }
@@ -119,143 +130,129 @@ export default function TodayChecklist() {
     }
   }
 
-  // Quiet failure/loading: this is a small helper widget sitting above the
-  // real journal content, not something that should block or flash the page.
+  function openSlot(index: number) {
+    setError(null);
+    setEditingSlot(index);
+    setDraftText(items[index]?.text ?? "");
+  }
+
+  function cancelEdit() {
+    setEditingSlot(null);
+    setDraftText("");
+  }
+
+  async function submitSlot() {
+    if (editingSlot === null) return;
+    const index = editingSlot;
+    const text = draftText.trim();
+    const existing = items[index];
+    cancelEdit();
+
+    if (!existing) {
+      if (!text) return;
+      try {
+        const plan = await addTodayItem(date, text);
+        setItems(plan.items.slice(0, SLOTS.length));
+      } catch {
+        setError("Couldn't add that. Try again.");
+      }
+      return;
+    }
+
+    if (!text) {
+      await removeItem(existing);
+      return;
+    }
+    if (text === existing.text) return;
+
+    const previous = items;
+    setItems((current) => current.map((entry) => (entry.id === existing.id ? { ...entry, text } : entry)));
+    try {
+      await updateTodayItem(date, existing.id, { text });
+    } catch {
+      setError("Couldn't save that edit. Try again.");
+      setItems(previous);
+    }
+  }
+
   if (loadState === "loading" || loadState === "error") return null;
 
-  // Before the cutoff: always shown. After it: shown whenever there is something
-  // on the list (done or not) or you're mid-edit. An empty list quietly disappears.
   const isMorning = hour < CUTOFF_HOUR;
-  if (!isMorning && items.length === 0 && !adding) return null;
+  if (!isMorning && items.length === 0 && editingSlot === null) return null;
 
-  const allDone = items.length > 0 && items.every((item) => item.completed);
+  const nextEmpty = items.length; // slots fill in order
+  const isEditing = editingSlot !== null;
 
   return (
-    <section className="mb-8">
-      <h2 className="type-eyebrow">To do</h2>
-      {allDone && (
-        <p className="mt-1 text-[15px] text-secondary">
-          {items.length === 1 ? "You did it." : `All ${items.length} done.`} Good day&apos;s work.
-        </p>
-      )}
+    <section className="mb-10">
+      <div className="grid grid-cols-3 gap-2">
+        {SLOTS.map((slot, index) => {
+          const item = items[index];
+          const state = !item ? "empty" : item.completed ? "done" : "todo";
+          const locked = !item && index !== nextEmpty;
 
-      {items.length > 0 || adding ? (
-        <ul className="mt-3 border-t border-border">
-          {items.map((item) => (
-            <li key={item.id} className="page-in group flex items-start gap-3 border-b border-border py-3.5">
+          return (
+            <div key={slot.name} className="flex flex-col items-center">
               <button
                 type="button"
-                onClick={() => void toggleComplete(item)}
-                aria-label={item.completed ? "Mark as not done" : "Mark as done"}
+                disabled={locked}
+                onClick={() => (item ? void toggleComplete(item) : openSlot(index))}
+                aria-label={
+                  item
+                    ? item.completed
+                      ? `Mark "${item.text}" as not done`
+                      : `Mark "${item.text}" as done`
+                    : "Add a task"
+                }
                 className={
-                  `mt-0.5 flex h-[22px] w-[22px] flex-shrink-0 items-center justify-center rounded-full border transition-all duration-200 ${EASE} active:scale-90 ` +
-                  (item.completed ? "border-text bg-text" : "border-tertiary hover:border-secondary")
+                  `rounded-full transition-transform duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 ` +
+                  `focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text`
                 }
               >
-                <Check
-                  size={12}
-                  strokeWidth={3}
-                  className={
-                    `text-bg transition-all duration-200 ${EASE} ` +
-                    (item.completed ? "scale-100 opacity-100" : "scale-50 opacity-0")
-                  }
-                />
+                <Avatar slot={slot} state={state} />
               </button>
 
-              {editingId === item.id ? (
-                <input
-                  ref={editInputRef}
-                  type="text"
-                  value={editingText}
-                  maxLength={TEXT_LIMIT}
-                  onChange={(event) => setEditingText(event.target.value)}
-                  onBlur={() => void submitEdit(item)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      void submitEdit(item);
-                    }
-                    if (event.key === "Escape") setEditingId(null);
-                  }}
-                  className="flex-1 bg-transparent text-[16px] leading-relaxed text-text focus:outline-none"
-                />
-              ) : (
+              {item && (
                 <button
                   type="button"
-                  onClick={() => startEditing(item)}
+                  onClick={() => openSlot(index)}
+                  aria-label={`Edit "${item.text}"`}
                   className={
-                    `flex-1 whitespace-normal break-words text-left text-[16px] leading-relaxed transition-all duration-200 ${EASE} ` +
-                    (item.completed ? "text-tertiary line-through" : "text-text")
+                    `mt-2 line-clamp-2 w-full break-words text-center text-[12px] leading-4 transition-colors duration-300 ` +
+                    (item.completed ? "text-tertiary line-through" : "text-secondary hover:text-text")
                   }
                 >
                   {item.text}
                 </button>
               )}
+            </div>
+          );
+        })}
+      </div>
 
-              <button
-                type="button"
-                onClick={() => void removeItem(item)}
-                aria-label="Remove item"
-                className="-mr-1 mt-px flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-tertiary opacity-100 transition-opacity duration-150 hover:bg-hover hover:text-text focus-visible:opacity-100 group-hover:opacity-100 [@media(hover:hover)]:opacity-0"
-              >
-                <X size={14} strokeWidth={2} />
-              </button>
-            </li>
-          ))}
-
-          {adding ? (
-            <li className="flex items-center gap-3 border-b border-border py-3.5">
-              <span className="h-[22px] w-[22px] flex-shrink-0 rounded-full border border-dashed border-tertiary" />
-              <input
-                ref={addInputRef}
-                type="text"
-                value={draftText}
-                maxLength={TEXT_LIMIT}
-                placeholder="Something to do today"
-                onChange={(event) => setDraftText(event.target.value)}
-                onBlur={() => void submitAdd()}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    void submitAdd();
-                  }
-                  if (event.key === "Escape") {
-                    setAdding(false);
-                    setDraftText("");
-                  }
-                }}
-                className="flex-1 bg-transparent text-[16px] text-text placeholder:text-tertiary focus:outline-none"
-              />
-            </li>
-          ) : (
-            <li>
-              <button
-                type="button"
-                onClick={() => setAdding(true)}
-                className="flex w-full items-center gap-3 py-3.5 text-left text-secondary transition-colors duration-150 hover:text-text"
-              >
-                <span className="flex h-[22px] w-[22px] flex-shrink-0 items-center justify-center rounded-full border border-dashed border-tertiary">
-                  <Plus size={11} strokeWidth={2.5} />
-                </span>
-                <span className="text-[16px]">Add something</span>
-              </button>
-            </li>
-          )}
-        </ul>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setAdding(true)}
-          className="mt-2 flex w-full items-center gap-3 border-b border-border pb-3 pt-1 text-left text-[16px] text-tertiary transition-colors duration-150 hover:text-text"
-        >
-          <span className="flex h-[22px] w-[22px] flex-shrink-0 items-center justify-center rounded-full border border-dashed border-tertiary">
-            <Plus size={11} strokeWidth={2.5} />
-          </span>
-          Add a to-do
-        </button>
+      {isEditing && (
+        <div className="mt-5 border-b border-border pb-2 focus-within:border-secondary">
+          <input
+            ref={inputRef}
+            type="text"
+            value={draftText}
+            maxLength={TEXT_LIMIT}
+            placeholder="Write the task"
+            onChange={(event) => setDraftText(event.target.value)}
+            onBlur={() => void submitSlot()}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                void submitSlot();
+              }
+              if (event.key === "Escape") cancelEdit();
+            }}
+            className="w-full bg-transparent font-serif text-[1.25rem] leading-snug text-text placeholder:text-tertiary focus:outline-none"
+          />
+        </div>
       )}
 
-      {error && <p className="mt-2 text-[13px] text-alert">{error}</p>}
+      {error && <p className="mt-3 text-[13px] text-alert">{error}</p>}
     </section>
   );
 }
