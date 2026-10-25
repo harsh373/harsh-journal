@@ -14,12 +14,27 @@ type Props = {
   onTallyChange?: (done: number, total: number) => void;
 };
 
-// Slot order = priority order. Images live in public/avatars/.
+// Permanent priority slots. Slot order = priority order, and each image is
+// fixed to its slot: it never changes with the task or the date.
+// Images live in public/avatars/.
 const SLOTS = [
-  { name: "Loki", src: "/avatars/loki.jpg", ring: "linear-gradient(45deg, #1B8A4B, #D4AF37)" },
-  { name: "Iron Man", src: "/avatars/ironman.jpg", ring: "linear-gradient(45deg, #C62828, #F5B301)" },
-  { name: "Rocket", src: "/avatars/rocket.jpg", ring: "linear-gradient(45deg, #E65100, #FFB74D)" },
+  {
+    priority: "Essential",
+    src: "/avatars/image1.jpg",
+    ring: "linear-gradient(45deg, #B45309, #F5B754)", // accretion-disk amber
+  },
+  {
+    priority: "Important",
+    src: "/avatars/image2.jpg",
+    ring: "linear-gradient(45deg, #3B5BDB, #BFD4FF)", // stellar blue-white
+  },
+  {
+    priority: "Extra",
+    src: "/avatars/image3.jpg",
+    ring: "linear-gradient(45deg, #8E1B4A, #FF6FA3)", // deep magenta to soft rose// violet to teal
+  },
 ] as const;
+
 
 type Slot = (typeof SLOTS)[number];
 
@@ -39,11 +54,7 @@ function Avatar({ slot, state }: { slot: Slot; state: "empty" | "todo" | "done" 
         }
       >
         <div className="relative h-[72px] w-[72px] overflow-hidden rounded-full bg-surface sm:h-[84px] sm:w-[84px]">
-          {broken ? (
-            <span className="flex h-full w-full items-center justify-center font-serif text-[1.75rem] text-secondary">
-              {slot.name.charAt(0)}
-            </span>
-          ) : (
+          {!broken && (
             <img
               src={slot.src}
               alt=""
@@ -192,7 +203,7 @@ export default function TodayChecklist({ onTallyChange }: Props) {
           const locked = !item && index !== nextEmpty;
 
           return (
-            <div key={slot.name} className="flex flex-col items-center">
+            <div key={slot.priority} className="flex flex-col items-center">
               <button
                 type="button"
                 disabled={locked}
@@ -202,7 +213,7 @@ export default function TodayChecklist({ onTallyChange }: Props) {
                     ? item.completed
                       ? `Mark "${item.text}" as not done`
                       : `Mark "${item.text}" as done`
-                    : "Add a task"
+                    : `Add ${slot.priority.toLowerCase()} task`
                 }
                 className={
                   `rounded-full transition-transform duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 ` +
@@ -216,10 +227,10 @@ export default function TodayChecklist({ onTallyChange }: Props) {
                 <button
                   type="button"
                   onClick={() => openSlot(index)}
-                  aria-label={`Edit "${item.text}"`}
+                  aria-label={`Edit ${slot.priority.toLowerCase()} task: ${item.text}`}
                   className={
-                    `mt-2 line-clamp-2 w-full break-words text-center text-[12px] leading-4 transition-colors duration-300 ` +
-                    (item.completed ? "text-tertiary line-through" : "text-secondary hover:text-text")
+                    `mt-2.5 line-clamp-2 w-full break-words text-center text-[13px] font-medium leading-[18px] transition-colors duration-300 ` +
+                    (item.completed ? "text-tertiary line-through decoration-1" : "text-text")
                   }
                 >
                   {item.text}
