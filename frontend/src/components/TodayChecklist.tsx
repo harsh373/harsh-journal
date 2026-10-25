@@ -1,8 +1,9 @@
 import { Check, Plus } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { addTodayItem, deleteTodayItem, fetchTodayPlan, updateTodayItem } from "../api/today.api";
 import type { TodayItem } from "../api/today.api";
 import { getJournalToday } from "../config/dates";
+import LineField from "./LineField";
 
 const TEXT_LIMIT = 500;
 const EASE = "ease-[cubic-bezier(0.2,0.7,0.2,1)]";
@@ -92,7 +93,6 @@ export default function TodayChecklist({ onTallyChange }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [hour, setHour] = useState(() => new Date().getHours());
 
-  const inputRef = useRef<HTMLInputElement>(null);
   const doneCount = items.filter((item) => item.completed).length;
 
   useEffect(() => {
@@ -112,10 +112,6 @@ export default function TodayChecklist({ onTallyChange }: Props) {
     const id = window.setInterval(() => setHour(new Date().getHours()), 60_000);
     return () => window.clearInterval(id);
   }, []);
-
-  useEffect(() => {
-    if (editingSlot !== null) inputRef.current?.focus();
-  }, [editingSlot]);
 
   async function toggleComplete(item: TodayItem) {
     const previous = items;
@@ -243,12 +239,12 @@ export default function TodayChecklist({ onTallyChange }: Props) {
 
       {isEditing && (
         <div className="mt-5 border-b border-border pb-2 focus-within:border-secondary">
-          <input
-            ref={inputRef}
-            type="text"
+          <LineField
+            key={editingSlot}
             value={draftText}
             maxLength={TEXT_LIMIT}
             placeholder="Write the task"
+            autoFocus
             onChange={(event) => setDraftText(event.target.value)}
             onBlur={() => void submitSlot()}
             onKeyDown={(event) => {
@@ -258,7 +254,7 @@ export default function TodayChecklist({ onTallyChange }: Props) {
               }
               if (event.key === "Escape") cancelEdit();
             }}
-            className="w-full bg-transparent font-serif text-[1.25rem] leading-snug text-text placeholder:text-tertiary focus:outline-none"
+            className="font-serif text-[1.25rem] leading-snug text-text placeholder:text-tertiary"
           />
         </div>
       )}
