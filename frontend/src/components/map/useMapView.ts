@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useRef } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
-import { WORLD_H, WORLD_W } from "./world";
 
 export interface View {
-  x: number; // screen position of the world's top-left corner
+  x: number;
   y: number;
-  k: number; // pixels per world unit
+  k: number;
 }
 
 export interface Inset {
@@ -27,14 +26,11 @@ interface Hooks {
   onUserMove?: () => void;
 }
 
-// All pan/zoom state lives in plain variables, never in React state. Moving the map
-// updates the DOM directly through subscribers, so opening a panel or switching theme
-// can never disturb the view, and panning never re-renders React.
 export function createMapController(getStage: () => HTMLElement | null, hooks: Hooks) {
   let view: View = { x: 0, y: 0, k: 1 };
   let size = { w: 0, h: 0 };
   let minK = 0.5;
-  let maxK = 3;
+  let maxK = 4;
   let ready = false;
   let inset: Inset = { left: 0, right: 0, top: 0, bottom: 0 };
   const listeners = new Set<Listener>();
@@ -45,16 +41,10 @@ export function createMapController(getStage: () => HTMLElement | null, hooks: H
 
   function clampView(v: View): View {
     const k = clamp(v.k, minK, maxK);
-    const w = WORLD_W * k;
-    const h = WORLD_H * k;
-    const x = w <= size.w ? (size.w - w) / 2 : clamp(v.x, size.w - w, 0);
-    const y = h <= size.h ? (size.h - h) / 2 : clamp(v.y, size.h - h, 0);
-    return { x, y, k };
+    return { x: v.x, y: v.y, k };
   }
 
   function emitNow() {
-    // Cancel any frame already queued by emit(), so listeners are notified once per frame
-    // even when an animation step calls this directly.
     if (frame) {
       cancelAnimationFrame(frame);
       frame = 0;
@@ -71,17 +61,10 @@ export function createMapController(getStage: () => HTMLElement | null, hooks: H
     emit();
   }
 
-  function fitView(): View {
-    const k = minK;
-    return { k, x: (size.w - WORLD_W * k) / 2, y: (size.h - WORLD_H * k) / 2 };
-  }
-
   function computeLimits() {
-    const contain = Math.min(size.w / WORLD_W, size.h / WORLD_H);
-    const cover = Math.max(size.w / WORLD_W, size.h / WORLD_H);
-    // On a phone the whole world would be tiny, so the lowest zoom fills the screen instead.
-    minK = size.w < 700 ? cover : contain;
-    maxK = Math.max(minK * 6, 2.6);
+    const contain = Math.min(size.w / 2000, size.h / 2000);
+    minK = size.w < 700 ? 0.4 : contain * 0.8;
+    maxK = 5;
   }
 
   function cancelAnim() {
@@ -120,7 +103,6 @@ export function createMapController(getStage: () => HTMLElement | null, hooks: H
     else setView(dest);
   }
 
-  /* ----- Pointer handling ----- */
   const pointers = new Map<number, Point>();
   let drag: { sx: number; sy: number; vx: number; vy: number; moved: boolean } | null = null;
   let pinch: { dist: number; k: number; wx: number; wy: number } | null = null;
@@ -129,8 +111,6 @@ export function createMapController(getStage: () => HTMLElement | null, hooks: H
 
   const rel = (e: { clientX: number; clientY: number }) => ({ x: e.clientX - (rect?.left ?? 0), y: e.clientY - (rect?.top ?? 0) });
 
-  // The first two active pointers, or null when fewer than two are down.
-  // Indexing an array can give undefined, so this checks before handing them out.
   function getTwoPointers(): [Point, Point] | null {
     const all = [...pointers.values()];
     const a = all[0];
@@ -183,12 +163,9 @@ export function createMapController(getStage: () => HTMLElement | null, hooks: H
     if (!drag.moved) {
       if (Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
       drag.moved = true;
-      // Capture only once it is really a drag, so a plain tap still reaches the landmark button.
       try {
         e.currentTarget.setPointerCapture(e.pointerId);
-      } catch {
-        /* pointer already gone */
-      }
+      } catch {}
       hooks.onUserMove?.();
     }
     setView({ k: view.k, x: drag.vx + dx, y: drag.vy + dy });
@@ -212,9 +189,7 @@ export function createMapController(getStage: () => HTMLElement | null, hooks: H
     }
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {
-      /* not captured */
-    }
+    } catch {}
   };
 
   const onClickCapture = (e: { stopPropagation: () => void; preventDefault: () => void }) => {
@@ -224,7 +199,6 @@ export function createMapController(getStage: () => HTMLElement | null, hooks: H
     }
   };
 
-  /* ----- Wheel: pinch and mouse wheel zoom, two-finger trackpad scroll pans ----- */
   function onWheel(e: WheelEvent) {
     e.preventDefault();
     cancelAnim();
@@ -246,7 +220,6 @@ export function createMapController(getStage: () => HTMLElement | null, hooks: H
     hooks.onUserMove?.();
   }
 
-  /* ----- Public API ----- */
   function attach(): () => void {
     const stage = getStage();
     if (!stage) return () => undefined;
@@ -259,15 +232,14 @@ export function createMapController(getStage: () => HTMLElement | null, hooks: H
         size = { w, h };
         computeLimits();
         ready = true;
-        view = clampView(fitView());
+        view = { k: 1.5, x: w / 2, y: h / 2 };
       } else {
-        // Keep the same world point at the centre when the window resizes.
         const wx = (size.w / 2 - view.x) / view.k;
         const wy = (size.h / 2 - view.y) / view.k;
         size = { w, h };
         computeLimits();
         const k = clamp(view.k, minK, maxK);
-        view = clampView({ k, x: w / 2 - wx * k, y: h / 2 - wy * k });
+        view = { k, x: w / 2 - wx * k, y: h / 2 - wy * k };
       }
       emit();
     };
@@ -299,10 +271,13 @@ export function createMapController(getStage: () => HTMLElement | null, hooks: H
     refresh: emit,
     getView: () => ({ ...view }),
     getMinK: () => minK,
-    setInset(next: Inset) {
-      inset = next;
+    setInset(next: Inset) { inset = next; },
+    jumpToWorld(wx: number, wy: number, k?: number) {
+      const k2 = clamp(k ?? view.k, minK, maxK);
+      const cx = inset.left + (size.w - inset.left - inset.right) / 2;
+      const cy = inset.top + (size.h - inset.top - inset.bottom) / 2;
+      setView({ k: k2, x: cx - wx * k2, y: cy - wy * k2 });
     },
-    /** Glide so a world point sits in the middle of the unobstructed part of the screen. */
     flyToWorld(wx: number, wy: number, k?: number) {
       const k2 = clamp(k ?? view.k, minK, maxK);
       const cx = inset.left + (size.w - inset.left - inset.right) / 2;
@@ -328,7 +303,7 @@ export function createMapController(getStage: () => HTMLElement | null, hooks: H
       hooks.onUserMove?.();
     },
     reset() {
-      animateTo(fitView());
+      animateTo({ k: 1.5, x: size.w / 2, y: size.h / 2 });
       hooks.onUserMove?.();
     },
   };

@@ -43,6 +43,7 @@ export default function MapRoom() {
   const clientKeyRef = useRef(makeKey());
   const toastTimer = useRef<number | undefined>(undefined);
   const arrivedTimer = useRef<number | undefined>(undefined);
+  const hasCenteredRef = useRef(false);
 
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">("loading");
@@ -64,7 +65,6 @@ export default function MapRoom() {
   }, []);
   const ctl = useMapView(stageRef, markUserMoved);
 
-  /* ---------- Loading ---------- */
   const load = useCallback(() => {
     setLoadState("loading");
     fetchQuotes()
@@ -77,6 +77,16 @@ export default function MapRoom() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Center the map on the majority of thoughts when they load
+  useEffect(() => {
+    if (quotes.length > 0 && !hasCenteredRef.current) {
+      hasCenteredRef.current = true;
+      const avgX = quotes.reduce((sum, q) => sum + q.x, 0) / quotes.length;
+      const avgY = quotes.reduce((sum, q) => sum + q.y, 0) / quotes.length;
+      ctl.jumpToWorld(avgX, avgY, 1.2);
+    }
+  }, [quotes, ctl]);
 
   useEffect(
     () => () => {
@@ -92,8 +102,6 @@ export default function MapRoom() {
     toastTimer.current = window.setTimeout(() => setToast(null), 2400);
   }
 
-  /* ---------- Opening and closing quotes ---------- */
-  // The part of the map left uncovered by the reading panel, so a landmark can be centred in it.
   const insetFor = useCallback(
     (open: boolean): Inset => {
       if (!open) return NO_INSET;
@@ -108,7 +116,6 @@ export default function MapRoom() {
     (id: string, options?: { zoomIn?: boolean }) => {
       const q = quotesRef.current.find((item) => item.id === id);
       if (!q) return;
-      // Remember where the map was, so closing the quote puts the reader back there.
       if (!returnViewRef.current) {
         returnViewRef.current = ctl.getView();
         userMovedRef.current = false;
@@ -144,7 +151,6 @@ export default function MapRoom() {
     return () => window.removeEventListener("keydown", onKey);
   }, [selectedId, editor, closeQuote]);
 
-  // If the window changes between phone and desktop layouts while reading, re-measure.
   useEffect(() => {
     if (selectedRef.current) ctl.setInset(insetFor(true));
   }, [ctl, insetFor]);
@@ -152,13 +158,11 @@ export default function MapRoom() {
   function rediscover() {
     const pool = quotes.filter((q) => q.id !== selectedId);
     const list = pool.length ? pool : quotes;
-    // Indexing an array can give undefined, so check the pick before using it.
     const pick = list[Math.floor(Math.random() * list.length)];
     if (!pick) return;
     openQuote(pick.id, { zoomIn: true });
   }
 
-  /* ---------- Saving ---------- */
   function openAdd() {
     clientKeyRef.current = makeKey();
     setEditor({ mode: "add" });
@@ -175,7 +179,6 @@ export default function MapRoom() {
       return;
     }
 
-    // The landmark's spot is chosen once, now, and stored with the quote. It never moves again.
     const key = clientKeyRef.current;
     const site = pickLandmarkSite(
       quotesRef.current.map((q) => ({ x: q.x, y: q.y })),
@@ -184,7 +187,7 @@ export default function MapRoom() {
     const saved = await createQuote({ ...fields, ...site, clientKey: key });
     setQuotes((prev) => (prev.some((q) => q.id === saved.id) ? prev : [...prev, saved]));
     setEditor(null);
-    showToast("Added to the map");
+    showToast("Memory added to the map");
 
     userMovedRef.current = true;
     ctl.setInset(insetFor(!!selectedRef.current));
@@ -198,7 +201,7 @@ export default function MapRoom() {
     await deleteQuote(id);
     setQuotes((prev) => prev.filter((q) => q.id !== id));
     closeQuote();
-    showToast("Quote deleted");
+    showToast("Memory deleted");
   }
 
   async function copyQuote(q: Quote): Promise<boolean> {
@@ -211,7 +214,6 @@ export default function MapRoom() {
     }
   }
 
-  /* ---------- Keyboard on the map itself ---------- */
   function onStageKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.target !== e.currentTarget) return;
     const step = 90;
@@ -229,18 +231,27 @@ export default function MapRoom() {
     e.preventDefault();
   }
 
+  const handleReset = useCallback(() => {
+    if (quotes.length > 0) {
+      const avgX = quotes.reduce((sum, q) => sum + q.x, 0) / quotes.length;
+      const avgY = quotes.reduce((sum, q) => sum + q.y, 0) / quotes.length;
+      ctl.flyToWorld(avgX, avgY, 1.2);
+    } else {
+      ctl.reset();
+    }
+  }, [quotes, ctl]);
+
   const selected = selectedId ? quotes.find((q) => q.id === selectedId) ?? null : null;
   const empty = loadState === "ready" && quotes.length === 0;
   const modalOpen = editor !== null;
 
   return (
     <div className="map-room relative h-full min-h-0 w-full overflow-hidden">
-      {/* The world. Artwork, light and grain are static layers; only landmarks are interactive. */}
       <div
         ref={stageRef}
         tabIndex={0}
         role="group"
-        aria-label="Map of a fictional world. Drag to move, scroll or pinch to zoom. Arrow keys pan, plus and minus zoom."
+        aria-label="Map of your memories. Drag to move, scroll or pinch to zoom."
         {...ctl.handlers}
         onKeyDown={onStageKeyDown}
         inert={modalOpen}
@@ -252,10 +263,9 @@ export default function MapRoom() {
         <Landmarks quotes={quotes} selectedId={selectedId} arrivedId={arrivedId} controller={ctl} onOpen={openQuote} />
       </div>
 
-      {/* Toolbar */}
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 p-3 lg:p-4" inert={modalOpen}>
         <div className="glass-nav pointer-events-auto flex h-11 items-center gap-2 rounded-[12px] px-3.5 lg:h-9">
-          <h1 className="text-[14px] font-semibold tracking-tight">The Map Room</h1>
+          <h1 className="text-[14px] font-semibold tracking-tight text-text">The Map Room</h1>
           {quotes.length > 0 && <span className="text-[13px] tabular-nums text-tertiary">{quotes.length}</span>}
         </div>
 
@@ -265,8 +275,8 @@ export default function MapRoom() {
               type="button"
               onClick={rediscover}
               disabled={quotes.length === 0}
-              aria-label="Rediscover a random quote"
-              title={quotes.length === 0 ? "Add a quote first" : "Rediscover a quote"}
+              aria-label="Rediscover a random memory"
+              title={quotes.length === 0 ? "Add a memory first" : "Random memory"}
               className="mr-ctl"
             >
               <Shuffle size={16} strokeWidth={1.75} />
@@ -278,15 +288,14 @@ export default function MapRoom() {
             className="flex h-11 items-center gap-1.5 rounded-[12px] bg-text px-3.5 text-[14px] font-medium text-bg shadow-[0_0_0_0.5px_var(--nav-edge),0_8px_20px_-8px_rgba(0,0,0,0.5)] transition-[opacity,transform] duration-150 hover:opacity-90 active:scale-[0.97] lg:h-9 lg:text-[13px]"
           >
             <Plus size={16} strokeWidth={2} />
-            Add quote
+            Add memory
           </button>
         </div>
       </div>
 
-      {/* Zoom */}
       <div
         className={
-          "glass-nav absolute bottom-[calc(var(--bottom-nav-space,0px)+12px)] right-3 z-10 flex flex-col rounded-[12px] p-1 lg:bottom-4 lg:left-4 lg:right-auto lg:p-0.5 " +
+          "glass-nav absolute bottom-[calc(var(--bottom-nav-space,0px)+12px)] right-3 z-10 flex flex-col rounded-[12px] p-1 lg:bottom-4 lg:right-4 lg:p-0.5 " +
           (selected ? "max-lg:hidden" : "")
         }
         inert={modalOpen}
@@ -298,32 +307,30 @@ export default function MapRoom() {
           <Minus size={17} strokeWidth={1.75} />
         </button>
         <span className="mx-2 my-0.5 h-px bg-border" aria-hidden="true" />
-        <button type="button" onClick={() => ctl.reset()} aria-label="Show the whole map" title="Whole map" className="mr-ctl">
+        <button type="button" onClick={handleReset} aria-label="Show the whole map" title="Whole map" className="mr-ctl">
           <LocateFixed size={16} strokeWidth={1.75} />
         </button>
       </div>
 
-      {/* Empty state: one quiet invitation, nothing fake on the map. */}
       {empty && !modalOpen && (
         <div className="pointer-events-none absolute inset-x-0 bottom-[calc(var(--bottom-nav-space,0px)+68px)] z-10 flex justify-center px-4 lg:bottom-10">
           <div className="glass-nav pointer-events-auto mr-fade-in flex items-center gap-4 rounded-[16px] py-2.5 pl-5 pr-2.5">
-            <p className="font-serif text-[16px] italic text-secondary">Your world is waiting.</p>
+            <p className="font-serif text-[16px] italic text-secondary">The map is quiet.</p>
             <button
               type="button"
               onClick={openAdd}
               className="h-9 rounded-control bg-text px-3.5 text-[13px] font-medium text-bg transition-opacity hover:opacity-85"
             >
-              Add your first quote
+              Drop your first pin
             </button>
           </div>
         </div>
       )}
 
-      {/* Status messages */}
       {loadState === "error" && (
         <div className="absolute inset-x-0 top-[68px] z-30 flex justify-center px-4" role="alert">
           <div className="glass-nav flex items-center gap-3 rounded-[12px] py-2 pl-4 pr-2 text-[13px]">
-            <span className="text-secondary">Couldn&apos;t load your quotes.</span>
+            <span className="text-secondary">Couldn&apos;t load the map.</span>
             <button type="button" onClick={load} className="h-8 rounded-control px-3 font-medium text-text transition-colors hover:bg-hover">
               Try again
             </button>
@@ -332,7 +339,7 @@ export default function MapRoom() {
       )}
       {toast && (
         <div className="pointer-events-none absolute inset-x-0 top-[68px] z-40 flex justify-center px-4" role="status" aria-live="polite">
-          <div className="glass-nav mr-pop-in rounded-full px-4 py-2 text-[13px] font-medium">{toast}</div>
+          <div className="glass-nav mr-pop-in rounded-full px-4 py-2 text-[13px] font-medium text-text">{toast}</div>
         </div>
       )}
 
@@ -362,9 +369,6 @@ export default function MapRoom() {
   );
 }
 
-/* ---------- Landmarks ----------
-   Real buttons, positioned by the map controller without re-rendering React. They keep a
-   constant on-screen size, so they stay easy to hit at every zoom level. */
 function Landmarks({
   quotes,
   selectedId,
@@ -392,7 +396,6 @@ function Landmarks({
     [controller],
   );
 
-  // New landmarks mount at the origin; put them in place before the browser paints.
   useLayoutEffect(() => {
     const v = viewRef.current;
     if (!v) return;
@@ -414,10 +417,9 @@ function Landmarks({
           data-quote-id={q.id}
           data-arrived={arrivedId === q.id}
           aria-pressed={selectedId === q.id}
-          aria-label={`Quote: ${shorten(q.text, 80)}${q.author ? `, ${q.author}` : ""}`}
+          aria-label={`Memory: ${shorten(q.text, 80)}${q.author ? `, ${q.author}` : ""}`}
           onClick={() => onOpen(q.id)}
           onFocus={() => {
-            // Tabbing to an off-screen landmark brings it into view.
             if (!controller.isComfortablyVisible(q.x, q.y)) controller.flyToWorld(q.x, q.y);
           }}
           className="mr-mark"

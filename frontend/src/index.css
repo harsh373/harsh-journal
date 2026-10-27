@@ -56,6 +56,27 @@
   color-scheme: dark;
 }
 
+/* ---------- Space palette ----------
+   The galaxy has colours the rest of the app doesn't need to know about —
+   nebula violet, dust pink, the warm white of a star. They live here so any
+   surface can borrow them without a hard-coded hex. These are theme-independent
+   on purpose: even in light mode, the star chart is a window into the night. */
+:root {
+  --space-void: #000000;
+  --space-deep: #04030a;
+  --space-nebula: #5b4dd4;
+  --space-nebula-warm: #b45aff;
+  --space-dust: #ff9dc4;
+  --space-cyan: #4ad4ff;
+  --space-star: #dbe8ff;
+  --space-star-warm: #fff2d6;
+
+  /* Pre-mixed glows so a halo is never hand-typed twice. */
+  --glow-star: 0 0 12px rgba(140, 160, 255, 0.35);
+  --glow-star-soft: 0 0 24px rgba(140, 160, 255, 0.22);
+  --glow-nebula: 0 0 60px rgba(91, 77, 212, 0.28);
+}
+
 /* Expose the variables to Tailwind so classes like bg-surface and text-secondary work. */
 @theme inline {
   --color-desktop: var(--desktop);
@@ -120,6 +141,28 @@
   font-size: 0.8125rem;
   line-height: 1.25rem;
   color: var(--text-secondary);
+}
+
+/* A quote set over the star chart: serif italic, warm, with a faint starlight halo.
+   The halo is the point — it lets the words sit on a photographic sky. */
+@utility type-star {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2rem);
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--space-star);
+  text-shadow:
+    0 0 1px rgba(255, 255, 255, 0.4),
+    0 0 24px var(--glow-star);
+  text-wrap: pretty;
+}
+
+/* A quiet glow for a single word or icon that should feel lit from within. */
+@utility text-glow {
+  text-shadow:
+    0 0 1px rgba(255, 255, 255, 0.4),
+    var(--glow-star);
 }
 
 /* ---------- Base ---------- */
@@ -208,33 +251,86 @@ h3 {
   scrollbar-color: var(--border) transparent;
 }
 
-/* Kept only in case another screen (e.g. Now) still uses it. AppShell no longer renders it.
-   If nothing else uses .starfield, delete this whole block. */
+/* ---------- Starfield ----------
+   A field of distant stars you can drop behind any dark surface to give it depth.
+   Opt in with .starfield, then set --starfield-opacity to taste. The dots are
+   deliberately uneven in size and warmth so the field reads as sky, not as dots. */
 @keyframes starfield-drift {
   from {
-    background-position: 0 0, 40px 60px, 130px 270px, 200px 40px, 20px 200px;
+    background-position:
+      0 0,
+      40px 60px,
+      130px 270px,
+      200px 40px,
+      20px 200px,
+      300px 140px,
+      80px 220px;
   }
   to {
-    background-position: -280px -280px, -240px -220px, -150px 10px, -80px -320px, -260px -60px;
+    background-position:
+      -340px -340px,
+      -300px -280px,
+      -210px -70px,
+      -140px -380px,
+      -320px -140px,
+      -40px -200px,
+      -260px -120px;
   }
 }
 
 .starfield {
+  --starfield-opacity: 0.6;
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  opacity: var(--starfield-opacity);
   background-repeat: repeat;
-  background-size: 320px 320px;
-  background-image: radial-gradient(1.5px 1.5px at 20px 30px, rgba(255, 255, 255, 0.6), transparent),
-    radial-gradient(1px 1px at 120px 90px, rgba(255, 255, 255, 0.4), transparent),
-    radial-gradient(1.5px 1.5px at 60px 170px, rgba(255, 255, 255, 0.55), transparent),
-    radial-gradient(1px 1px at 220px 230px, rgba(255, 255, 255, 0.35), transparent),
-    radial-gradient(1.5px 1.5px at 270px 50px, rgba(255, 255, 255, 0.5), transparent);
-  opacity: 0;
-  transition: opacity 500ms ease;
+  background-size: 340px 340px;
+  background-image:
+    radial-gradient(1.5px 1.5px at 20px 30px, rgba(255, 255, 255, 0.78), transparent),
+    radial-gradient(1px 1px at 120px 90px, rgba(220, 232, 255, 0.58), transparent),
+    radial-gradient(1.5px 1.5px at 60px 170px, rgba(255, 255, 255, 0.72), transparent),
+    radial-gradient(1px 1px at 220px 230px, rgba(220, 232, 255, 0.5), transparent),
+    radial-gradient(1.5px 1.5px at 270px 50px, rgba(255, 255, 255, 0.68), transparent),
+    radial-gradient(1px 1px at 300px 200px, rgba(255, 245, 220, 0.56), transparent),
+    radial-gradient(2px 2px at 60px 280px, rgba(190, 208, 255, 0.72), transparent);
+  animation: starfield-drift 260s linear infinite;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .starfield {
+    animation: none;
+  }
+}
+
+/* ---------- Ambient nebula ----------
+   Wrap a panel in .ambient-nebula to give it a soft, blurred halo of deep-space
+   violet. It only paints behind — the content stays crisp — so it is safe to use
+   on the quote panel, the star chart header, or a modal reading surface. */
+.ambient-nebula {
+  position: relative;
+  isolation: isolate;
+}
+
+.ambient-nebula::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(91, 77, 212, 0.18) 0%,
+    rgba(180, 90, 255, 0.08) 35%,
+    transparent 70%
+  );
+  filter: blur(36px);
+  opacity: 0.85;
+}
+
+/* The final dark palette. Kept at the very end so these values win — the sky is
+   truly black at night, and the chrome sits in it without fighting it. */
 :root[data-theme="dark"] {
   --desktop: #000000;
   --desktop-deep: #000000;
@@ -252,7 +348,9 @@ h3 {
 }
 
 /* ---------- Floating glass bottom navigation (phones only) ----------
-   Kept at the very end of the file so these values win over the earlier definitions. */
+   Kept at the very end of the file so these values win over the earlier definitions.
+   In dark mode the shadow carries a whisper of nebula violet, so the nav feels lit
+   by the galaxy behind it rather than pinned on top. */
 
 :root,
 :root[data-theme="light"] {
@@ -268,7 +366,10 @@ h3 {
   --nav-glass: rgba(20, 20, 22, 0.72);
   --nav-edge: rgba(255, 255, 255, 0.12);
   --nav-highlight: rgba(255, 255, 255, 0.07);
-  --nav-shadow: 0 14px 34px -10px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.6);
+  --nav-shadow:
+    0 14px 34px -10px rgba(0, 0, 0, 0.9),
+    0 2px 8px rgba(0, 0, 0, 0.6),
+    0 0 40px rgba(91, 77, 212, 0.08);
   --nav-active: rgba(255, 255, 255, 0.1);
   --nav-active-highlight: rgba(255, 255, 255, 0.05);
 }
@@ -305,7 +406,6 @@ h3 {
   }
 }
 
-
 @keyframes track-check-draw {
   from { stroke-dashoffset: 24; }
   to { stroke-dashoffset: 0; }
@@ -318,7 +418,6 @@ h3 {
   .track-check-path { animation: none !important; }
   [aria-checked="true"] > svg > .track-check-path { stroke-dashoffset: 0; }
 }
-
 
 @keyframes quest-rise {
   from {

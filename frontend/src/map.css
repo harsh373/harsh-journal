@@ -1,113 +1,59 @@
-/* The Map Room. Import this right after `@import "tailwindcss";` in index.css.
-   Map-only colours are scoped to .map-room and switch with the app's data-theme. */
+/* The Map Room: a dark tactical city map.
+   Import this right after `@import "tailwindcss";` in index.css. */
 
 .map-room {
-  --map-sea-a: #e3ebeb;
-  --map-sea-b: #d0dddf;
-  --map-shallow: #eaf1ee;
-  --map-land-a: #f7f2e3;
-  --map-land-b: #ece6d1;
-  --map-hyp-line: #c2c3a3;
-  --map-hyp-1: #eae7d0;
-  --map-hyp-2: #e2e1c6;
-  --map-hyp-3: #d9dabd;
-  --map-hyp-4: #d0d3b5;
-  --map-forest: #86a07c;
-  --map-water: #a9c2ca;
-  --map-water-line: #86a4ae;
-  --map-peak: #f5f1e4;
-  --map-peak-line: #8a8573;
-  --map-shade: #aaa38b;
-  --map-coast: #8a8774;
-  --map-ink: #4a4a42;
-  --map-wave: #9db4b8;
-  --map-label-land: #6c6957;
-  --map-label-sea: #7b9399;
-  --map-mark: #b4532a;
-  --map-mark-edge: rgba(255, 255, 255, 0.92);
-  --map-mark-glow: 0 0 0 transparent;
-  --map-vignette: rgba(60, 70, 70, 0.2);
-  --map-panel: color-mix(in srgb, var(--elevated) 90%, transparent);
-  --map-panel-edge: rgba(0, 0, 0, 0.1);
-  --map-grain-invert: 0;
-  background: var(--map-sea-b);
-}
-
-:root[data-theme="dark"] .map-room {
-  --map-sea-a: #0d1b2c;
-  --map-sea-b: #050b15;
-  --map-shallow: #153347;
-  --map-land-a: #1b3036;
-  --map-land-b: #132429;
-  --map-hyp-line: #38605f;
-  --map-hyp-1: #1b3337;
-  --map-hyp-2: #1f3a3c;
-  --map-hyp-3: #234241;
-  --map-hyp-4: #284a46;
-  --map-forest: #2b5247;
-  --map-water: #27506f;
-  --map-water-line: #3f7194;
-  --map-peak: #213a3e;
-  --map-peak-line: #7ea4af;
-  --map-shade: #0b171b;
-  --map-coast: #5f8c97;
-  --map-ink: #9bc2cc;
-  --map-wave: #1f4357;
-  --map-label-land: rgba(176, 208, 214, 0.5);
-  --map-label-sea: rgba(112, 156, 180, 0.55);
-  --map-mark: #f2cf84;
-  --map-mark-edge: rgba(20, 14, 4, 0.55);
-  --map-mark-glow: 0 0 12px 2px rgba(242, 207, 132, 0.42);
-  --map-vignette: rgba(0, 0, 0, 0.62);
+  /* Force the entire Map Room to use dark mode variables, regardless of the app theme. 
+     A tactical map should always be dark, and this fixes the invisible black text. */
+  --bg: #020202;
+  --surface: #0a0a0c;
+  --elevated: #16181c;
+  --text: #f3f3f5;
+  --text-secondary: #a3a3aa;
+  --text-tertiary: #86868e;
+  --border: rgba(255, 255, 255, 0.1);
+  --window-border: rgba(255, 255, 255, 0.15);
+  --hover: rgba(255, 255, 255, 0.06);
+  --selected: rgba(255, 255, 255, 0.1);
+  
+  /* Panel & glass specifics */
+  --map-panel: rgba(10, 12, 18, 0.85);
   --map-panel-edge: rgba(255, 255, 255, 0.12);
+  --map-vignette: rgba(0, 0, 0, 0.6);
   --map-grain-invert: 1;
+
+  /* Force the glass nav to be dark inside the map room */
+  --nav-glass: rgba(10, 12, 18, 0.75);
+  --nav-edge: rgba(255, 255, 255, 0.12);
+  --nav-highlight: rgba(255, 255, 255, 0.05);
+  --nav-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.9), 0 2px 6px rgba(0, 0, 0, 0.6);
+  --nav-active: rgba(255, 255, 255, 0.1);
+  --nav-active-highlight: rgba(255, 255, 255, 0.05);
+
+  background: #020202;
 }
 
 /* ---------- Artwork ---------- */
-.mr-svg { display: block; }
-.mr-grid { fill: none; stroke: var(--map-ink); stroke-width: 0.6; opacity: 0.07; }
-.mr-wave { fill: none; stroke: var(--map-wave); stroke-width: 1.1; stroke-linecap: round; }
-.mr-halo { fill: none; stroke: var(--map-shallow); stroke-linejoin: round; }
-.mr-land { fill: url(#mr-land-g); }
-.mr-coast { fill: none; stroke: var(--map-coast); stroke-width: 1.3px; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
-.mr-ribbon { fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.mr-hyp-line { stroke: var(--map-hyp-line); }
-.mr-hyp-1 { stroke: var(--map-hyp-1); }
-.mr-hyp-2 { stroke: var(--map-hyp-2); }
-.mr-hyp-3 { stroke: var(--map-hyp-3); }
-.mr-hyp-4 { stroke: var(--map-hyp-4); }
-.mr-river { fill: none; stroke: var(--map-water); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.mr-water { fill: var(--map-water); stroke: var(--map-water-line); stroke-width: 1; }
-.mr-forest { fill: var(--map-forest); opacity: 0.85; }
-.mr-peak { fill: var(--map-peak); stroke: var(--map-peak-line); stroke-width: 1.2; stroke-linejoin: round; }
-.mr-shade { fill: var(--map-shade); opacity: 0.5; }
-.mr-label { font-family: var(--font-serif); font-style: italic; }
-.mr-label-land { fill: var(--map-label-land); font-style: normal; font-weight: 500; }
-.mr-label-sea { fill: var(--map-label-sea); }
-.mr-label-isle { fill: var(--map-label-land); }
-.mr-compass circle,
-.mr-compass-fine { fill: none; stroke: var(--map-label-land); stroke-width: 0.8; }
-.mr-compass-star { fill: var(--map-label-land); opacity: 0.55; }
-.mr-frame { fill: none; stroke: var(--map-label-land); stroke-width: 1.4; opacity: 0.6; }
-.mr-frame-fine { stroke-width: 0.6; }
-
-/* Fine detail eases in as you zoom closer. */
-.mr-lod-1 { opacity: 0; transition: opacity 350ms ease; }
-.mr-svg[data-lod="1"] .mr-lod-1,
-.mr-svg[data-lod="2"] .mr-lod-1 { opacity: 1; }
+.mr-canvas {
+  display: block;
+  image-rendering: auto;
+}
 
 /* ---------- Atmosphere ---------- */
 .mr-vignette {
-  background: radial-gradient(120% 100% at 50% 45%, transparent 55%, var(--map-vignette) 100%);
+  background: radial-gradient(
+    120% 100% at 50% 45%,
+    transparent 55%,
+    var(--map-vignette) 100%
+  );
 }
 .mr-grain {
-  opacity: 0.06;
+  opacity: 0.04;
   filter: invert(var(--map-grain-invert));
   background-size: 240px 240px;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
 
-/* ---------- Landmarks ---------- */
+/* ---------- Landmarks: a thought is a glowing node ---------- */
 .mr-mark {
   position: absolute;
   left: 0;
@@ -121,47 +67,78 @@
   pointer-events: auto;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  will-change: transform;
 }
 @media (pointer: coarse) {
   .mr-mark { margin: -24px 0 0 -24px; width: 48px; height: 48px; }
 }
 .mr-mark:focus-visible { outline: 2px solid var(--blue); outline-offset: -5px; }
+
 .mr-mark-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 2.5px;
-  background: var(--map-mark);
-  transform: rotate(45deg);
-  box-shadow: 0 0 0 1.5px var(--map-mark-edge), 0 1px 3px rgba(0, 0, 0, 0.35), var(--map-mark-glow);
-  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow:
+    0 0 6px 1px rgba(74, 212, 255, 0.9),
+    0 0 16px 4px rgba(74, 212, 255, 0.45),
+    0 0 36px 10px rgba(74, 212, 255, 0.22);
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 220ms ease;
   animation: mr-appear 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
+
 .mr-mark-ring {
   position: absolute;
-  width: 24px;
-  height: 24px;
-  border-radius: 999px;
-  border: 1px solid var(--map-mark);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(74, 212, 255, 0.4);
   opacity: 0;
   transform: scale(0.6);
   transition: opacity 220ms ease, transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+
 .mr-mark:hover .mr-mark-dot,
-.mr-mark:focus-visible .mr-mark-dot { transform: rotate(45deg) scale(1.35); }
-.mr-mark[aria-pressed="true"] .mr-mark-dot { transform: rotate(45deg) scale(1.5); }
-.mr-mark[aria-pressed="true"] .mr-mark-ring { opacity: 0.6; transform: scale(1); }
+.mr-mark:focus-visible .mr-mark-dot {
+  transform: scale(1.35);
+  box-shadow:
+    0 0 8px 2px rgba(255, 255, 255, 0.95),
+    0 0 22px 6px rgba(74, 212, 255, 0.65),
+    0 0 48px 14px rgba(74, 212, 255, 0.3);
+}
+.mr-mark[aria-pressed="true"] .mr-mark-dot {
+  transform: scale(1.6);
+  box-shadow:
+    0 0 8px 2px rgba(255, 255, 255, 0.95),
+    0 0 24px 8px rgba(74, 212, 255, 0.65),
+    0 0 56px 18px rgba(74, 212, 255, 0.35);
+}
+.mr-mark:hover .mr-mark-ring,
+.mr-mark:focus-visible .mr-mark-ring,
+.mr-mark[aria-pressed="true"] .mr-mark-ring {
+  opacity: 1;
+  transform: scale(1);
+}
+
 .mr-mark-pulse {
   position: absolute;
-  width: 24px;
-  height: 24px;
-  border-radius: 999px;
-  border: 1.5px solid var(--map-mark);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(74, 212, 255, 0.7);
   opacity: 0;
   pointer-events: none;
 }
 .mr-mark[data-arrived="true"] .mr-mark-pulse { animation: mr-arrive 1.3s ease-out 2; }
-@keyframes mr-arrive { 0% { transform: scale(0.4); opacity: 0.9; } 100% { transform: scale(2.8); opacity: 0; } }
-@keyframes mr-appear { from { transform: rotate(45deg) scale(0); } to { transform: rotate(45deg) scale(1); } }
+
+@keyframes mr-arrive {
+  0%   { transform: scale(0.4); opacity: 0.9; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+@keyframes mr-appear {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}
 
 .mr-mark-tip {
   position: absolute;
@@ -179,7 +156,7 @@
   background: var(--map-panel);
   -webkit-backdrop-filter: blur(16px) saturate(1.5);
   backdrop-filter: blur(16px) saturate(1.5);
-  box-shadow: 0 0 0 0.5px var(--map-panel-edge), 0 6px 18px -6px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 0.5px var(--map-panel-edge), 0 6px 18px -6px rgba(0, 0, 0, 0.5);
   opacity: 0;
   translate: -50% 4px;
   pointer-events: none;
@@ -214,21 +191,36 @@
   background: var(--map-panel);
   -webkit-backdrop-filter: blur(28px) saturate(1.6);
   backdrop-filter: blur(28px) saturate(1.6);
-  box-shadow: 0 0 0 0.5px var(--map-panel-edge), inset 0 1px 0 var(--nav-highlight), 0 24px 60px -18px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    0 0 0 0.5px var(--map-panel-edge),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 24px 60px -18px rgba(0, 0, 0, 0.8);
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .mr-panel, .mr-mark-tip { background: var(--elevated); }
+  .mr-panel, .mr-mark-tip { background: #16181c; }
 }
+
 .mr-panel-in { animation: mr-sheet-in 360ms cubic-bezier(0.32, 0.72, 0, 1) both; }
-@keyframes mr-sheet-in { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes mr-sheet-in {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
 @media (min-width: 1024px) {
   .mr-panel-in { animation-name: mr-panel-in; }
-  @keyframes mr-panel-in { from { transform: translateX(14px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes mr-panel-in {
+    from { transform: translateX(14px); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+  }
 }
+
 .mr-fade-in { animation: mr-fade 200ms ease both; }
 @keyframes mr-fade { from { opacity: 0; } to { opacity: 1; } }
+
 .mr-pop-in { animation: mr-pop 320ms cubic-bezier(0.2, 0.9, 0.25, 1) both; }
-@keyframes mr-pop { from { transform: translateY(10px) scale(0.985); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes mr-pop {
+  from { transform: translateY(10px) scale(0.985); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
 
 .mr-quote {
   font-family: var(--font-serif);
@@ -237,71 +229,14 @@
   hanging-punctuation: first;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+  color: var(--text);
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .mr-mark-dot,
+  .mr-mark-ring,
+  .mr-panel-in,
+  .mr-fade-in,
+  .mr-pop-in { animation: none; transition: none; }
   .mr-mark[data-arrived="true"] .mr-mark-pulse { animation: none; }
-}
-
-/* ===================== Premium cartography pass ===================== */
-.map-room {
-  --map-ripple: #a6bcc0;
-  --map-rim: #ddddbf;
-  --map-meadow: #b7c8a2;
-  --map-stipple: #a7a38b;
-  --map-grove: #9ab38b;
-  --map-snow: #ffffff;
-  --map-halo: rgba(247, 242, 227, 0.85);
-  --map-wash: rgba(255, 246, 224, 0.34);
-}
-:root[data-theme="dark"] .map-room {
-  --map-ripple: #2c5670;
-  --map-rim: #27494e;
-  --map-meadow: #21473e;
-  --map-stipple: #6c98a2;
-  --map-grove: #346055;
-  --map-snow: #c4dce3;
-  --map-halo: rgba(8, 20, 24, 0.7);
-  --map-wash: rgba(110, 165, 200, 0.12);
-}
-
-.mr-vignette {
-  background:
-    radial-gradient(70% 55% at 22% 8%, var(--map-wash), transparent 70%),
-    radial-gradient(120% 100% at 50% 45%, transparent 55%, var(--map-vignette) 100%);
-}
-
-.mr-lift { fill: rgba(40, 40, 30, 0.2); }
-:root[data-theme="dark"] .mr-lift { fill: rgba(0, 0, 0, 0.55); }
-.mr-ripple { fill: none; stroke: var(--map-ripple); stroke-width: 1; stroke-linejoin: round; }
-.mr-rim { fill: none; stroke: var(--map-rim); stroke-linejoin: round; }
-.mr-meadow { fill: var(--map-meadow); opacity: 0.4; }
-.mr-stipple { fill: none; stroke: var(--map-stipple); stroke-width: 1.1; stroke-linecap: round; opacity: 0.55; }
-.mr-grove { fill: var(--map-grove); opacity: 0.85; }
-.mr-snow { fill: var(--map-snow); opacity: 0.95; }
-.mr-shade { fill: var(--map-shade); stroke: var(--map-shade); stroke-width: 0.6; opacity: 0.5; }
-.mr-river-under { fill: none; stroke: var(--map-water); stroke-width: 4.6; stroke-linecap: round; stroke-linejoin: round; opacity: 0.28; }
-.mr-rhumb { fill: none; stroke: var(--map-ink); stroke-width: 0.7; opacity: 0.08; }
-:root[data-theme="dark"] .mr-rhumb { opacity: 0.1; }
-.mr-ship { fill: var(--map-peak); stroke: var(--map-ink); stroke-width: 0.9; stroke-linejoin: round; opacity: 0.8; }
-.mr-ticks { fill: none; stroke: var(--map-label-land); stroke-width: 0.8; opacity: 0.6; }
-.mr-scale-a { fill: var(--map-label-land); }
-.mr-scale-b { fill: none; stroke: var(--map-label-land); stroke-width: 0.8; }
-.mr-label-land,
-.mr-label-isle {
-  paint-order: stroke;
-  stroke: var(--map-halo);
-  stroke-width: 3px;
-  stroke-linejoin: round;
-}
-
-/* Landmark: a small jewel with a centre point */
-.mr-mark-dot { position: relative; }
-.mr-mark-dot::after {
-  content: "";
-  position: absolute;
-  inset: 3px;
-  border-radius: 1px;
-  background: var(--map-mark-edge);
-  opacity: 0.85;
 }
