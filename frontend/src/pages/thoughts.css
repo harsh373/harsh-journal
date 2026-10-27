@@ -1,4 +1,5 @@
-/* My Thoughts: a night sky where every thought is a star. Everything is scoped under .thoughts / .t-*. */
+/* My Thoughts: an endless night sky where every thought is a star.
+   Everything is scoped under .thoughts / .t-*. */
 
 .thoughts {
   --t-text: #f5f5f7;
@@ -22,11 +23,14 @@
   }
 }
 
+/* The distant sky. It drifts very slowly on its own, so the universe is never still. */
 .t-sky {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  animation: t-fade 1800ms ease backwards;
+  animation:
+    t-fade 1800ms ease backwards,
+    t-sky-drift 140s ease-in-out 1.8s infinite alternate;
 }
 
 /* A rare, quiet shooting star. A thin streak, so it can't be mistaken for a thought. */
@@ -56,6 +60,26 @@
   top: 3.5rem;
   bottom: calc(var(--t-bottom) + 5.25rem);
   z-index: 2;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.t-field.is-grabbing {
+  cursor: grabbing;
+}
+
+/* The world is a torus a little bigger than the viewport. Panning just slides this layer;
+   flying into a star also scales it. Origin must be 0 0 so the zoom matches the camera math. */
+.t-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
 }
 
 /* The button is a generous 28px target; the visible star is the small core inside it. */
@@ -150,7 +174,7 @@
 .t-label {
   position: absolute;
   z-index: 6;
-  max-width: min(260px, calc(100% - 24px));
+  max-width: 260px;
   padding: 7px 14px;
   border: 1px solid var(--t-border);
   border-radius: 999px;
@@ -399,6 +423,20 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
+/* ---- flying into a star: the interface steps aside ------------------------------------ */
+
+.t-flying .t-field {
+  pointer-events: none;
+}
+.t-flying .t-header,
+.t-flying .t-note,
+.t-flying .t-dock,
+.t-flying .t-panel {
+  opacity: 0;
+  transition: opacity 280ms ease;
+  pointer-events: none;
+}
+
 /* ---- keyframes -------------------------------------------------------------------------------- */
 
 @keyframes t-fade {
@@ -440,6 +478,15 @@
   }
   to {
     transform: translate(2px, 3px);
+  }
+}
+/* The deep sky, breathing. Kept just under 1% of travel so it never shows a seam. */
+@keyframes t-sky-drift {
+  from {
+    transform: scale(1.06) translate3d(-1.2%, -0.8%, 0);
+  }
+  to {
+    transform: scale(1.06) translate3d(1.2%, 0.8%, 0);
   }
 }
 @keyframes t-shoot {
@@ -503,6 +550,15 @@
   }
   .t-star,
   .t-core {
+    transition: none;
+  }
+  .t-field {
+    cursor: default;
+  }
+  .t-flying .t-header,
+  .t-flying .t-note,
+  .t-flying .t-dock,
+  .t-flying .t-panel {
     transition: none;
   }
 }
