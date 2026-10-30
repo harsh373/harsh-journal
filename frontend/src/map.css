@@ -1,4 +1,4 @@
-/* The Map Room: a dark tactical city map.
+/* The Map Room: a dark city street map with glowing pins.
    Import this right after `@import "tailwindcss";` in index.css. */
 
 .map-room {
@@ -75,14 +75,14 @@
 .mr-mark:focus-visible { outline: 2px solid var(--blue); outline-offset: -5px; }
 
 .mr-mark-dot {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: #ffffff;
+  background: #ff9a2e;
   box-shadow:
-    0 0 6px 1px rgba(74, 212, 255, 0.9),
-    0 0 16px 4px rgba(74, 212, 255, 0.45),
-    0 0 36px 10px rgba(74, 212, 255, 0.22);
+    0 0 5px 1px rgba(255, 140, 30, 0.85),
+    0 0 14px 3px rgba(255, 140, 30, 0.38),
+    0 0 30px 8px rgba(255, 140, 30, 0.16);
   transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 220ms ease;
   animation: mr-appear 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
@@ -92,7 +92,7 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 1px solid rgba(74, 212, 255, 0.4);
+  border: 1px solid rgba(255, 150, 50, 0.45);
   opacity: 0;
   transform: scale(0.6);
   transition: opacity 220ms ease, transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -101,18 +101,22 @@
 .mr-mark:hover .mr-mark-dot,
 .mr-mark:focus-visible .mr-mark-dot {
   transform: scale(1.35);
+  background: #ffb35c;
   box-shadow:
-    0 0 8px 2px rgba(255, 255, 255, 0.95),
-    0 0 22px 6px rgba(74, 212, 255, 0.65),
-    0 0 48px 14px rgba(74, 212, 255, 0.3);
+    0 0 8px 2px rgba(255, 190, 110, 0.95),
+    0 0 22px 6px rgba(255, 140, 30, 0.6),
+    0 0 46px 14px rgba(255, 140, 30, 0.28);
 }
+/* The pin you have open turns blue, like the single blue dot on a city map. */
 .mr-mark[aria-pressed="true"] .mr-mark-dot {
   transform: scale(1.6);
+  background: #4aa8ff;
   box-shadow:
-    0 0 8px 2px rgba(255, 255, 255, 0.95),
-    0 0 24px 8px rgba(74, 212, 255, 0.65),
-    0 0 56px 18px rgba(74, 212, 255, 0.35);
+    0 0 8px 2px rgba(150, 205, 255, 0.95),
+    0 0 24px 8px rgba(60, 150, 255, 0.6),
+    0 0 52px 16px rgba(60, 150, 255, 0.3);
 }
+.mr-mark[aria-pressed="true"] .mr-mark-ring { border-color: rgba(90, 170, 255, 0.55); }
 .mr-mark:hover .mr-mark-ring,
 .mr-mark:focus-visible .mr-mark-ring,
 .mr-mark[aria-pressed="true"] .mr-mark-ring {
@@ -125,11 +129,25 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 1.5px solid rgba(74, 212, 255, 0.7);
+  border: 1.5px solid rgba(255, 150, 50, 0.7);
   opacity: 0;
   pointer-events: none;
+  /* A slow, quiet breath. Pins are staggered below so they never pulse in unison. */
+  animation: mr-breathe 6s ease-out infinite;
+  animation-delay: -2s;
 }
+.mr-mark:nth-child(3n + 1) .mr-mark-pulse { animation-duration: 6.4s; animation-delay: -0.7s; }
+.mr-mark:nth-child(3n + 2) .mr-mark-pulse { animation-duration: 7.3s; animation-delay: -3.4s; }
+.mr-mark:nth-child(5n) .mr-mark-pulse { animation-duration: 8.1s; animation-delay: -5.2s; }
+.mr-mark[aria-pressed="true"] .mr-mark-pulse { border-color: rgba(90, 170, 255, 0.7); }
 .mr-mark[data-arrived="true"] .mr-mark-pulse { animation: mr-arrive 1.3s ease-out 2; }
+
+@keyframes mr-breathe {
+  0%   { transform: scale(0.45); opacity: 0; }
+  6%   { opacity: 0.45; }
+  55%  { transform: scale(2.3); opacity: 0; }
+  100% { transform: scale(2.3); opacity: 0; }
+}
 
 @keyframes mr-arrive {
   0%   { transform: scale(0.4); opacity: 0.9; }
@@ -235,6 +253,7 @@
 @media (prefers-reduced-motion: reduce) {
   .mr-mark-dot,
   .mr-mark-ring,
+  .mr-mark-pulse,
   .mr-panel-in,
   .mr-fade-in,
   .mr-pop-in { animation: none; transition: none; }
